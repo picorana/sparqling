@@ -6,6 +6,19 @@
 	left: 0px;
 }
 
+#config {
+    position: absolute;
+    background: #bbb;
+    z-index: 1;
+    height: 100%;
+    width: 15%;
+    padding: 1em;
+    overflow: auto;
+    box-sizing: border-box;
+    left: 0;
+    top: 0;
+}
+
 #sparql_box {
     text-align: right;
     width: 20%;

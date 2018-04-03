@@ -1,8 +1,10 @@
 #_require event_management.coffee
+# require cyto_style.coffee
 
 sparql_text = document.getElementById("sparql_text")
 class_cur_letter = "a"
-
+state_buffer = null
+state_buffer_max_length = 20
 
 # possible types:
 # node-domain
@@ -22,86 +24,9 @@ cy = new cytoscape(
     container: document.getElementById('cy'),
     elements: elements
     layout: {name: 'cose'}
-    style: new cytoscape.stylesheet()
-        .selector('node')
-            .style({
-                'background-color' : 'black',
-                'shape' : 'rectangle'
-                'content' : 'data(id)'
-            })
-        .selector('.node-domain')
-            .style({
-                'background-color' : 'white'
-                'border-color' : 'black'
-                'border-style' : 'solid'
-                'border-width' : '2px'
-            })
-        .selector('.node-range')
-            .style({
-                'background-color' : 'black'
-                'border-color' : 'white'
-                'border-style' : 'solid'
-                'border-width' : '2px'
-            })
-        .selector('.node-attribute')
-            .style({
-                'shape' : 'ellipse'
-                'background-color' : 'white'
-                'border-style' : 'solid'
-                'border-color' : 'black'
-                'border-width' : '2px'  
-            })
-        .selector('.node-variable')
-            .style({
-                'shape' : 'ellipse'
-                'background-color' : 'gray'
-                'width' : '500' 
-                'height' : '500'
-                'text-valign' : 'center'
-                'font-size' : '60'
-                'color' : 'white'
-                'text-outline-color' : 'black'
-                'text-outline-width' : '2px'
-            })
-        .selector(':parent')
-            .style({
-                'background-image' : 'resources/background-circle.svg'
-                'background-opacity' : '0'
-                'background-width' : '100%'
-                'background-height' : '100%'
-                'shape' : 'rectangle'
-                'border-color' : 'white'
-            })
+    style: generate_style()
 )
 
-reshape2 = ->
-    parents = cy.nodes().parents()
-    parents.layout({name:'circle'}).run()
-    for parent in parents
-        #parent.position({x:Math.random()*1000, y:Math.random()*1000})
-        #console.log 'x: ' + parent.position('x')
-        #console.log parent.position('y')
-        parent.children().layout({name:'circle'}).run()
-        for child in parent.children()
-            for neighbor in child.neighborhood('node')
-                neighbor.position('x', child.position('x') + (child.position('x') - parent.position('x')))
-                neighbor.position('y', child.position('y') + (child.position('y') - parent.position('y')))
-                for neighbor2 in neighbor.neighborhood('node')
-                    if neighbor2 != child
-                        #console.log neighbor2.id()
-                        neighbor2.position('x', neighbor.position('x') + (neighbor.position('x')-child.position('x')))
-                        neighbor2.position('y', neighbor.position('y') + (neighbor.position('y')-child.position('y')))
-                        if neighbor2.isOrphan()
-                            console.log neighbor2.id()
-                            par_name = neighbor2.id() + 'p'
-                            #cy.add({
-                                #group: 'nodes'
-                                #data: {id: par_name}
-                                #position: {x: neighbor2.position('x'), 'y': neighbor2.position('y')}
-                            #})
-                            #neighbor2.move({parent: par_name})
-                        #neighbor2.parent().position('x', neighbor.position('x') + (neighbor.position('x')-child.position('x')))
-                        #neighbor2.parent().position('y', neighbor.position('y') + (neighbor.position('y')-child.position('y')))
 
 reshape = -> 
 
@@ -135,50 +60,6 @@ reshape = ->
                                 new_var.position('x', neighbor2.position('x') + (neighbor2.position('x')-neighbor.position('x')))
                                 new_var.position('y', neighbor2.position('y') + (neighbor2.position('y')-neighbor.position('y')))
 
-
-
-randomize = (parent_name) ->
-    range = Math.round(Math.random() * (10 - 4) + 4)
-    console.log "number of generated nodes: " + range
-    for i in [0...range - 1] by 1
-        new_node_range_id = parent_name + Math.round(Math.random()*10000) + "r"
-        new_node_domain_id = parent_name + Math.round(Math.random()*10000) + "d"
-        new_node_attribute_id = parent_name + Math.round(Math.random()*10000) + "a"
-        new_node_new_parent_id = parent_name + i
-        cy.add({
-            group: 'nodes'
-            data: {id: new_node_range_id, parent: parent_name}
-            classes: 'node-range'
-        })
-        cy.add({
-            group: 'nodes'
-            data: {id: new_node_attribute_id}
-            classes: 'node-attribute'
-        })
-        #cy.add({
-            #group: 'nodes'
-            #data: {id: new_node_new_parent_id}
-        #})
-        cy.add({
-            group: 'nodes'
-            data: {id: new_node_domain_id, parent: new_node_new_parent_id}
-            classes: 'node-domain'
-        })
-        cy.add({
-            group: 'edges'
-            data: {
-                source: new_node_range_id,
-                target: new_node_attribute_id
-            }
-        })
-        cy.add({
-            group: 'edges'
-            data: {
-                source: new_node_attribute_id
-                target: new_node_domain_id
-            }
-        })
-        reshape()
 
 add_role = (parent) ->
     range_id = parent.id() + Math.round(Math.random()*1000)
@@ -238,7 +119,38 @@ add_role = (parent) ->
         }
     })
 
-    
+
+compute_distance = (node1, node2) ->
+    a = Math.abs(node1.position('x') - node2.position('x'))
+    b = Math.abs(node1.position('y') - node2.position('y'))
+    return Math.sqrt(a*a + b*b)
+
+
+check_collisions = ->
+    for node in cy.nodes(".node-variable")
+        check = false
+        for node2 in cy.nodes(".node-variable")
+            if node != node2
+                if compute_distance(node, node2) < 500
+                    node.addClass('highlight')
+                else
+                    node.removeClass('highlight')
+
+undo = (state_buffer) ->
+    if state_buffer == null or state_buffer.length < 1
+        console.log "no saved states"
+    else
+        cy.json(state_buffer[state_buffer.length - 1])
+        state_buffer.pop()
+
+save_state = ->
+    # state should actually be saved only when the graph is actually modified !!
+    if state_buffer == null
+        state_buffer = []
+    if cy.json() != state_buffer[state_buffer.length - 1]
+        state_buffer.push(cy.json())
+    if state_buffer.length >= state_buffer_max_length 
+       state_buffer.shift() 
 
 cy.on('click', '.node-variable',
     ($) -> 
@@ -250,7 +162,22 @@ cy.on('click', '.node-variable',
 cy.on('mousemove',
     ($) ->
         update_sparql_text()
+        check_collisions()
 )
 
-#randomize('a')
+cy.on('mouseup',
+    ($) -> 
+        save_state()
+)
+
+init = ->
+    left_panel = document.getElementById("config")
+    button = document.createElement('button')
+    button.innerHTML = 'undo'
+    button.onclick = ($) -> 
+        undo(state_buffer)
+    left_panel.append(button)
+
+init()
 reshape()
+cy.resize()
