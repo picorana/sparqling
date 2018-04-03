@@ -1,16 +1,20 @@
+#_require event_management.coffee
 
 sparql_text = document.getElementById("sparql_text")
+class_cur_letter = "a"
+
 
 # possible types:
 # node-domain
 # node-range
 # node-attribute
 # node-role
+# node-variable
 
 elements = {
     # to be removed in final version
     nodes: [
-        {data: {id: 'a'}},
+        {data: {id: 'a'}, classes: 'node-variable'},
     ]
 }
 
@@ -46,7 +50,19 @@ cy = new cytoscape(
                 'border-style' : 'solid'
                 'border-color' : 'black'
                 'border-width' : '2px'  
-            }) 
+            })
+        .selector('.node-variable')
+            .style({
+                'shape' : 'ellipse'
+                'background-color' : 'gray'
+                'width' : '500' 
+                'height' : '500'
+                'text-valign' : 'center'
+                'font-size' : '60'
+                'color' : 'white'
+                'text-outline-color' : 'black'
+                'text-outline-width' : '2px'
+            })
         .selector(':parent')
             .style({
                 'background-image' : 'resources/background-circle.svg'
@@ -58,7 +74,7 @@ cy = new cytoscape(
             })
 )
 
-reshape = ->
+reshape2 = ->
     parents = cy.nodes().parents()
     parents.layout({name:'circle'}).run()
     for parent in parents
@@ -86,6 +102,40 @@ reshape = ->
                             #neighbor2.move({parent: par_name})
                         #neighbor2.parent().position('x', neighbor.position('x') + (neighbor.position('x')-child.position('x')))
                         #neighbor2.parent().position('y', neighbor.position('y') + (neighbor.position('y')-child.position('y')))
+
+reshape = -> 
+
+    parents = cy.nodes('.node-variable')
+    
+    for parent in parents
+        
+        parent.neighborhood().layout({
+                name:'circle'
+                boundingBox: {
+                    x1: parent.position('x') - parent.width()/2
+                    y1: parent.position('x') - parent.height()/2
+                    w: parent.width()
+                    h: parent.height()
+                }
+            }).run()
+
+        for child in parent.neighborhood('.node-range')
+            for neighbor in child.neighborhood('.node-attribute')
+                console.log neighbor.id()
+                neighbor.position('x', child.position('x') + (child.position('x') - parent.position('x')))
+                neighbor.position('y', child.position('y') + (child.position('y') - parent.position('y')))
+
+                for neighbor2 in neighbor.neighborhood('.node-domain')
+                    if neighbor2 != child
+                        neighbor2.position('x', neighbor.position('x') + (neighbor.position('x')-child.position('x')))
+                        neighbor2.position('y', neighbor.position('y') + (neighbor.position('y')-child.position('y')))
+
+                        for new_var in neighbor2.neighborhood('.node-variable')
+                            if new_var != neighbor
+                                new_var.position('x', neighbor2.position('x') + (neighbor2.position('x')-neighbor.position('x')))
+                                new_var.position('y', neighbor2.position('y') + (neighbor2.position('y')-neighbor.position('y')))
+
+
 
 randomize = (parent_name) ->
     range = Math.round(Math.random() * (10 - 4) + 4)
@@ -137,7 +187,14 @@ add_role = (parent) ->
     var_id = parent.id() + range_id + "p"
     cy.add({
         group: 'nodes'
-        data: {id: range_id, parent:parent.id()}
+        data: {id: range_id}
+    })
+    cy.add({
+        group: 'edges'
+        data: {
+            source: parent.id()
+            target: range_id
+        }
     })
     cy.add({
         group: 'nodes'
@@ -163,9 +220,27 @@ add_role = (parent) ->
             target: dom_id
         }}
     )
-    cy.nodes().layout({name:'concentric'}).run()
 
-cy.on('click', 'node',
+    # male qui
+    reshape()
+    class_cur_letter += 1
+    
+    cy.add({
+        group: 'nodes'
+        data: {id: class_cur_letter}
+        classes: 'node-variable'
+    })
+    cy.add({
+        group: 'edges'
+        data: {
+            source: dom_id
+            target: class_cur_letter
+        }
+    })
+
+    
+
+cy.on('click', '.node-variable',
     ($) -> 
         if this.isOrphan()
             add_role(this)
@@ -174,13 +249,7 @@ cy.on('click', 'node',
 
 cy.on('mousemove',
     ($) ->
-        sparql_string = "Select * <br> where { <br>"
-        
-        for parent in cy.nodes().parents()
-            for child in parent.children()
-                sparql_string += "&emsp;$" + parent.id() + " " + child.id() + "<br>"    
-
-        sparql_text.innerHTML = sparql_string + "}"
+        update_sparql_text()
 )
 
 #randomize('a')
