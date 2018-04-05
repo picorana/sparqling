@@ -11,7 +11,7 @@
     background: #bbb;
     z-index: 1;
     height: 100%;
-    width: 15%;
+    width: 20%;
     padding: 1em;
     overflow: auto;
     box-sizing: border-box;
@@ -19,9 +19,18 @@
     top: 0;
 }
 
+.highlighting_box {
+    background-color: #ccc;
+    border-radius: 10px;
+}
+
+.highlighting_box:hover {
+    background-color: #ddd;
+}
+
 #sparql_box {
     text-align: right;
-    width: 20%;
+    width: 100%;
     padding: 2%;
 }
 
@@ -30,6 +39,3 @@
     font-family: "Courier New";
 }
 
-node {
-    background-color: cyan;
-}

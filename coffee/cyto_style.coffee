@@ -1,22 +1,22 @@
+
 generate_style = ->
     return new cytoscape.stylesheet()
         .selector('node')
             .style({
                 'background-color' : 'black',
                 'shape' : 'rectangle'
-                'content' : 'data(id)'
             })
         .selector('.node-domain')
             .style({
-                'background-color' : 'white'
+                'background-color' : 'black'
                 'border-color' : 'black'
                 'border-style' : 'solid'
                 'border-width' : '2px'
             })
         .selector('.node-range')
             .style({
-                'background-color' : 'black'
-                'border-color' : 'white'
+                'background-color' : 'white'
+                'border-color' : 'black'
                 'border-style' : 'solid'
                 'border-width' : '2px'
             })
@@ -26,19 +26,23 @@ generate_style = ->
                 'background-color' : 'white'
                 'border-style' : 'solid'
                 'border-color' : 'black'
-                'border-width' : '2px'  
+                'border-width' : '2px' 
+                'content' : 'data(id)'
             })
         .selector('.node-variable')
             .style({
                 'shape' : 'ellipse'
                 'background-color' : 'gray'
-                'width' : '500' 
-                'height' : '500'
+                'width' : (ele) ->
+                    return 50 + (ele.neighborhood('edge').length*50)
+                'height' : (ele) ->
+                    return 50 + (ele.neighborhood('edge').length*50)
                 'text-valign' : 'center'
                 'font-size' : '60'
                 'color' : 'white'
                 'text-outline-color' : 'black'
                 'text-outline-width' : '2px'
+                'content' : 'data(id)'
             })
         .selector('node.highlight')
             .style({

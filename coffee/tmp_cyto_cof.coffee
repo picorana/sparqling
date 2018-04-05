@@ -1,5 +1,6 @@
 #_require event_management.coffee
-# require cyto_style.coffee
+#_require constants.coffee
+#_require cyto_style.coffee
 
 sparql_text = document.getElementById("sparql_text")
 class_cur_letter = "a"
@@ -29,36 +30,21 @@ cy = new cytoscape(
 
 
 reshape = -> 
+    console.log "reshaping"
 
     parents = cy.nodes('.node-variable')
     
-    for parent in parents
+    cy.nodes().layout({name:'circle'}).run()
+
+    #parents.layout({
+        #name: 'circle'
+    #}).run()
+
+    #for parent in parents
         
-        parent.neighborhood().layout({
-                name:'circle'
-                boundingBox: {
-                    x1: parent.position('x') - parent.width()/2
-                    y1: parent.position('x') - parent.height()/2
-                    w: parent.width()
-                    h: parent.height()
-                }
-            }).run()
-
-        for child in parent.neighborhood('.node-range')
-            for neighbor in child.neighborhood('.node-attribute')
-                console.log neighbor.id()
-                neighbor.position('x', child.position('x') + (child.position('x') - parent.position('x')))
-                neighbor.position('y', child.position('y') + (child.position('y') - parent.position('y')))
-
-                for neighbor2 in neighbor.neighborhood('.node-domain')
-                    if neighbor2 != child
-                        neighbor2.position('x', neighbor.position('x') + (neighbor.position('x')-child.position('x')))
-                        neighbor2.position('y', neighbor.position('y') + (neighbor.position('y')-child.position('y')))
-
-                        for new_var in neighbor2.neighborhood('.node-variable')
-                            if new_var != neighbor
-                                new_var.position('x', neighbor2.position('x') + (neighbor2.position('x')-neighbor.position('x')))
-                                new_var.position('y', neighbor2.position('y') + (neighbor2.position('y')-neighbor.position('y')))
+        #parent.neighborhood().layout({
+                #name:'circle'
+            #}).run()
 
 
 add_role = (parent) ->
@@ -69,6 +55,7 @@ add_role = (parent) ->
     cy.add({
         group: 'nodes'
         data: {id: range_id}
+        classes: 'node-range'
     })
     cy.add({
         group: 'edges'
@@ -131,7 +118,7 @@ check_collisions = ->
         check = false
         for node2 in cy.nodes(".node-variable")
             if node != node2
-                if compute_distance(node, node2) < 500
+                if compute_distance(node, node2) < node_base_size
                     node.addClass('highlight')
                     node2.addClass('highlight')
                     return [node, node2]
@@ -202,6 +189,8 @@ cy.on('mouseup',
         if check_collisions() != undefined
             node_tmp_arr = check_collisions()
             merge(node_tmp_arr[0], node_tmp_arr[1])
+    
+        reshape()
 )
 
 init = ->
