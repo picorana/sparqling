@@ -133,6 +133,8 @@ check_collisions = ->
             if node != node2
                 if compute_distance(node, node2) < 500
                     node.addClass('highlight')
+                    node2.addClass('highlight')
+                    return [node, node2]
                 else
                     node.removeClass('highlight')
 
@@ -152,6 +154,35 @@ save_state = ->
     if state_buffer.length >= state_buffer_max_length 
        state_buffer.shift() 
 
+
+merge = (node1, node2) ->
+    ###* merges node1 and node2, repositioning all node2's edges into node1 ###
+    
+    for edge in node2.neighborhood('edge')
+    
+        # if this edge has node2 as target
+        if edge.target().id() == node2.id()
+            cy.add({
+                group: 'edges'
+                data: {
+                    source: edge.source().id()
+                    target: node1.id()
+                }
+            })
+
+        # if this edge has node2 as source
+        if edge.source().id() == node2.id()
+            cy.add({
+                group: 'edges'
+                data: {
+                    source: node1.id()
+                    target: edge.target().id()
+                }
+            })
+
+    # remove node2 with all its connected edges
+    cy.remove(node2)
+
 cy.on('click', '.node-variable',
     ($) -> 
         if this.isOrphan()
@@ -168,6 +199,9 @@ cy.on('mousemove',
 cy.on('mouseup',
     ($) -> 
         save_state()
+        if check_collisions() != undefined
+            node_tmp_arr = check_collisions()
+            merge(node_tmp_arr[0], node_tmp_arr[1])
 )
 
 init = ->
