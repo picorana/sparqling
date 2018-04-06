@@ -34,6 +34,9 @@ update_sparql_text = ->
                         q_line.append(f)
                         sparql_text.append(q_line)
 
+                        carr_ret = document.createElement("br")
+                        sparql_text.append(carr_ret)
+
 
 
     f_string = document.createElement('div')

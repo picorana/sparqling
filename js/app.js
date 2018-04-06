@@ -55,14 +55,33 @@
   };
 
   create_highlighting_box = function(node) {
+
+    /** creates a box in the sparql text that helps locate in the graph where the node is */
     var st;
-    st = "<div class='highlighting_box' onmouseover=''>" + node.id() + "</div>";
+    st = document.createElement('div');
+    st.className = "highlighting_box";
+    st.onmouseover = function($) {
+      console.log("highlighted: " + node.id());
+      return node.addClass("highlight");
+    };
+    st.onmouseout = function($) {
+      console.log("removed highlighting: " + node.id());
+      return node.removeClass("highlight");
+    };
+    st.innerHTML = node.id();
     return st;
   };
 
   update_sparql_text = function() {
-    var j, k, l, len, len1, len2, len3, len4, m, n, node1, node2, node3, node4, node5, ref, ref1, ref2, ref3, ref4, sparql_string;
-    sparql_string = "Select * <br> where { <br>";
+
+    /** performs all update functions to the query string */
+    var f, f_string, init_string, j, k, l, len, len1, len2, len3, len4, m, n, node1, node2, node3, node4, node5, q_line, ref, ref1, ref2, ref3, ref4;
+    sparql_text.innerHTML = "";
+    init_string = document.createElement('div');
+    init_string.innerHTML = "Select * <br> where { <br>";
+    sparql_text.append(init_string);
+    q_line = document.createElement('div');
+    q_line.className = "q_line";
     ref = cy.nodes(".node-variable");
     for (j = 0, len = ref.length; j < len; j++) {
       node1 = ref[j];
@@ -78,13 +97,21 @@
             ref4 = node4.neighborhood(".node-variable");
             for (n = 0, len4 = ref4.length; n < len4; n++) {
               node5 = ref4[n];
-              sparql_string += "&emsp;$" + create_highlighting_box(node1) + node2.id() + " " + create_highlighting_box(node5) + "<br>";
+              q_line.append(create_highlighting_box(node5));
+              q_line.append(create_highlighting_box(node3));
+              q_line.append(create_highlighting_box(node1));
+              f = document.createElement("div");
+              f.innerHTML = " .";
+              q_line.append(f);
+              sparql_text.append(q_line);
             }
           }
         }
       }
     }
-    return sparql_text.innerHTML = sparql_string + "}";
+    f_string = document.createElement('div');
+    f_string.innerHTML = '}';
+    return sparql_text.append(f_string);
   };
 
   reshape2 = function() {
