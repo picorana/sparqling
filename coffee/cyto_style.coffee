@@ -47,6 +47,14 @@ generate_style = ->
         .selector('node.highlight')
             .style({
                 'border-color' : '#333'
+                'border-opacity' : '0.5'
+                'border-width' : '20px'
+                'border-style' : 'solid'
+            })
+        .selector('node.selected')
+            .style({
+                'border-color' : '#daa'
+                'border-opacity' : '0.5'
                 'border-width' : '20px'
                 'border-style' : 'solid'
             })

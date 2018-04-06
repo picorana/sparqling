@@ -6,6 +6,7 @@ sparql_text = document.getElementById("sparql_text")
 class_cur_letter = "a"
 state_buffer = null
 state_buffer_max_length = 20
+selected_node = null
 
 # possible types:
 # node-domain
@@ -170,8 +171,17 @@ merge = (node1, node2) ->
     # remove node2 with all its connected edges
     cy.remove(node2)
 
+
+select_node = (node) ->
+    if selected_node != null
+        selected_node.removeClass('selected')
+    selected_node = node
+    selected_node.addClass('selected')
+
+
 cy.on('click', '.node-variable',
-    ($) -> 
+    ($) ->
+        select_node(this)
         if this.isOrphan()
             add_role(this)
             reshape()

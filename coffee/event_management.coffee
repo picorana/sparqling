@@ -6,6 +6,8 @@ create_highlighting_box = (node) ->
     st.onmouseover = ($) ->
         console.log "highlighted: " + node.id()
         node.addClass("highlight")
+    st.onclick = ($) ->
+        select_node(node)
     st.onmouseout = ($) ->
         console.log "removed highlighting: " + node.id()
         node.removeClass("highlight")
