@@ -207,6 +207,7 @@ init = ->
     left_panel = document.getElementById("config")
     button = document.createElement('button')
     button.innerHTML = 'undo'
+    button.className = 'button'
     button.onclick = ($) -> 
         undo(state_buffer)
     left_panel.append(button)

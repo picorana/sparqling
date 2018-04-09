@@ -48,3 +48,7 @@
     display: inline-block;
 }
 
+.button {
+    border: none;
+    background: '#ffffff';
+}
