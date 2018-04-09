@@ -13,20 +13,18 @@ class window.PainlessSparql
         this.add_event_listener()
 
 
-    create_sidenav : ->
+    create_sidenav : =>
         side_nav = document.createElement("div");
         side_nav.id = "sidenav";
         side_nav.className = "sidenav";
-        side_nav.style.cssText = "height: 100%; width: 0%; position: fixed; z-index: 1; top: 0; right: 0; background-color: #111; overflow-x: hidden; padding-top: 60px; transition: 0.5s;";
         document.body.appendChild(side_nav);
 
         sparql_textbox = document.createElement("div");
         sparql_textbox.id = "sparql_textbox";
         sparql_textbox.innerHTML = "sparql_query_here";
-        sparql_textbox.style.cssText = "color: blue";
         side_nav.appendChild(sparql_textbox);
 
-        @query_canvas = document.createElement("canvas");
+        @query_canvas = document.createElement("div");
         @query_canvas.id = "query_canvas";
         side_nav.appendChild(@query_canvas);
 
@@ -54,7 +52,7 @@ class window.PainlessSparql
         else if event.key == "b"
             @close_nav()
         else if event.key == "c"
-            @add_selected_node_to_sidenav()
+            @painless_graph.add_role(@cy.nodes(":selected").data('label'))
 
 
     add_event_listener : ->

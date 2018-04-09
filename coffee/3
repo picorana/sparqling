@@ -1,0 +1,37 @@
+#_require cyto_style.coffee
+
+class window.PainlessGraph
+
+    @elements = {
+        nodes: [
+            {data: {id: 'a'}, classes: 'node-variable'},
+            {data: {id: 'b'}, classes: 'node-variable'},
+            {data: {id: 'c'}, classes: 'node-variable'},
+            {data: {id: 'd'}, classes: 'node-variable'},
+        ]
+    }
+
+
+    init: =>
+        @cy = new cytoscape(
+            container: document.getElementById("query_canvas"),
+            style: generate_style()
+        )
+
+        @cy.add({
+            group: 'nodes'
+            data: {id: i}
+        })
+        
+        @cy.resize()
+
+
+    constructor: (canvas) ->
+        @canvas = canvas # can't understand scope of this
+        @init()
+        @reshape()
+
+
+    reshape: =>
+        console.log "reshaping"
+        @cy.nodes().layout({name: 'circle'}).run()

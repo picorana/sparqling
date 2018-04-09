@@ -1,10 +1,28 @@
-#cy {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	top: 0px;
-	left: 0px;
+#query_canvas {
+	position: relative;
+	width: 90%;
+	height: 40%;
+	bottom: 5%;
+    z-index: 2;
+	top: 30%;
+	background-color: #fff;
+	margin: 5%;
+	border-radius: 10px;
 }
+
+#sidenav {
+	height: 100%; 
+	width: 500px; 
+	position: fixed; 
+	z-index: 1; 
+	top: 0; 
+	right: 0; 
+	background-color: #222;
+	overflow-x: hidden; 
+	padding-top: 60px; 
+	transition: 0.5s;
+}
+
 
 #config {
     position: absolute;
@@ -20,18 +38,24 @@
 }
 
 .highlighting_box {
-    background-color: #ccc;
+    background-color: #666;
     border-radius: 10px;
+	padding: 3px;
+	margin: 3px;
+	color: 555;
 }
 
 .highlighting_box:hover {
     background-color: #ddd;
 }
 
-#sparql_box {
-    text-align: right;
+#sparql_textbox {
+    text-align: left;
+	color: #ccc;
+	font-family : "Courier New";
+	font-size: large;
     width: 100%;
-    padding: 2%;
+    padding: 5%;
 }
 
 #sparql_text {

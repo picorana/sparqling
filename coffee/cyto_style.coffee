@@ -51,7 +51,7 @@ generate_style = ->
                 'border-width' : '20px'
                 'border-style' : 'solid'
             })
-        .selector('node.selected')
+        .selector('node:selected')
             .style({
                 'border-color' : '#daa'
                 'border-opacity' : '0.5'
