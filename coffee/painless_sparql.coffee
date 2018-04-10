@@ -39,20 +39,27 @@ class window.PainlessSparql
         document.getElementById("sidenav").style.width = "0px";
 
 
-    add_selected_node_to_sidenav: ->
-        side_nav = document.getElementById("sidenav");
-        new_node_div = document.createElement("div");
-        new_node_div.innerHTML = @cy.$(":selected").data("label");
-        side_nav.append(new_node_div);
-
-
     onkeypress_handler : (event) =>
         if event.key == "a" 
             @open_nav()
+        
         else if event.key == "b"
             @close_nav()
-        else if event.key == "c"
-            @painless_graph.add_role(@cy.nodes(":selected").data('label'))
+        
+        else if event.key == "c" # to be activated by a button
+            
+            selected_node = @cy.nodes(":selected")
+            
+            if selected_node.length == 0
+                console.warn "please, select a node in the main graph"
+            
+            switch selected_node.data('type')
+                when "role"         then @painless_graph.add_link(selected_node.data('label'), 'role')
+                when "attribute"    then @painless_graph.add_link(selected_node.data('label'), 'attribute')
+                when "concept"      then @painless_graph.add_link(selected_node.data('label'), 'concept')
+        
+        else if event.key == "d"
+            console.log @cy.nodes(":selected").data('type')
 
 
     add_event_listener : ->

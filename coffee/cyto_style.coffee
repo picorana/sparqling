@@ -32,7 +32,8 @@ generate_style = ->
         .selector('.node-variable')
             .style({
                 'shape' : 'ellipse'
-                'background-color' : 'gray'
+                'background-color' : (ele) ->
+                    return ele.data('color')
                 'width' : (ele) ->
                     return 50 + (ele.neighborhood('edge').length*50)
                 'height' : (ele) ->
@@ -43,6 +44,19 @@ generate_style = ->
                 'text-outline-color' : 'black'
                 'text-outline-width' : '2px'
                 'content' : 'data(id)'
+            })
+        .selector('.node-concept')
+            .style({
+                'shape' : 'rectangle'
+                'background-color' : 'white'
+                'content' : 'data(id)'
+                'text-valign' : 'center'
+                'width' : (ele) ->
+                    return ele.data('id').length * 10 #compute text length?
+                'height' : '30'
+                'border-color' : '#000'
+                'border-width' : '2px'
+                'border-style' : 'solid'
             })
         .selector('node.highlight')
             .style({
