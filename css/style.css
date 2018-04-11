@@ -18,7 +18,8 @@
 	top: 0; 
 	right: 0; 
 	background-color: #222;
-	overflow-x: hidden; 
+	overflow-x: hidden;
+    overflow-y: hidden; 
 	transition: 0.5s;
 }
 
@@ -28,6 +29,8 @@
 	padding: 3px;
 	margin: 0px;
 	color: #eee;
+    display: inline-block;
+    float: left;
 }
 
 .highlighting_box:hover {
@@ -64,12 +67,29 @@
 	opacity: 0;
 }
 
+.minicross {
+    font-weight: bold;
+    float: left;
+    display: inline-block;
+    font-size: small;
+    color: red;
+}
+
+.minicross:hover {
+    cursor: pointer;
+}
+
+.highlighting_box_container {
+    padding-right: 10px;
+}
+
 .menu_button {
 	background-color: #333;
 	color: #ccc;
-	margin: 5px;
+	margin: 2px;
 	border-radius: 10px;
     border: none;
+    font-size: x-small;
 }
 
 .menu_button:hover {

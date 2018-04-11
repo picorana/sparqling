@@ -22,6 +22,9 @@ class window.SparqlText
 
     create_highlighting_box: (node) =>
         ###* creates a box in the sparql text that helps locate in the graph where the node is ###
+        container = document.createElement('div')
+        container.className = 'highlighting_box_container'
+
         st = document.createElement('div')
         st.className = "highlighting_box"
         st.id = node.id() + Math.round(Math.random()*100)
@@ -33,13 +36,30 @@ class window.SparqlText
         )
         st.onmouseover = ($) ->
             node.addClass("highlight")
-        st.onclick = ($) ->
-            node.select()
         st.onmouseout = ($) ->
             node.removeClass("highlight")
+        st.onclick = ($) ->
+            node.select()
         st.innerHTML = "?" + node.id()
         st.style.backgroundColor = node.data('color')
-        return st
+        
+        container.append(st)
+
+        minicross = document.createElement('div')
+        minicross.innerHTML = ' x '
+        minicross.className = 'minicross'
+        minicross.dataset.linkedhbox = st.id
+        minicross.style.display = 'none'
+        minicross.onclick = ($) ->
+            console.log st.id
+        container.append(minicross)
+
+        container.onmouseover = ($) ->
+            minicross.style.display = 'inline-block'
+        container.onmouseout = ($) ->
+            minicross.style.display = 'none'
+
+        return container
 
 
     dragslot_drop: (ev, index) =>

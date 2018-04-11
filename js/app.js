@@ -103,7 +103,9 @@
     SparqlText.prototype.create_highlighting_box = function(node) {
 
       /** creates a box in the sparql text that helps locate in the graph where the node is */
-      var st;
+      var container, minicross, st;
+      container = document.createElement('div');
+      container.className = 'highlighting_box_container';
       st = document.createElement('div');
       st.className = "highlighting_box";
       st.id = node.id() + Math.round(Math.random() * 100);
@@ -115,15 +117,31 @@
       st.onmouseover = function($) {
         return node.addClass("highlight");
       };
-      st.onclick = function($) {
-        return node.select();
-      };
       st.onmouseout = function($) {
         return node.removeClass("highlight");
       };
+      st.onclick = function($) {
+        return node.select();
+      };
       st.innerHTML = "?" + node.id();
       st.style.backgroundColor = node.data('color');
-      return st;
+      container.append(st);
+      minicross = document.createElement('div');
+      minicross.innerHTML = ' x ';
+      minicross.className = 'minicross';
+      minicross.dataset.linkedhbox = st.id;
+      minicross.style.display = 'none';
+      minicross.onclick = function($) {
+        return console.log(st.id);
+      };
+      container.append(minicross);
+      container.onmouseover = function($) {
+        return minicross.style.display = 'inline-block';
+      };
+      container.onmouseout = function($) {
+        return minicross.style.display = 'none';
+      };
+      return container;
     };
 
     SparqlText.prototype.dragslot_drop = function(ev, index) {
@@ -457,6 +475,22 @@
       menu.append(button);
       button = document.createElement('button');
       button.innerHTML = 'rename';
+      button.className = 'menu_button';
+      menu.append(button);
+      button = document.createElement('button');
+      button.innerHTML = 'center view';
+      button.className = 'menu_button';
+      menu.append(button);
+      button = document.createElement('button');
+      button.innerHTML = 'copy to clipboard';
+      button.className = 'menu_button';
+      menu.append(button);
+      button = document.createElement('button');
+      button.innerHTML = 'add to select';
+      button.className = 'menu_button';
+      menu.append(button);
+      button = document.createElement('button');
+      button.innerHTML = 'filter';
       button.className = 'menu_button';
       return menu.append(button);
     };

@@ -86,6 +86,26 @@ class window.PainlessSparql
         button.className = 'menu_button'
         menu.append(button)
 
+        button = document.createElement('button')
+        button.innerHTML = 'center view'
+        button.className = 'menu_button'
+        menu.append(button)
+
+        button = document.createElement('button')
+        button.innerHTML = 'copy to clipboard'
+        button.className = 'menu_button'
+        menu.append(button)
+
+        button = document.createElement('button')
+        button.innerHTML = 'add to select'
+        button.className = 'menu_button'
+        menu.append(button)
+
+        button = document.createElement('button')
+        button.innerHTML = 'filter'
+        button.className = 'menu_button'
+        menu.append(button)
+
     open_nav : -> 
         document.getElementById("sidenav").style.width = "50%";
 
