@@ -111,33 +111,6 @@ class window.PainlessGraph
     
     init: =>
 
-        menu = document.createElement('div')
-        menu.id = 'painless_menu'
-        menu.style.backgroundColor = '#555'
-        document.getElementById('sidenav').append(menu)
-
-        button = document.createElement('button')
-        button.innerHTML = 'undo'
-        button.className = 'menu_button'
-        button.onclick = () -> console.log 'undo'
-        menu.append(button)
-
-        button = document.createElement('button')
-        button.innerHTML = 'delete node'
-        button.className = 'menu_button'
-        button.onclick = () -> console.log 'delete node'
-        menu.append(button)
-
-        button = document.createElement('button')
-        button.innerHTML = 'reverse relationship'
-        button.className = 'menu_button'
-        menu.append(button)
-
-        button = document.createElement('button')
-        button.innerHTML = 'rename'
-        button.className = 'menu_button'
-        menu.append(button)
-
         @cy = new cytoscape(
             container: document.getElementById("query_canvas"),
             style: generate_style()

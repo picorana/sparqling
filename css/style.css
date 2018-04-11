@@ -1,12 +1,13 @@
 #query_canvas {
 	position: absolute;
 	width: 94%;
-	height: 50%;
-	bottom: 6%;
+	height: 40%;
     z-index: 2;
 	background-color: #fff;
 	margin: 3%;
+    bottom: 0%;
 	border-radius: 10px;
+    transition: 0.5s;
 }
 
 #sidenav {
@@ -18,22 +19,7 @@
 	right: 0; 
 	background-color: #222;
 	overflow-x: hidden; 
-	padding-top: 60px; 
 	transition: 0.5s;
-}
-
-
-#config {
-    position: absolute;
-    background: #bbb;
-    z-index: 1;
-    height: 100%;
-    width: 20%;
-    padding: 1em;
-    overflow: auto;
-    box-sizing: border-box;
-    left: 0;
-    top: 0;
 }
 
 .highlighting_box {
@@ -51,12 +37,25 @@
   	box-shadow:         2px 2px 2px 2px #888;
 }
 
+#nav_div {
+    text-align: center;
+    color: #ccc;
+    vertical-align: middle;
+}
+
+.resize_button {
+    width: 25px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
 #painless_menu {
 	padding: 1%;
 	margin-left: 3%;
-	margin-top: 3%;
 	margin-right: 3%;
 	bottom: 0%;
+    text-align: center;
+    background-color: #444;
 }
 
 .dragslot_select {
@@ -70,6 +69,7 @@
 	color: #ccc;
 	margin: 5px;
 	border-radius: 10px;
+    border: none;
 }
 
 .menu_button:hover {
@@ -84,7 +84,8 @@
     width: 100%;
 	overflow-y: scroll;
 	height: 10%;
-    padding: 5%;
+    margin: 5%;
+    transition: 0.5s;
 }
 
 #sparql_text {
@@ -109,7 +110,3 @@
     display: inline-block;
 }
 
-.button {
-    border: none;
-    background: '#ffffff';
-}

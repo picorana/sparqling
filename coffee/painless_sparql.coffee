@@ -26,10 +26,65 @@ class window.PainlessSparql
 
         @query_canvas = document.createElement("div");
         @query_canvas.id = "query_canvas";
-        side_nav.appendChild(@query_canvas);
+        side_nav.appendChild(@query_canvas)
 
         @painless_graph = new PainlessGraph(@query_canvas)
 
+
+        menu = document.createElement('div')
+        menu.id = 'painless_menu'
+        document.getElementById('sidenav').append(menu)
+
+        nav_div = document.createElement('div')
+        nav_div.id = 'nav_div'
+
+        up_button = document.createElement('div')
+        up_button.innerHTML = '▲'
+        up_button.className = 'resize_button'
+        up_button.onclick = ($) ->
+            query_canvas.style.height = '70%'
+            sparql_textbox.style.height = '0%'
+        nav_div.append(up_button)
+
+        mid_button = document.createElement('div')
+        mid_button.innerHTML = '≡'
+        mid_button.className = 'resize_button'
+        mid_button.onclick = ($) ->
+            query_canvas.style.height = '40%'
+            sparql_textbox.style.height = '30%'
+        nav_div.append(mid_button)
+
+        down_button = document.createElement('div')
+        down_button.innerHTML = '▼'
+        down_button.className = 'resize_button'
+        down_button.onclick = ($) ->
+            sparql_textbox.style.height = '70%'
+            query_canvas.style.height = '0%'
+        nav_div.append(down_button)
+
+        menu.append(nav_div)
+
+        button = document.createElement('button')
+        button.innerHTML = 'undo'
+        button.className = 'menu_button'
+        button.onclick = () -> console.log 'undo'
+        menu.append(button)
+
+        button = document.createElement('button')
+        button.innerHTML = 'delete node'
+        button.className = 'menu_button'
+        button.onclick = () -> console.log 'delete node'
+        menu.append(button)
+
+        button = document.createElement('button')
+        button.innerHTML = 'reverse relationship'
+        button.className = 'menu_button'
+        menu.append(button)
+
+        button = document.createElement('button')
+        button.innerHTML = 'rename'
+        button.className = 'menu_button'
+        menu.append(button)
 
     open_nav : -> 
         document.getElementById("sidenav").style.width = "50%";

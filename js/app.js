@@ -354,33 +354,6 @@
     };
 
     PainlessGraph.prototype.init = function() {
-      var button, menu;
-      menu = document.createElement('div');
-      menu.id = 'painless_menu';
-      menu.style.backgroundColor = '#555';
-      document.getElementById('sidenav').append(menu);
-      button = document.createElement('button');
-      button.innerHTML = 'undo';
-      button.className = 'menu_button';
-      button.onclick = function() {
-        return console.log('undo');
-      };
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'delete node';
-      button.className = 'menu_button';
-      button.onclick = function() {
-        return console.log('delete node');
-      };
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'reverse relationship';
-      button.className = 'menu_button';
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'rename';
-      button.className = 'menu_button';
-      menu.append(button);
       this.cy = new cytoscape({
         container: document.getElementById("query_canvas"),
         style: generate_style()
@@ -421,7 +394,7 @@
     };
 
     PainlessSparql.prototype.create_sidenav = function() {
-      var side_nav, sparql_textbox;
+      var button, down_button, menu, mid_button, nav_div, side_nav, sparql_textbox, up_button;
       side_nav = document.createElement("div");
       side_nav.id = "sidenav";
       side_nav.className = "sidenav";
@@ -433,7 +406,59 @@
       this.query_canvas = document.createElement("div");
       this.query_canvas.id = "query_canvas";
       side_nav.appendChild(this.query_canvas);
-      return this.painless_graph = new PainlessGraph(this.query_canvas);
+      this.painless_graph = new PainlessGraph(this.query_canvas);
+      menu = document.createElement('div');
+      menu.id = 'painless_menu';
+      document.getElementById('sidenav').append(menu);
+      nav_div = document.createElement('div');
+      nav_div.id = 'nav_div';
+      up_button = document.createElement('div');
+      up_button.innerHTML = '▲';
+      up_button.className = 'resize_button';
+      up_button.onclick = function($) {
+        query_canvas.style.height = '70%';
+        return sparql_textbox.style.height = '0%';
+      };
+      nav_div.append(up_button);
+      mid_button = document.createElement('div');
+      mid_button.innerHTML = '≡';
+      mid_button.className = 'resize_button';
+      mid_button.onclick = function($) {
+        query_canvas.style.height = '40%';
+        return sparql_textbox.style.height = '30%';
+      };
+      nav_div.append(mid_button);
+      down_button = document.createElement('div');
+      down_button.innerHTML = '▼';
+      down_button.className = 'resize_button';
+      down_button.onclick = function($) {
+        sparql_textbox.style.height = '70%';
+        return query_canvas.style.height = '0%';
+      };
+      nav_div.append(down_button);
+      menu.append(nav_div);
+      button = document.createElement('button');
+      button.innerHTML = 'undo';
+      button.className = 'menu_button';
+      button.onclick = function() {
+        return console.log('undo');
+      };
+      menu.append(button);
+      button = document.createElement('button');
+      button.innerHTML = 'delete node';
+      button.className = 'menu_button';
+      button.onclick = function() {
+        return console.log('delete node');
+      };
+      menu.append(button);
+      button = document.createElement('button');
+      button.innerHTML = 'reverse relationship';
+      button.className = 'menu_button';
+      menu.append(button);
+      button = document.createElement('button');
+      button.innerHTML = 'rename';
+      button.className = 'menu_button';
+      return menu.append(button);
     };
 
     PainlessSparql.prototype.open_nav = function() {
