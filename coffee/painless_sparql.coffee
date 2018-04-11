@@ -32,7 +32,7 @@ class window.PainlessSparql
 
 
     open_nav : -> 
-        document.getElementById("sidenav").style.width = "500px";
+        document.getElementById("sidenav").style.width = "50%";
 
 
     close_nav : ->

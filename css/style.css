@@ -11,7 +11,7 @@
 
 #sidenav {
 	height: 100%; 
-	width: 500px; 
+	width: 50%; 
 	position: fixed; 
 	z-index: 1; 
 	top: 0; 
@@ -45,17 +45,24 @@
 }
 
 .highlighting_box:hover {
-    border-style: solid;
-	border-width: 5px;
-	border-color: #fff;
-	box-sizing: border-box;
+	cursor: grab;
+	-webkit-box-shadow: 2px 2px 2px 2px #888;
+  	-webkit-box-shadow: 2px 2px 2px 2px #888;
+  	box-shadow:         2px 2px 2px 2px #888;
 }
 
 #painless_menu {
 	padding: 1%;
 	margin-left: 3%;
+	margin-top: 3%;
 	margin-right: 3%;
-	top: 50%;
+	bottom: 0%;
+}
+
+.dragslot_select {
+	background-color: gray;
+	border-radius: 10px;
+	opacity: 0;
 }
 
 .menu_button {
@@ -73,8 +80,10 @@
     text-align: left;
 	color: #ccc;
 	font-family : "Courier New";
-	font-size: large;
+	font-size: small;
     width: 100%;
+	overflow-y: scroll;
+	height: 10%;
     padding: 5%;
 }
 

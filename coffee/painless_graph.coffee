@@ -1,132 +1,26 @@
 #_require cyto_style.coffee
+#_require sparql_text.coffee
 
 class window.PainlessGraph
 
     
     palette = null
-    select_boxes = ['x0']
+    sparql_text = null
     cur_variable_value = 0
 
 
-    constructor: (canvas) ->
-        @canvas = canvas # can't understand scope of this
+    constructor: ->
         palette = window.palette('sol-accent', 8)
-        @cur_char_code = 66 # better char codes?
+ 
         @init()
         @reshape()
-        @update_sparql_text()
+        
+        sparql_text = new SparqlText(@cy)
+        sparql_text.update()
 
 
     reshape: =>
         @cy.nodes().layout({name: 'circle'}).run()
-
-
-    create_highlighting_box: (node) =>
-        ###* creates a box in the sparql text that helps locate in the graph where the node is ###
-        st = document.createElement('div')
-        st.className = "highlighting_box"
-        st.setAttribute('draggable', true)
-        st.addEventListener('dragstart',
-            (ev) ->
-                ev.dataTransfer.setData("text", ev.target.id);
-        )
-        st.onmouseover = ($) ->
-            node.addClass("highlight")
-        st.onclick = ($) ->
-            node.select()
-        st.onmouseout = ($) ->
-            node.removeClass("highlight")
-        st.innerHTML = node.id()
-        st.style.backgroundColor = node.data('color')
-        return st
-
-
-    update_sparql_text: =>
-
-        sparql_text = document.getElementById("sparql_textbox")
-        sparql_text.innerHTML = ""
-
-        init_string = document.createElement('div')
-        init_string.className = "init_string"
-
-        s_line = document.createElement('div')
-        s_line.className = "s_line"
-
-
-        if select_boxes.length == 0
-            s_line.innerHTML = "*"
-        else
-            for elem in select_boxes
-                nbsp = document.createElement('div')
-                nbsp.addEventListener('dragover'
-                    (ev) ->
-                        console.log ev
-                        ev.preventDefault()
-                )
-                nbsp.addEventListener('drop'
-                    (ev) ->
-                        ev.preventDefault()
-                        data = ev.dataTransfer.getData("text");
-                        #ev.target.appendChild(document.getElementById(data));
-                )
-                nbsp.innerHTML = '&nbsp;'
-                console.log nbsp
-                s_line.append(nbsp)
-                s_line.append(@create_highlighting_box(@cy.getElementById(elem)))
-   
-        select_div = document.createElement('div')
-        select_div.innerHTML = "Select "
-        init_string.append(select_div)
-
-        init_string.append(s_line)
-        init_string.append(document.createElement('br'))
-
-        select_div_f = document.createElement('div')
-        select_div_f.innerHTML =  " where {"
-        init_string.append(select_div_f)
-        
-        sparql_text.append(init_string)
-       
-        q_line = document.createElement('div')
-        q_line.className = "q_line"
-        for node1 in @cy.nodes(".node-variable")
-
-            for node2 in node1.neighborhood(".node-concept")
-                q_line.append(@create_highlighting_box(node1))
-                f = document.createElement("div")
-                f.innerHTML = ("&nbsp;rdf:type " + node2.id() + " .")
-                q_line.append(f)
-                q_line.append(document.createElement('br'))
-
-            for node2 in node1.neighborhood(".node-domain")
-                for node3 in node2.neighborhood(".node-attribute")
-                    for node4 in node3.neighborhood(".node-range")
-                        for node5 in node4.neighborhood(".node-variable")
-                            
-                            q_line.append(@create_highlighting_box(node5))
-                            
-                            nbsp = document.createElement('div')
-                            nbsp.innerHTML = '&nbsp;'
-                            q_line.append(nbsp)
-                            
-                            q_line.append(@create_highlighting_box(node3))
-
-                            nbsp = document.createElement('div')
-                            nbsp.innerHTML = '&nbsp'
-                            q_line.append(nbsp)
-
-                            q_line.append(@create_highlighting_box(node1))
-                            
-                            f = document.createElement("div")
-                            f.innerHTML = " ."
-                            q_line.append(f)
-                            q_line.append(document.createElement('br'))
-        
-        sparql_text.append(q_line)
-
-        f_string = document.createElement('div')
-        f_string.innerHTML = '}'
-        sparql_text.append(f_string)
 
 
     add_link: (link_name, link_type) =>
@@ -201,7 +95,7 @@ class window.PainlessGraph
                 classes: 'node-variable'
             })
 
-            select_boxes.push(var_id)
+            sparql_text.add_to_select(var_id)
 
             @cy.add({
                 group: 'edges'
@@ -211,7 +105,7 @@ class window.PainlessGraph
                 }
             })
 
-        @update_sparql_text()
+        sparql_text.update()
         @reshape()
     
     
