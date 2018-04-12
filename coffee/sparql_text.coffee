@@ -2,7 +2,7 @@ class window.SparqlText
 
 
     div_sparql_text = null
-    select_boxes = ['x0']
+    select_boxes = []
 
 
     constructor: (cy) ->
@@ -49,9 +49,14 @@ class window.SparqlText
         minicross.innerHTML = ' x '
         minicross.className = 'minicross'
         minicross.dataset.linkedhbox = st.id
+        minicross.dataset.node_id = st.dataset.node_id
         minicross.style.display = 'none'
-        minicross.onclick = ($) ->
-            console.log st.id
+        minicross.onclick = ($) =>
+            l_index = select_boxes.indexOf(minicross.dataset.node_id)
+            console.log l_index
+            select_boxes.splice(l_index, 1)
+            console.log select_boxes
+            @update()
         container.append(minicross)
 
         container.onmouseover = ($) ->
@@ -103,7 +108,7 @@ class window.SparqlText
 
 
         if select_boxes.length == 0
-            s_line.innerHTML = "*"
+            s_line.innerHTML = "&nbsp;*"
         else
 
             s_line.append(@create_tab())

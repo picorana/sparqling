@@ -25,9 +25,25 @@ class window.PainlessGraph
 
     add_link: (link_name, link_type) =>
 
-        cur_variable_value += 1
 
-        parent = @cy.nodes(":selected")
+        if @cy.nodes(":selected").length > 0
+            parent = @cy.nodes(":selected")
+        else 
+            par_id = "x" + cur_variable_value
+            
+            @cy.add({
+                group: 'nodes'
+                data: {
+                    id: par_id
+                    color: '#' + palette[cur_variable_value % palette.length];
+                }
+                classes: 'node-variable'
+            })
+
+            parent = @cy.getElementById(par_id)
+            sparql_text.add_to_select(par_id)
+            cur_variable_value += 1
+
         range_id = parent.id() + Math.round(Math.random()*1000)
         attr_id = link_name
         dom_id = parent.id() + range_id + "d"
@@ -96,7 +112,8 @@ class window.PainlessGraph
             })
 
             sparql_text.add_to_select(var_id)
-
+            cur_variable_value += 1
+            
             @cy.add({
                 group: 'edges'
                 data: {
@@ -115,16 +132,6 @@ class window.PainlessGraph
             container: document.getElementById("query_canvas"),
             style: generate_style()
         )
-
-        @cy.add({
-            group: 'nodes'
-            data: {
-                id: 'x0'
-                color: '#' + palette[cur_variable_value % palette.length];
-                }
-            classes: 'node-variable'
-        })
-
         @cy.on('click', '.node-variable',
             (event) =>
                 event.target.select()

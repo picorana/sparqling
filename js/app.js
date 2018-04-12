@@ -78,7 +78,7 @@
 
     div_sparql_text = null;
 
-    select_boxes = ['x0'];
+    select_boxes = [];
 
     function SparqlText(cy) {
       this.update = bind(this.update, this);
@@ -130,10 +130,18 @@
       minicross.innerHTML = ' x ';
       minicross.className = 'minicross';
       minicross.dataset.linkedhbox = st.id;
+      minicross.dataset.node_id = st.dataset.node_id;
       minicross.style.display = 'none';
-      minicross.onclick = function($) {
-        return console.log(st.id);
-      };
+      minicross.onclick = (function(_this) {
+        return function($) {
+          var l_index;
+          l_index = select_boxes.indexOf(minicross.dataset.node_id);
+          console.log(l_index);
+          select_boxes.splice(l_index, 1);
+          console.log(select_boxes);
+          return _this.update();
+        };
+      })(this);
       container.append(minicross);
       container.onmouseover = function($) {
         return minicross.style.display = 'inline-block';
@@ -188,7 +196,7 @@
       s_line = document.createElement('div');
       s_line.className = "s_line";
       if (select_boxes.length === 0) {
-        s_line.innerHTML = "*";
+        s_line.innerHTML = "&nbsp;*";
       } else {
         s_line.append(this.create_tab());
         count = 0;
@@ -285,9 +293,23 @@
     };
 
     PainlessGraph.prototype.add_link = function(link_name, link_type) {
-      var attr_id, dom_id, parent, range_id, var_id;
-      cur_variable_value += 1;
-      parent = this.cy.nodes(":selected");
+      var attr_id, dom_id, par_id, parent, range_id, var_id;
+      if (this.cy.nodes(":selected").length > 0) {
+        parent = this.cy.nodes(":selected");
+      } else {
+        par_id = "x" + cur_variable_value;
+        this.cy.add({
+          group: 'nodes',
+          data: {
+            id: par_id,
+            color: '#' + palette[cur_variable_value % palette.length]
+          },
+          classes: 'node-variable'
+        });
+        parent = this.cy.getElementById(par_id);
+        sparql_text.add_to_select(par_id);
+        cur_variable_value += 1;
+      }
       range_id = parent.id() + Math.round(Math.random() * 1000);
       attr_id = link_name;
       dom_id = parent.id() + range_id + "d";
@@ -359,6 +381,7 @@
           classes: 'node-variable'
         });
         sparql_text.add_to_select(var_id);
+        cur_variable_value += 1;
         this.cy.add({
           group: 'edges',
           data: {
@@ -376,14 +399,6 @@
         container: document.getElementById("query_canvas"),
         style: generate_style()
       });
-      this.cy.add({
-        group: 'nodes',
-        data: {
-          id: 'x0',
-          color: '#' + palette[cur_variable_value % palette.length]
-        },
-        classes: 'node-variable'
-      });
       this.cy.on('click', '.node-variable', (function(_this) {
         return function(event) {
           event.target.select();
@@ -398,9 +413,12 @@
   })();
 
   window.PainlessSparql = (function() {
+    PainlessSparql.painless_graph = null;
+
     function PainlessSparql(graph) {
       this.onkeypress_handler = bind(this.onkeypress_handler, this);
       this.create_sidenav = bind(this.create_sidenav, this);
+      this.add_to_select = bind(this.add_to_select, this);
       this.graph = graph;
       this.cy = graph.cy;
       this.init();
@@ -409,6 +427,11 @@
     PainlessSparql.prototype.init = function() {
       this.create_sidenav();
       return this.add_event_listener();
+    };
+
+    PainlessSparql.prototype.add_to_select = function() {
+      console.log(this.painless_graph.cy.nodes(":selected").id());
+      return console.log(this.painless_graph.sparql_text);
     };
 
     PainlessSparql.prototype.create_sidenav = function() {
@@ -488,6 +511,11 @@
       button = document.createElement('button');
       button.innerHTML = 'add to select';
       button.className = 'menu_button';
+      button.onclick = (function(_this) {
+        return function($) {
+          return _this.add_to_select();
+        };
+      })(this);
       menu.append(button);
       button = document.createElement('button');
       button.innerHTML = 'filter';

@@ -1,5 +1,7 @@
 class window.PainlessSparql
 
+    @painless_graph = null
+
     
     constructor: (graph) ->
         @graph = graph
@@ -11,6 +13,11 @@ class window.PainlessSparql
     init : ->
         this.create_sidenav()
         this.add_event_listener()
+
+
+    add_to_select: =>
+        console.log @painless_graph.cy.nodes(":selected").id()
+        console.log @painless_graph.sparql_text
 
 
     create_sidenav : =>
@@ -29,7 +36,6 @@ class window.PainlessSparql
         side_nav.appendChild(@query_canvas)
 
         @painless_graph = new PainlessGraph(@query_canvas)
-
 
         menu = document.createElement('div')
         menu.id = 'painless_menu'
@@ -99,6 +105,7 @@ class window.PainlessSparql
         button = document.createElement('button')
         button.innerHTML = 'add to select'
         button.className = 'menu_button'
+        button.onclick = ($) => @add_to_select() 
         menu.append(button)
 
         button = document.createElement('button')
