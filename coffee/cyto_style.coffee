@@ -11,7 +11,9 @@ generate_style = ->
                 'background-color' : 'black'
                 'border-color' : 'black'
                 'border-style' : 'solid'
-                'border-width' : '2px'
+                'border-width' : '0.5px'
+                'width' : 30
+                'height' : 30
             })
         .selector('.node-range')
             .style({
@@ -19,15 +21,19 @@ generate_style = ->
                 'border-color' : 'black'
                 'border-style' : 'solid'
                 'border-width' : '2px'
+                'width' : 30
+                'height' : 30
             })
         .selector('.node-attribute')
             .style({
-                'shape' : 'ellipse'
+                'shape' : 'diamond'
                 'background-color' : 'white'
                 'border-style' : 'solid'
                 'border-color' : 'black'
                 'border-width' : '2px' 
-                'content' : 'data(id)'
+                'content' : 'data(label)'
+                'width' : 90
+                'height' : 60
             })
         .selector('.node-variable')
             .style({
@@ -35,11 +41,14 @@ generate_style = ->
                 'background-color' : (ele) ->
                     return ele.data('color')
                 'width' : (ele) ->
-                    return 50 + (ele.neighborhood('edge').length*50)
+                    return 100
+                    #return 50 + (ele.neighborhood('edge').length*50)
                 'height' : (ele) ->
-                    return 50 + (ele.neighborhood('edge').length*50)
+                    return 100
+                    #return 50 + (ele.neighborhood('edge').length*50)
                 'text-valign' : 'center'
-                'font-size' : '60'
+                'font-size' : '40'
+                'font-family' : "Courier New";
                 'color' : 'white'
                 'text-outline-color' : 'black'
                 'text-outline-width' : '2px'

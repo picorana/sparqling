@@ -1,6 +1,6 @@
 class window.PainlessSparql
 
-    @painless_graph = null
+    painless_graph = null
 
     
     constructor: (graph) ->
@@ -16,8 +16,8 @@ class window.PainlessSparql
 
 
     add_to_select: =>
-        console.log @painless_graph.cy.nodes(":selected").id()
-        console.log @painless_graph.sparql_text
+        console.log painless_graph.cy.nodes(":selected").id()
+        console.log painless_graph.sparql_text
 
 
     create_sidenav : =>
@@ -35,7 +35,7 @@ class window.PainlessSparql
         @query_canvas.id = "query_canvas";
         side_nav.appendChild(@query_canvas)
 
-        @painless_graph = new PainlessGraph(@query_canvas)
+        painless_graph = new PainlessGraph(@query_canvas)
 
         menu = document.createElement('div')
         menu.id = 'painless_menu'
@@ -48,15 +48,16 @@ class window.PainlessSparql
         up_button.innerHTML = '▲'
         up_button.className = 'resize_button'
         up_button.onclick = ($) ->
-            query_canvas.style.height = '70%'
+            query_canvas.style.height = '80%'
             sparql_textbox.style.height = '0%'
+            query_canvas.style.height = '80%'
         nav_div.append(up_button)
 
         mid_button = document.createElement('div')
         mid_button.innerHTML = '≡'
         mid_button.className = 'resize_button'
         mid_button.onclick = ($) ->
-            query_canvas.style.height = '40%'
+            query_canvas.style.height = '50%'
             sparql_textbox.style.height = '30%'
         nav_div.append(mid_button)
 
@@ -64,7 +65,7 @@ class window.PainlessSparql
         down_button.innerHTML = '▼'
         down_button.className = 'resize_button'
         down_button.onclick = ($) ->
-            sparql_textbox.style.height = '70%'
+            sparql_textbox.style.height = '80%'
             query_canvas.style.height = '0%'
         nav_div.append(down_button)
 
@@ -73,7 +74,7 @@ class window.PainlessSparql
         button = document.createElement('button')
         button.innerHTML = 'undo'
         button.className = 'menu_button'
-        button.onclick = () -> console.log 'undo'
+        button.onclick = ($) => painless_graph.undo()
         menu.append(button)
 
         button = document.createElement('button')
@@ -136,9 +137,9 @@ class window.PainlessSparql
                 console.warn "please, select a node in the main graph"
             
             switch selected_node.data('type')
-                when "role"         then @painless_graph.add_link(selected_node.data('label'), 'role')
-                when "attribute"    then @painless_graph.add_link(selected_node.data('label'), 'attribute')
-                when "concept"      then @painless_graph.add_link(selected_node.data('label'), 'concept')
+                when "role"         then painless_graph.add_link(selected_node.data('label'), 'role')
+                when "attribute"    then painless_graph.add_link(selected_node.data('label'), 'attribute')
+                when "concept"      then painless_graph.add_link(selected_node.data('label'), 'concept')
         
         else if event.key == "d"
             console.log @cy.nodes(":selected").data('type')

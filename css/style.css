@@ -1,7 +1,7 @@
 #query_canvas {
 	position: absolute;
 	width: 94%;
-	height: 40%;
+	height: 50%;
     z-index: 2;
 	background-color: #fff;
 	margin: 3%;
@@ -106,8 +106,10 @@
 	font-size: small;
     width: 100%;
 	overflow-y: scroll;
-	height: 10%;
-    margin: 5%;
+	height: 30%;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-top: 5%;
     transition: 0.5s;
 }
 

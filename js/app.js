@@ -11,32 +11,39 @@
       'background-color': 'black',
       'border-color': 'black',
       'border-style': 'solid',
-      'border-width': '2px'
+      'border-width': '0.5px',
+      'width': 30,
+      'height': 30
     }).selector('.node-range').style({
       'background-color': 'white',
       'border-color': 'black',
       'border-style': 'solid',
-      'border-width': '2px'
+      'border-width': '2px',
+      'width': 30,
+      'height': 30
     }).selector('.node-attribute').style({
-      'shape': 'ellipse',
+      'shape': 'diamond',
       'background-color': 'white',
       'border-style': 'solid',
       'border-color': 'black',
       'border-width': '2px',
-      'content': 'data(id)'
+      'content': 'data(label)',
+      'width': 90,
+      'height': 60
     }).selector('.node-variable').style({
       'shape': 'ellipse',
       'background-color': function(ele) {
         return ele.data('color');
       },
       'width': function(ele) {
-        return 50 + (ele.neighborhood('edge').length * 50);
+        return 100;
       },
       'height': function(ele) {
-        return 50 + (ele.neighborhood('edge').length * 50);
+        return 100;
       },
       'text-valign': 'center',
-      'font-size': '60',
+      'font-size': '40',
+      'font-family': "Courier New",
       'color': 'white',
       'text-outline-color': 'black',
       'text-outline-width': '2px',
@@ -108,7 +115,7 @@
       container.className = 'highlighting_box_container';
       st = document.createElement('div');
       st.className = "highlighting_box";
-      st.id = node.id() + Math.round(Math.random() * 100);
+      st.id = node.id() + Math.round(Math.random() * 1000);
       st.dataset.node_id = node.id();
       st.setAttribute('draggable', true);
       st.addEventListener('dragstart', function(ev) {
@@ -123,7 +130,7 @@
       st.onclick = function($) {
         return node.select();
       };
-      st.innerHTML = "?" + node.id();
+      st.innerHTML = "?" + node.data('label');
       st.style.backgroundColor = node.data('color');
       container.append(st);
       minicross = document.createElement('div');
@@ -287,14 +294,21 @@
     }
 
     PainlessGraph.prototype.reshape = function() {
-      return this.cy.nodes().layout({
-        name: 'circle'
+      return this.cy.layout({
+        name: 'breadthfirst',
+        padding: 5,
+        spacingFactor: 1,
+        fit: false
       }).run();
+    };
+
+    PainlessGraph.prototype.undo = function() {
+      return console.log("undo");
     };
 
     PainlessGraph.prototype.add_link = function(link_name, link_type) {
       var attr_id, dom_id, par_id, parent, range_id, var_id;
-      if (this.cy.nodes(":selected").length > 0) {
+      if (this.cy.nodes(":selected").length > 0 && this.cy.nodes(":selected").hasClass('node-variable')) {
         parent = this.cy.nodes(":selected");
       } else {
         par_id = "x" + cur_variable_value;
@@ -302,7 +316,8 @@
           group: 'nodes',
           data: {
             id: par_id,
-            color: '#' + palette[cur_variable_value % palette.length]
+            color: '#' + palette[cur_variable_value % palette.length],
+            label: par_id
           },
           classes: 'node-variable'
         });
@@ -311,7 +326,7 @@
         cur_variable_value += 1;
       }
       range_id = parent.id() + Math.round(Math.random() * 1000);
-      attr_id = link_name;
+      attr_id = link_name + Math.round(Math.random() * 1000);
       dom_id = parent.id() + range_id + "d";
       var_id = "x" + cur_variable_value;
       if (link_type === "concept") {
@@ -347,7 +362,8 @@
         this.cy.add({
           group: 'nodes',
           data: {
-            id: attr_id
+            id: attr_id,
+            label: link_name
           },
           classes: 'node-attribute'
         });
@@ -376,7 +392,8 @@
           group: 'nodes',
           data: {
             id: var_id,
-            color: '#' + palette[cur_variable_value % palette.length]
+            color: '#' + palette[cur_variable_value % palette.length],
+            label: var_id
           },
           classes: 'node-variable'
         });
@@ -397,7 +414,8 @@
     PainlessGraph.prototype.init = function() {
       this.cy = new cytoscape({
         container: document.getElementById("query_canvas"),
-        style: generate_style()
+        style: generate_style(),
+        wheelSensitivity: 0.5
       });
       this.cy.on('click', '.node-variable', (function(_this) {
         return function(event) {
@@ -413,7 +431,9 @@
   })();
 
   window.PainlessSparql = (function() {
-    PainlessSparql.painless_graph = null;
+    var painless_graph;
+
+    painless_graph = null;
 
     function PainlessSparql(graph) {
       this.onkeypress_handler = bind(this.onkeypress_handler, this);
@@ -430,8 +450,8 @@
     };
 
     PainlessSparql.prototype.add_to_select = function() {
-      console.log(this.painless_graph.cy.nodes(":selected").id());
-      return console.log(this.painless_graph.sparql_text);
+      console.log(painless_graph.cy.nodes(":selected").id());
+      return console.log(painless_graph.sparql_text);
     };
 
     PainlessSparql.prototype.create_sidenav = function() {
@@ -447,7 +467,7 @@
       this.query_canvas = document.createElement("div");
       this.query_canvas.id = "query_canvas";
       side_nav.appendChild(this.query_canvas);
-      this.painless_graph = new PainlessGraph(this.query_canvas);
+      painless_graph = new PainlessGraph(this.query_canvas);
       menu = document.createElement('div');
       menu.id = 'painless_menu';
       document.getElementById('sidenav').append(menu);
@@ -457,15 +477,16 @@
       up_button.innerHTML = '▲';
       up_button.className = 'resize_button';
       up_button.onclick = function($) {
-        query_canvas.style.height = '70%';
-        return sparql_textbox.style.height = '0%';
+        query_canvas.style.height = '80%';
+        sparql_textbox.style.height = '0%';
+        return query_canvas.style.height = '80%';
       };
       nav_div.append(up_button);
       mid_button = document.createElement('div');
       mid_button.innerHTML = '≡';
       mid_button.className = 'resize_button';
       mid_button.onclick = function($) {
-        query_canvas.style.height = '40%';
+        query_canvas.style.height = '50%';
         return sparql_textbox.style.height = '30%';
       };
       nav_div.append(mid_button);
@@ -473,7 +494,7 @@
       down_button.innerHTML = '▼';
       down_button.className = 'resize_button';
       down_button.onclick = function($) {
-        sparql_textbox.style.height = '70%';
+        sparql_textbox.style.height = '80%';
         return query_canvas.style.height = '0%';
       };
       nav_div.append(down_button);
@@ -481,9 +502,11 @@
       button = document.createElement('button');
       button.innerHTML = 'undo';
       button.className = 'menu_button';
-      button.onclick = function() {
-        return console.log('undo');
-      };
+      button.onclick = (function(_this) {
+        return function($) {
+          return painless_graph.undo();
+        };
+      })(this);
       menu.append(button);
       button = document.createElement('button');
       button.innerHTML = 'delete node';
@@ -544,11 +567,11 @@
         }
         switch (selected_node.data('type')) {
           case "role":
-            return this.painless_graph.add_link(selected_node.data('label'), 'role');
+            return painless_graph.add_link(selected_node.data('label'), 'role');
           case "attribute":
-            return this.painless_graph.add_link(selected_node.data('label'), 'attribute');
+            return painless_graph.add_link(selected_node.data('label'), 'attribute');
           case "concept":
-            return this.painless_graph.add_link(selected_node.data('label'), 'concept');
+            return painless_graph.add_link(selected_node.data('label'), 'concept');
         }
       } else if (event.key === "d") {
         return console.log(this.cy.nodes(":selected").data('type'));

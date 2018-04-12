@@ -27,7 +27,7 @@ class window.SparqlText
 
         st = document.createElement('div')
         st.className = "highlighting_box"
-        st.id = node.id() + Math.round(Math.random()*100)
+        st.id = node.id() + Math.round(Math.random()*1000)
         st.dataset.node_id = node.id()
         st.setAttribute('draggable', true)
         st.addEventListener('dragstart',
@@ -40,7 +40,7 @@ class window.SparqlText
             node.removeClass("highlight")
         st.onclick = ($) ->
             node.select()
-        st.innerHTML = "?" + node.id()
+        st.innerHTML = "?" + node.data('label')
         st.style.backgroundColor = node.data('color')
         
         container.append(st)

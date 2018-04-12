@@ -44,32 +44,8 @@ class window.PainlessGraph
         console.log "undo"
 
 
-    merge: = (node1, node2) ->
-    ###* merges node1 and node2, repositioning all node2's edges into node1 ###
-		for edge in node2.neighborhood('edge')
-		
-			# if this edge has node2 as target
-			if edge.target().id() == node2.id()
-				@cy.add({
-					group: 'edges'
-					data: {
-						source: edge.source().id()
-						target: node1.id()
-					}
-				})
-
-			# if this edge has node2 as source
-			if edge.source().id() == node2.id()
-				@cy.add({
-					group: 'edges'
-					data: {
-						source: node1.id()
-						target: edge.target().id()
-					}
-				})
-
-		# remove node2 with all its connected edges
-		@cy.remove(node2) 
+    merge: ->
+        
 
 
     add_link: (link_name, link_type) =>
@@ -186,8 +162,8 @@ class window.PainlessGraph
 		return Math.sqrt(a*a + b*b)
 
 
+
 	check_collisions: =>
-		console.log 'checking collisions'
 		for node in @cy.nodes(".node-variable")
         check = false
         for node2 in @cy.nodes(".node-variable")
@@ -198,9 +174,11 @@ class window.PainlessGraph
                     return [node, node2]
                 else
                     node.removeClass('highlight')
+
  
     
     init: =>
+
         @cy = new cytoscape(
             container: document.getElementById("query_canvas"),
             style: generate_style()
@@ -211,8 +189,9 @@ class window.PainlessGraph
                 event.target.select()
                 @reshape()
             )
+
 		@cy.on('mouseup',
-			($) => 
+			($) -> 
 				#save_state()
 				if @check_collisions() != undefined
 					node_tmp_arr = @check_collisions()
@@ -220,4 +199,6 @@ class window.PainlessGraph
 			
 				@reshape()
 			)
+
+        
         @cy.resize()
