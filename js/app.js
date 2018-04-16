@@ -300,6 +300,8 @@
       this.init = bind(this.init, this);
       this.check_collisions = bind(this.check_collisions, this);
       this.add_link = bind(this.add_link, this);
+      this.delete_node = bind(this.delete_node, this);
+      this.cleanup_unlinked_variables = bind(this.cleanup_unlinked_variables, this);
       this.reshape = bind(this.reshape, this);
 
       /**
@@ -351,6 +353,60 @@
         state_buffer.pop();
         return this.reshape();
       }
+    };
+
+    PainlessGraph.prototype.cleanup_unlinked_variables = function() {
+      var i, len, node, ref, results;
+      ref = this.cy.nodes('.node-variable');
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        node = ref[i];
+        if (node.neighborhood('node').length === 0) {
+          this.cy.remove(node);
+          results.push(sparql_text.remove_from_select_boxes(node.id()));
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
+    };
+
+    PainlessGraph.prototype.delete_node = function() {
+      var i, j, k, l, len, len1, len2, len3, len4, m, node, node2, node3, node4, ref, ref1, ref2, ref3, ref4;
+      this.save_state();
+      ref = this.cy.nodes(':selected');
+      for (i = 0, len = ref.length; i < len; i++) {
+        node = ref[i];
+        if (node.hasClass('node-variable')) {
+          ref1 = node.neighborhood('node');
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            node2 = ref1[j];
+            ref2 = node2.neighborhood('node');
+            for (k = 0, len2 = ref2.length; k < len2; k++) {
+              node3 = ref2[k];
+              ref3 = node3.neighborhood('node');
+              for (l = 0, len3 = ref3.length; l < len3; l++) {
+                node4 = ref3[l];
+                this.cy.remove(node4);
+              }
+              this.cy.remove(node3);
+            }
+            this.cy.remove(node2);
+          }
+          this.cy.remove(node);
+          sparql_text.remove_from_select_boxes(node.id());
+        }
+        if (node.hasClass('node-attribute')) {
+          ref4 = node.neighborhood('node');
+          for (m = 0, len4 = ref4.length; m < len4; m++) {
+            node2 = ref4[m];
+            this.cy.remove(node2);
+          }
+          this.cy.remove(node);
+        }
+      }
+      this.cleanup_unlinked_variables();
+      return this.reshape();
     };
 
     PainlessGraph.prototype.merge = function(node1, node2) {
@@ -651,7 +707,7 @@
       button.innerHTML = 'delete node';
       button.className = 'menu_button';
       button.onclick = function() {
-        return console.log('delete node');
+        return painless_graph.delete_node();
       };
       menu.append(button);
       button = document.createElement('button');

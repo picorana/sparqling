@@ -80,7 +80,7 @@ class window.PainlessSparql
         button = document.createElement('button')
         button.innerHTML = 'delete node'
         button.className = 'menu_button'
-        button.onclick = () -> console.log 'delete node'
+        button.onclick = () -> painless_graph.delete_node()
         menu.append(button)
 
         button = document.createElement('button')

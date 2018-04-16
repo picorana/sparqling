@@ -61,6 +61,36 @@ class window.PainlessGraph
             @reshape()
 
 
+    cleanup_unlinked_variables: =>
+        for node in @cy.nodes('.node-variable')
+            if node.neighborhood('node').length == 0
+                @cy.remove(node)
+                sparql_text.remove_from_select_boxes(node.id())
+
+
+    delete_node: =>
+
+        @save_state()
+
+        for node in @cy.nodes(':selected')
+            if node.hasClass('node-variable')
+                for node2 in node.neighborhood('node')
+                    for node3 in node2.neighborhood('node')
+                        for node4 in node3.neighborhood('node')
+                            @cy.remove(node4)
+                        @cy.remove(node3)
+                    @cy.remove(node2) 
+                @cy.remove(node)
+                sparql_text.remove_from_select_boxes(node.id())
+            if node.hasClass('node-attribute')
+                for node2 in node.neighborhood('node')
+                    @cy.remove(node2)
+                @cy.remove(node)
+        
+        @cleanup_unlinked_variables()
+        @reshape()
+
+
     merge: (node1, node2) ->
         ###* merges node1 and node2, repositioning all node2's edges into node1 ###
         @save_state()
