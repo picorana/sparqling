@@ -52,19 +52,22 @@ class window.SparqlText
         minicross.dataset.node_id = st.dataset.node_id
         minicross.style.display = 'none'
         minicross.onclick = ($) =>
-            l_index = select_boxes.indexOf(minicross.dataset.node_id)
-            console.log l_index
-            select_boxes.splice(l_index, 1)
-            console.log select_boxes
-            @update()
+            @remove_from_select_boxes(minicross.dataset.node_id)
         container.append(minicross)
-
         container.onmouseover = ($) ->
             minicross.style.display = 'inline-block'
         container.onmouseout = ($) ->
             minicross.style.display = 'none'
 
         return container
+
+
+    remove_from_select_boxes: (node_id) =>
+        l_index = select_boxes.indexOf(node_id)
+        console.log l_index
+        select_boxes.splice(l_index, 1)
+        console.log select_boxes
+        @update()
 
 
     dragslot_drop: (ev, index) =>

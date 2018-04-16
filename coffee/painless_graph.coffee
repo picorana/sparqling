@@ -3,14 +3,21 @@
 
 class window.PainlessGraph
     ###* manages the graph visualization
+        TODO: palette should be in constants
+        TODO: hardcoded collision distance should be in constants
     ###
     
     palette = [ "b58900", "cb4b16", "dc322f", "d33682", "6c71c4", "268bd2", "2aa198", "859900" ]
-    sparql_text = null
     cur_variable_value = 0
+    sparql_text = null
+    state_buffer = null
+    state_buffer_max_length = 20
 
 
     constructor: ->
+        ###*
+        TODO: sparql_text should be managed by painless_sparql.coffee
+        ###
         @init()
         @reshape()
         
@@ -19,7 +26,9 @@ class window.PainlessGraph
 
 
     reshape: =>
-        ###* resets node positions in the graph view ###
+        ###* resets node positions in the graph view 
+            TODO: it's ugly with complex graphs.
+        ###
         if @cy.nodes('.node-variable').length < 3
             @cy.layout({
                 name: 'circle'
@@ -33,12 +42,29 @@ class window.PainlessGraph
             }).run()
 
 
+    save_state: ->
+        if state_buffer == null
+            state_buffer = []
+        if @cy.json() != state_buffer[state_buffer.length - 1]
+            state_buffer.push(@cy.json())
+        if state_buffer.length >= state_buffer_max_length 
+           state_buffer.shift() 
+
+
     undo : ->
-        console.log "undo"
+        if state_buffer == null or state_buffer.length < 1
+            console.warn "no saved states"
+        else
+            @cy.json(state_buffer[state_buffer.length - 1])
+            @cy.style(generate_style())
+            state_buffer.pop()
+            @reshape()
 
 
     merge: (node1, node2) ->
         ###* merges node1 and node2, repositioning all node2's edges into node1 ###
+        @save_state()
+
         for edge in node2.neighborhood('edge')
         
             # if this edge has node2 as target
@@ -62,6 +88,7 @@ class window.PainlessGraph
                 })
 
         # remove node2 with all its connected edges
+        sparql_text.remove_from_select_boxes(node2.id())
         @cy.remove(node2) 
 
 
@@ -78,6 +105,8 @@ class window.PainlessGraph
 
             TODO: use an enum to represent link types instead of hardcoded strings
         ###
+        @save_state()
+
         if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
             parent = @cy.nodes(":selected")
         else 
@@ -184,15 +213,20 @@ class window.PainlessGraph
    
 
     compute_distance: (node1, node2) ->
+        ###* computes distance between two node positions ###
         a = Math.abs(node1.position('x') - node2.position('x'))
         b = Math.abs(node1.position('y') - node2.position('y'))
         return Math.sqrt(a*a + b*b)
 
 
     check_collisions: =>
-        console.log 'checking collisions'
+        ###* check if there are any collisions in all the node variables
+        returns the colliding nodes if there are any.
+
+        TODO: collision highlight is broken!
+        TODO: remove hardcoded collision distance threshold
+        ###
         for node in @cy.nodes(".node-variable")
-            check = false
             for node2 in @cy.nodes(".node-variable")
                 if node != node2
                     if @compute_distance(node, node2) < 100
@@ -216,7 +250,6 @@ class window.PainlessGraph
             )
         @cy.on('mouseup',
             ($) => 
-                #save_state()
                 if @check_collisions() != undefined
                     node_tmp_arr = @check_collisions()
                     @merge(node_tmp_arr[0], node_tmp_arr[1])

@@ -91,6 +91,7 @@
       this.update = bind(this.update, this);
       this.create_dragslot = bind(this.create_dragslot, this);
       this.dragslot_drop = bind(this.dragslot_drop, this);
+      this.remove_from_select_boxes = bind(this.remove_from_select_boxes, this);
       this.create_highlighting_box = bind(this.create_highlighting_box, this);
       div_sparql_text = document.getElementById('sparql_textbox');
       this.cy = cy;
@@ -141,12 +142,7 @@
       minicross.style.display = 'none';
       minicross.onclick = (function(_this) {
         return function($) {
-          var l_index;
-          l_index = select_boxes.indexOf(minicross.dataset.node_id);
-          console.log(l_index);
-          select_boxes.splice(l_index, 1);
-          console.log(select_boxes);
-          return _this.update();
+          return _this.remove_from_select_boxes(minicross.dataset.node_id);
         };
       })(this);
       container.append(minicross);
@@ -157,6 +153,15 @@
         return minicross.style.display = 'none';
       };
       return container;
+    };
+
+    SparqlText.prototype.remove_from_select_boxes = function(node_id) {
+      var l_index;
+      l_index = select_boxes.indexOf(node_id);
+      console.log(l_index);
+      select_boxes.splice(l_index, 1);
+      console.log(select_boxes);
+      return this.update();
     };
 
     SparqlText.prototype.dragslot_drop = function(ev, index) {
@@ -276,20 +281,30 @@
   window.PainlessGraph = (function() {
 
     /** manages the graph visualization
+        TODO: palette should be in constants
+        TODO: hardcoded collision distance should be in constants
      */
-    var cur_variable_value, palette, sparql_text;
+    var cur_variable_value, palette, sparql_text, state_buffer, state_buffer_max_length;
 
     palette = ["b58900", "cb4b16", "dc322f", "d33682", "6c71c4", "268bd2", "2aa198", "859900"];
 
+    cur_variable_value = 0;
+
     sparql_text = null;
 
-    cur_variable_value = 0;
+    state_buffer = null;
+
+    state_buffer_max_length = 20;
 
     function PainlessGraph() {
       this.init = bind(this.init, this);
       this.check_collisions = bind(this.check_collisions, this);
       this.add_link = bind(this.add_link, this);
       this.reshape = bind(this.reshape, this);
+
+      /**
+      TODO: sparql_text should be managed by painless_sparql.coffee
+       */
       this.init();
       this.reshape();
       sparql_text = new SparqlText(this.cy);
@@ -298,7 +313,9 @@
 
     PainlessGraph.prototype.reshape = function() {
 
-      /** resets node positions in the graph view */
+      /** resets node positions in the graph view 
+          TODO: it's ugly with complex graphs.
+       */
       if (this.cy.nodes('.node-variable').length < 3) {
         return this.cy.layout({
           name: 'circle'
@@ -313,14 +330,34 @@
       }
     };
 
+    PainlessGraph.prototype.save_state = function() {
+      if (state_buffer === null) {
+        state_buffer = [];
+      }
+      if (this.cy.json() !== state_buffer[state_buffer.length - 1]) {
+        state_buffer.push(this.cy.json());
+      }
+      if (state_buffer.length >= state_buffer_max_length) {
+        return state_buffer.shift();
+      }
+    };
+
     PainlessGraph.prototype.undo = function() {
-      return console.log("undo");
+      if (state_buffer === null || state_buffer.length < 1) {
+        return console.warn("no saved states");
+      } else {
+        this.cy.json(state_buffer[state_buffer.length - 1]);
+        this.cy.style(generate_style());
+        state_buffer.pop();
+        return this.reshape();
+      }
     };
 
     PainlessGraph.prototype.merge = function(node1, node2) {
 
       /** merges node1 and node2, repositioning all node2's edges into node1 */
       var edge, i, len, ref;
+      this.save_state();
       ref = node2.neighborhood('edge');
       for (i = 0, len = ref.length; i < len; i++) {
         edge = ref[i];
@@ -343,6 +380,7 @@
           });
         }
       }
+      sparql_text.remove_from_select_boxes(node2.id());
       return this.cy.remove(node2);
     };
 
@@ -361,6 +399,7 @@
           TODO: use an enum to represent link types instead of hardcoded strings
        */
       var attr_id, dom_id, par_id, parent, range_id, var_id;
+      this.save_state();
       if (this.cy.nodes(":selected").length > 0 && this.cy.nodes(":selected").hasClass('node-variable')) {
         parent = this.cy.nodes(":selected");
       } else {
@@ -465,6 +504,8 @@
     };
 
     PainlessGraph.prototype.compute_distance = function(node1, node2) {
+
+      /** computes distance between two node positions */
       var a, b;
       a = Math.abs(node1.position('x') - node2.position('x'));
       b = Math.abs(node1.position('y') - node2.position('y'));
@@ -472,12 +513,17 @@
     };
 
     PainlessGraph.prototype.check_collisions = function() {
-      var check, i, j, len, len1, node, node2, ref, ref1;
-      console.log('checking collisions');
+
+      /** check if there are any collisions in all the node variables
+      returns the colliding nodes if there are any.
+      
+      TODO: collision highlight is broken!
+      TODO: remove hardcoded collision distance threshold
+       */
+      var i, j, len, len1, node, node2, ref, ref1;
       ref = this.cy.nodes(".node-variable");
       for (i = 0, len = ref.length; i < len; i++) {
         node = ref[i];
-        check = false;
         ref1 = this.cy.nodes(".node-variable");
         for (j = 0, len1 = ref1.length; j < len1; j++) {
           node2 = ref1[j];
