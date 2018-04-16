@@ -20,61 +20,65 @@ class window.PainlessGraph
 
 
     reshape: =>
-
-        @cy.layout({
-            name:'breadthfirst'
-            padding: 5
-            spacingFactor: 1 
-            fit:false
-        }).run()
-
-        #for node in @cy.nodes('.node-variable')
-            #node.neighborhood('node').layout({
-                #name:'circle'
-                #boundingBox: {
-                    #x1: node.position('x') - 50
-                    #y1: node.position('y') - 50
-                    #w: 100
-                    #h: 100
-                #}
-            #}).run()
+        ###* resets node positions in the graph view ###
+        if @cy.nodes('.node-variable').length < 3
+            @cy.layout({
+                name: 'circle'
+            }).run()
+        else
+            @cy.layout({
+                name:'breadthfirst'
+                padding: 5
+                spacingFactor: 1 
+                fit:false
+            }).run()
 
 
     undo : ->
         console.log "undo"
 
 
-    merge: = (node1, node2) ->
-    ###* merges node1 and node2, repositioning all node2's edges into node1 ###
-		for edge in node2.neighborhood('edge')
-		
-			# if this edge has node2 as target
-			if edge.target().id() == node2.id()
-				@cy.add({
-					group: 'edges'
-					data: {
-						source: edge.source().id()
-						target: node1.id()
-					}
-				})
+    merge: (node1, node2) ->
+        ###* merges node1 and node2, repositioning all node2's edges into node1 ###
+        for edge in node2.neighborhood('edge')
+        
+            # if this edge has node2 as target
+            if edge.target().id() == node2.id()
+                @cy.add({
+                    group: 'edges'
+                    data: {
+                        source: edge.source().id()
+                        target: node1.id()
+                    }
+                })
 
-			# if this edge has node2 as source
-			if edge.source().id() == node2.id()
-				@cy.add({
-					group: 'edges'
-					data: {
-						source: node1.id()
-						target: edge.target().id()
-					}
-				})
+            # if this edge has node2 as source
+            if edge.source().id() == node2.id()
+                @cy.add({
+                    group: 'edges'
+                    data: {
+                        source: node1.id()
+                        target: edge.target().id()
+                    }
+                })
 
-		# remove node2 with all its connected edges
-		@cy.remove(node2) 
+        # remove node2 with all its connected edges
+        @cy.remove(node2) 
 
 
     add_link: (link_name, link_type) =>
+        ###* adds a new link in the graph. 
+            links that are not concepts (roles and attributes) add a new variable into the graph.
+            links are always added to the selected variable in the graph, if there are no selected variables,   
+                two new variables are created.
 
+            links can be:
+            - concepts   
+            - roles
+            - attributes
 
+            TODO: use an enum to represent link types instead of hardcoded strings
+        ###
         if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
             parent = @cy.nodes(":selected")
         else 
@@ -180,24 +184,24 @@ class window.PainlessGraph
         @reshape()
    
 
-	compute_distance: = (node1, node2) ->
-		a = Math.abs(node1.position('x') - node2.position('x'))
-		b = Math.abs(node1.position('y') - node2.position('y'))
-		return Math.sqrt(a*a + b*b)
+    compute_distance: (node1, node2) ->
+        a = Math.abs(node1.position('x') - node2.position('x'))
+        b = Math.abs(node1.position('y') - node2.position('y'))
+        return Math.sqrt(a*a + b*b)
 
 
-	check_collisions: =>
-		console.log 'checking collisions'
-		for node in @cy.nodes(".node-variable")
-        check = false
-        for node2 in @cy.nodes(".node-variable")
-            if node != node2
-                if @compute_distance(node, node2) < 100
-                    node.addClass('highlight')
-                    node2.addClass('highlight')
-                    return [node, node2]
-                else
-                    node.removeClass('highlight')
+    check_collisions: =>
+        console.log 'checking collisions'
+        for node in @cy.nodes(".node-variable")
+            check = false
+            for node2 in @cy.nodes(".node-variable")
+                if node != node2
+                    if @compute_distance(node, node2) < 100
+                        node.addClass('highlight')
+                        node2.addClass('highlight')
+                        return [node, node2]
+                    else
+                        node.removeClass('highlight')
  
     
     init: =>
@@ -211,13 +215,13 @@ class window.PainlessGraph
                 event.target.select()
                 @reshape()
             )
-		@cy.on('mouseup',
-			($) => 
-				#save_state()
-				if @check_collisions() != undefined
-					node_tmp_arr = @check_collisions()
-					@merge(node_tmp_arr[0], node_tmp_arr[1])
-			
-				@reshape()
-			)
+        @cy.on('mouseup',
+            ($) => 
+                #save_state()
+                if @check_collisions() != undefined
+                    node_tmp_arr = @check_collisions()
+                    @merge(node_tmp_arr[0], node_tmp_arr[1])
+            
+                @reshape()
+            )
         @cy.resize()

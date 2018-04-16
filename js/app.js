@@ -284,6 +284,7 @@
 
     function PainlessGraph() {
       this.init = bind(this.init, this);
+      this.check_collisions = bind(this.check_collisions, this);
       this.add_link = bind(this.add_link, this);
       this.reshape = bind(this.reshape, this);
       palette = window.palette('sol-accent', 8);
@@ -294,19 +295,69 @@
     }
 
     PainlessGraph.prototype.reshape = function() {
-      return this.cy.layout({
-        name: 'breadthfirst',
-        padding: 5,
-        spacingFactor: 1,
-        fit: false
-      }).run();
+
+      /** resets node positions in the graph view */
+      if (this.cy.nodes('.node-variable').length < 3) {
+        return this.cy.layout({
+          name: 'circle'
+        }).run();
+      } else {
+        return this.cy.layout({
+          name: 'breadthfirst',
+          padding: 5,
+          spacingFactor: 1,
+          fit: false
+        }).run();
+      }
     };
 
     PainlessGraph.prototype.undo = function() {
       return console.log("undo");
     };
 
+    PainlessGraph.prototype.merge = function(node1, node2) {
+
+      /** merges node1 and node2, repositioning all node2's edges into node1 */
+      var edge, i, len, ref;
+      ref = node2.neighborhood('edge');
+      for (i = 0, len = ref.length; i < len; i++) {
+        edge = ref[i];
+        if (edge.target().id() === node2.id()) {
+          this.cy.add({
+            group: 'edges',
+            data: {
+              source: edge.source().id(),
+              target: node1.id()
+            }
+          });
+        }
+        if (edge.source().id() === node2.id()) {
+          this.cy.add({
+            group: 'edges',
+            data: {
+              source: node1.id(),
+              target: edge.target().id()
+            }
+          });
+        }
+      }
+      return this.cy.remove(node2);
+    };
+
     PainlessGraph.prototype.add_link = function(link_name, link_type) {
+
+      /** adds a new link in the graph. 
+          links that are not concepts (roles and attributes) add a new variable into the graph.
+          links are always added to the selected variable in the graph, if there are no selected variables,   
+              two new variables are created.
+      
+          links can be:
+          - concepts   
+          - roles
+          - attributes
+      
+          TODO: use an enum to represent link types instead of hardcoded strings
+       */
       var attr_id, dom_id, par_id, parent, range_id, var_id;
       if (this.cy.nodes(":selected").length > 0 && this.cy.nodes(":selected").hasClass('node-variable')) {
         parent = this.cy.nodes(":selected");
@@ -411,6 +462,36 @@
       return this.reshape();
     };
 
+    PainlessGraph.prototype.compute_distance = function(node1, node2) {
+      var a, b;
+      a = Math.abs(node1.position('x') - node2.position('x'));
+      b = Math.abs(node1.position('y') - node2.position('y'));
+      return Math.sqrt(a * a + b * b);
+    };
+
+    PainlessGraph.prototype.check_collisions = function() {
+      var check, i, j, len, len1, node, node2, ref, ref1;
+      console.log('checking collisions');
+      ref = this.cy.nodes(".node-variable");
+      for (i = 0, len = ref.length; i < len; i++) {
+        node = ref[i];
+        check = false;
+        ref1 = this.cy.nodes(".node-variable");
+        for (j = 0, len1 = ref1.length; j < len1; j++) {
+          node2 = ref1[j];
+          if (node !== node2) {
+            if (this.compute_distance(node, node2) < 100) {
+              node.addClass('highlight');
+              node2.addClass('highlight');
+              return [node, node2];
+            } else {
+              node.removeClass('highlight');
+            }
+          }
+        }
+      }
+    };
+
     PainlessGraph.prototype.init = function() {
       this.cy = new cytoscape({
         container: document.getElementById("query_canvas"),
@@ -420,6 +501,16 @@
       this.cy.on('click', '.node-variable', (function(_this) {
         return function(event) {
           event.target.select();
+          return _this.reshape();
+        };
+      })(this));
+      this.cy.on('mouseup', (function(_this) {
+        return function($) {
+          var node_tmp_arr;
+          if (_this.check_collisions() !== void 0) {
+            node_tmp_arr = _this.check_collisions();
+            _this.merge(node_tmp_arr[0], node_tmp_arr[1]);
+          }
           return _this.reshape();
         };
       })(this));
