@@ -33,6 +33,7 @@ generate_style = ->
                 'border-width' : '2px' 
                 'content' : 'data(label)'
                 'width' : 90
+                'color' : 'white'
                 'height' : 60
             })
         .selector('.node-variable')
@@ -52,7 +53,7 @@ generate_style = ->
                 'color' : 'white'
                 'text-outline-color' : 'black'
                 'text-outline-width' : '2px'
-                'content' : 'data(id)'
+                'content' : 'data(label)'
             })
         .selector('.node-concept')
             .style({

@@ -29,6 +29,7 @@
       'border-width': '2px',
       'content': 'data(label)',
       'width': 90,
+      'color': 'white',
       'height': 60
     }).selector('.node-variable').style({
       'shape': 'ellipse',
@@ -47,7 +48,7 @@
       'color': 'white',
       'text-outline-color': 'black',
       'text-outline-width': '2px',
-      'content': 'data(id)'
+      'content': 'data(label)'
     }).selector('.node-concept').style({
       'shape': 'rectangle',
       'background-color': 'white',
@@ -87,6 +88,8 @@
 
     select_boxes = [];
 
+    SparqlText.cy = null;
+
     function SparqlText(cy) {
       this.update = bind(this.update, this);
       this.create_dragslot = bind(this.create_dragslot, this);
@@ -98,6 +101,7 @@
       div_sparql_text = document.getElementById('sparql_textbox');
       div_sparql_text.className = "unselectable";
       this.cy = cy;
+      console.log(this.cy);
     }
 
     SparqlText.prototype.add_to_select = function(id) {
@@ -112,6 +116,18 @@
       return nbsp;
     };
 
+    SparqlText.prototype.rename = function(st) {
+      var i, j, node, ref;
+      node = this.cy.getElementById(st.dataset.node_id);
+      for (i = j = 0, ref = select_boxes.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+        if (select_boxes[i] === st.dataset.prevname) {
+          select_boxes[i] = st.innerHTML.substr(i);
+        }
+      }
+      node.data('label', st.innerHTML.substr(1));
+      return console.log(st.innerHTML);
+    };
+
     SparqlText.prototype.create_highlighting_box = function(node) {
 
       /** creates a box in the sparql text that helps locate in the graph where the node is */
@@ -121,20 +137,30 @@
       st = document.createElement('div');
       st.className = "highlighting_box";
       st.id = node.id() + Math.round(Math.random() * 1000);
+      st.dataset.prevname = node.id();
       st.dataset.node_id = node.id();
       st.setAttribute('draggable', true);
+      st.setAttribute('contenteditable', 'true');
       st.addEventListener('dragstart', function(ev) {
         return ev.dataTransfer.setData("text", ev.target.id);
       });
+      st.onkeyup = (function(_this) {
+        return function() {
+          return _this.rename(st);
+        };
+      })(this);
       st.onmouseover = function($) {
         return node.addClass("highlight");
       };
       st.onmouseout = function($) {
         return node.removeClass("highlight");
       };
-      st.onclick = function($) {
-        return node.select();
-      };
+      st.onclick = (function(_this) {
+        return function($) {
+          _this.cy.nodes().unselect();
+          return node.select();
+        };
+      })(this);
       st.innerHTML = "?" + node.data('label');
       st.style.backgroundColor = node.data('color');
       container.append(st);
@@ -169,25 +195,25 @@
     SparqlText.prototype.generate_plaintext_query = function() {
 
       /** warning: VERY HACKY */
-      var count, d, elem, i, j, k, len, len1, len2, ref, ref1, result;
+      var count, d, elem, j, k, l, len, len1, len2, ref, ref1, result;
       result = "Select ";
       if (select_boxes.length === 0) {
         result += '*';
       } else {
-        for (i = 0, len = select_boxes.length; i < len; i++) {
-          elem = select_boxes[i];
+        for (j = 0, len = select_boxes.length; j < len; j++) {
+          elem = select_boxes[j];
           result += '?' + elem + ' ';
         }
       }
       result += '\r\nwhere {';
       ref = document.getElementsByClassName('q_line');
-      for (j = 0, len1 = ref.length; j < len1; j++) {
-        elem = ref[j];
+      for (k = 0, len1 = ref.length; k < len1; k++) {
+        elem = ref[k];
         result += '\r\n';
         count = 0;
         ref1 = elem.getElementsByClassName('highlighting_box');
-        for (k = 0, len2 = ref1.length; k < len2; k++) {
-          d = ref1[k];
+        for (l = 0, len2 = ref1.length; l < len2; l++) {
+          d = ref1[l];
           result += d.innerHTML + ' ';
           count += 1;
           if (count % 3 === 0) {
@@ -233,12 +259,12 @@
       nbsp.className = 'dragslot_select';
       nbsp.dataset.index = index;
       nbsp.addEventListener('dragover', function(ev) {
-        var ds, i, len, ref, results;
+        var ds, j, len, ref, results;
         ev.preventDefault();
         ref = document.getElementsByClassName('dragslot_select');
         results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          ds = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          ds = ref[j];
           results.push(ds.style.opacity = 1);
         }
         return results;
@@ -253,7 +279,7 @@
     };
 
     SparqlText.prototype.update = function() {
-      var count, elem, f, f_string, i, init_string, j, k, l, len, len1, len2, len3, len4, len5, len6, m, n, node1, node2, node3, node4, node5, o, q_line, ref, ref1, ref2, ref3, ref4, ref5, s_line, select_div, select_div_f;
+      var count, elem, f, f_string, init_string, j, k, l, len, len1, len2, len3, len4, len5, len6, m, n, node1, node2, node3, node4, node5, o, p, q_line, ref, ref1, ref2, ref3, ref4, ref5, s_line, select_div, select_div_f;
       div_sparql_text.innerHTML = "";
       init_string = document.createElement('div');
       init_string.className = "init_string";
@@ -264,8 +290,8 @@
       } else {
         s_line.append(this.create_tab());
         count = 0;
-        for (i = 0, len = select_boxes.length; i < len; i++) {
-          elem = select_boxes[i];
+        for (j = 0, len = select_boxes.length; j < len; j++) {
+          elem = select_boxes[j];
           s_line.append(this.create_highlighting_box(this.cy.getElementById(elem)));
           s_line.append(this.create_dragslot(count));
           count += 1;
@@ -283,11 +309,11 @@
       q_line = document.createElement('div');
       q_line.className = "q_line";
       ref = this.cy.nodes(".node-variable");
-      for (j = 0, len1 = ref.length; j < len1; j++) {
-        node1 = ref[j];
+      for (k = 0, len1 = ref.length; k < len1; k++) {
+        node1 = ref[k];
         ref1 = node1.neighborhood(".node-concept");
-        for (k = 0, len2 = ref1.length; k < len2; k++) {
-          node2 = ref1[k];
+        for (l = 0, len2 = ref1.length; l < len2; l++) {
+          node2 = ref1[l];
           q_line.append(this.create_highlighting_box(node1));
           f = document.createElement("div");
           f.innerHTML = "&nbsp;rdf:type " + node2.id() + " .";
@@ -295,17 +321,17 @@
           q_line.append(document.createElement('br'));
         }
         ref2 = node1.neighborhood(".node-domain");
-        for (l = 0, len3 = ref2.length; l < len3; l++) {
-          node2 = ref2[l];
+        for (m = 0, len3 = ref2.length; m < len3; m++) {
+          node2 = ref2[m];
           ref3 = node2.neighborhood(".node-attribute");
-          for (m = 0, len4 = ref3.length; m < len4; m++) {
-            node3 = ref3[m];
+          for (n = 0, len4 = ref3.length; n < len4; n++) {
+            node3 = ref3[n];
             ref4 = node3.neighborhood(".node-range");
-            for (n = 0, len5 = ref4.length; n < len5; n++) {
-              node4 = ref4[n];
+            for (o = 0, len5 = ref4.length; o < len5; o++) {
+              node4 = ref4[o];
               ref5 = node4.neighborhood(".node-variable");
-              for (o = 0, len6 = ref5.length; o < len6; o++) {
-                node5 = ref5[o];
+              for (p = 0, len6 = ref5.length; p < len6; p++) {
+                node5 = ref5[p];
                 q_line.append(this.create_highlighting_box(node5));
                 q_line.append(this.create_tab());
                 q_line.append(this.create_highlighting_box(node3));
@@ -327,6 +353,23 @@
     };
 
     return SparqlText;
+
+  })();
+
+  window.PainlessLink = (function() {
+    var node_a, node_b, node_link;
+
+    node_a = null;
+
+    node_link = null;
+
+    node_b = null;
+
+    function PainlessLink(link_name, link_type) {
+      this.link_name = link_name;
+    }
+
+    return PainlessLink;
 
   })();
 
@@ -430,11 +473,11 @@
     };
 
     PainlessGraph.prototype.cleanup_unlinked_variables = function() {
-      var i, len, node, ref, results;
+      var j, len, node, ref, results;
       ref = this.cy.nodes('.node-variable');
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        node = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        node = ref[j];
         if (node.neighborhood('node').length === 0) {
           this.cy.remove(node);
           results.push(sparql_text.remove_from_select_boxes(node.id()));
@@ -446,21 +489,21 @@
     };
 
     PainlessGraph.prototype.delete_node = function() {
-      var i, j, k, l, len, len1, len2, len3, len4, m, node, node2, node3, node4, ref, ref1, ref2, ref3, ref4;
+      var j, k, l, len, len1, len2, len3, len4, m, n, node, node2, node3, node4, ref, ref1, ref2, ref3, ref4;
       this.save_state();
       ref = this.cy.nodes(':selected');
-      for (i = 0, len = ref.length; i < len; i++) {
-        node = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        node = ref[j];
         if (node.hasClass('node-variable')) {
           ref1 = node.neighborhood('node');
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            node2 = ref1[j];
+          for (k = 0, len1 = ref1.length; k < len1; k++) {
+            node2 = ref1[k];
             ref2 = node2.neighborhood('node');
-            for (k = 0, len2 = ref2.length; k < len2; k++) {
-              node3 = ref2[k];
+            for (l = 0, len2 = ref2.length; l < len2; l++) {
+              node3 = ref2[l];
               ref3 = node3.neighborhood('node');
-              for (l = 0, len3 = ref3.length; l < len3; l++) {
-                node4 = ref3[l];
+              for (m = 0, len3 = ref3.length; m < len3; m++) {
+                node4 = ref3[m];
                 this.cy.remove(node4);
               }
               this.cy.remove(node3);
@@ -472,8 +515,8 @@
         }
         if (node.hasClass('node-attribute')) {
           ref4 = node.neighborhood('node');
-          for (m = 0, len4 = ref4.length; m < len4; m++) {
-            node2 = ref4[m];
+          for (n = 0, len4 = ref4.length; n < len4; n++) {
+            node2 = ref4[n];
             this.cy.remove(node2);
           }
           this.cy.remove(node);
@@ -486,11 +529,11 @@
     PainlessGraph.prototype.merge = function(node1, node2) {
 
       /** merges node1 and node2, repositioning all node2's edges into node1 */
-      var edge, i, len, ref;
+      var edge, j, len, ref;
       this.save_state();
       ref = node2.neighborhood('edge');
-      for (i = 0, len = ref.length; i < len; i++) {
-        edge = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        edge = ref[j];
         if (edge.target().id() === node2.id()) {
           this.cy.add({
             group: 'edges',
@@ -650,13 +693,13 @@
       TODO: collision highlight is broken!
       TODO: remove hardcoded collision distance threshold
        */
-      var i, j, len, len1, node, node2, ref, ref1;
+      var j, k, len, len1, node, node2, ref, ref1;
       ref = this.cy.nodes(".node-variable");
-      for (i = 0, len = ref.length; i < len; i++) {
-        node = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        node = ref[j];
         ref1 = this.cy.nodes(".node-variable");
-        for (j = 0, len1 = ref1.length; j < len1; j++) {
-          node2 = ref1[j];
+        for (k = 0, len1 = ref1.length; k < len1; k++) {
+          node2 = ref1[k];
           if (node !== node2) {
             if (this.compute_distance(node, node2) < 100) {
               node.addClass('highlight');

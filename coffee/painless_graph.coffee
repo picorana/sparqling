@@ -1,5 +1,6 @@
 #_require cyto_style.coffee
 #_require sparql_text.coffee
+#_require painless_link.coffee
 
 class window.PainlessGraph
     ###* manages the graph visualization

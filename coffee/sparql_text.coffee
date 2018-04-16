@@ -3,12 +3,13 @@ class window.SparqlText
 
     div_sparql_text = null
     select_boxes = []
-
+    @cy = null
 
     constructor: (cy) ->
        div_sparql_text = document.getElementById('sparql_textbox')
        div_sparql_text.className = "unselectable" 
        @cy = cy
+       console.log @cy
 
 
     add_to_select: (id) ->
@@ -22,6 +23,15 @@ class window.SparqlText
         return nbsp
 
 
+    rename: (st) ->
+        node = @cy.getElementById(st.dataset.node_id)
+        for i in [0 ... select_boxes.length]
+            if select_boxes[i] == st.dataset.prevname
+                select_boxes[i] = st.innerHTML.substr(i)
+        node.data('label', st.innerHTML.substr(1))
+        console.log st.innerHTML
+
+
     create_highlighting_box: (node) =>
         ###* creates a box in the sparql text that helps locate in the graph where the node is ###
         container = document.createElement('div')
@@ -30,17 +40,21 @@ class window.SparqlText
         st = document.createElement('div')
         st.className = "highlighting_box"
         st.id = node.id() + Math.round(Math.random()*1000)
+        st.dataset.prevname = node.id()
         st.dataset.node_id = node.id()
         st.setAttribute('draggable', true)
+        st.setAttribute('contenteditable', 'true')
         st.addEventListener('dragstart',
             (ev) ->
                 ev.dataTransfer.setData("text", ev.target.id);
         )
+        st.onkeyup =  () => @rename(st) 
         st.onmouseover = ($) ->
             node.addClass("highlight")
         st.onmouseout = ($) ->
             node.removeClass("highlight")
-        st.onclick = ($) ->
+        st.onclick = ($) =>
+            @cy.nodes().unselect()
             node.select()
         st.innerHTML = "?" + node.data('label')
         st.style.backgroundColor = node.data('color')
