@@ -2,16 +2,15 @@
 #_require sparql_text.coffee
 
 class window.PainlessGraph
-
+    ###* manages the graph visualization
+    ###
     
-    palette = null
+    palette = [ "b58900", "cb4b16", "dc322f", "d33682", "6c71c4", "268bd2", "2aa198", "859900" ]
     sparql_text = null
     cur_variable_value = 0
 
 
     constructor: ->
-        palette = window.palette('sol-accent', 8)
- 
         @init()
         @reshape()
         

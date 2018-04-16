@@ -274,9 +274,12 @@
   })();
 
   window.PainlessGraph = (function() {
+
+    /** manages the graph visualization
+     */
     var cur_variable_value, palette, sparql_text;
 
-    palette = null;
+    palette = ["b58900", "cb4b16", "dc322f", "d33682", "6c71c4", "268bd2", "2aa198", "859900"];
 
     sparql_text = null;
 
@@ -287,7 +290,6 @@
       this.check_collisions = bind(this.check_collisions, this);
       this.add_link = bind(this.add_link, this);
       this.reshape = bind(this.reshape, this);
-      palette = window.palette('sol-accent', 8);
       this.init();
       this.reshape();
       sparql_text = new SparqlText(this.cy);
