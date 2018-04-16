@@ -98,7 +98,8 @@
     }
 
     SparqlText.prototype.add_to_select = function(id) {
-      return select_boxes.push(id);
+      select_boxes.push(id);
+      return this.update();
     };
 
     SparqlText.prototype.create_tab = function() {
@@ -156,11 +157,9 @@
     };
 
     SparqlText.prototype.remove_from_select_boxes = function(node_id) {
-      var l_index;
-      l_index = select_boxes.indexOf(node_id);
-      console.log(l_index);
-      select_boxes.splice(l_index, 1);
-      console.log(select_boxes);
+      select_boxes = select_boxes.filter(function(elem) {
+        return elem !== node_id;
+      });
       return this.update();
     };
 
@@ -302,6 +301,8 @@
       this.add_link = bind(this.add_link, this);
       this.delete_node = bind(this.delete_node, this);
       this.cleanup_unlinked_variables = bind(this.cleanup_unlinked_variables, this);
+      this.add_to_select = bind(this.add_to_select, this);
+      this.center_view = bind(this.center_view, this);
       this.reshape = bind(this.reshape, this);
 
       /**
@@ -316,7 +317,7 @@
     PainlessGraph.prototype.reshape = function() {
 
       /** resets node positions in the graph view 
-          TODO: it's ugly with complex graphs.
+          TODO: it's ugly.
        */
       if (this.cy.nodes('.node-variable').length < 3) {
         return this.cy.layout({
@@ -330,6 +331,22 @@
           fit: false
         }).run();
       }
+    };
+
+    PainlessGraph.prototype.center_view = function() {
+
+      /** 
+      TODO: pan and center should actually be two different buttons!
+       */
+      if (this.cy.nodes(':selected').length > 0) {
+        return this.cy.center(this.cy.nodes(':selected'));
+      } else {
+        return this.cy.fit();
+      }
+    };
+
+    PainlessGraph.prototype.add_to_select = function(node_id) {
+      return sparql_text.add_to_select(node_id);
     };
 
     PainlessGraph.prototype.save_state = function() {
@@ -633,7 +650,6 @@
     function PainlessSparql(graph) {
       this.onkeypress_handler = bind(this.onkeypress_handler, this);
       this.create_sidenav = bind(this.create_sidenav, this);
-      this.add_to_select = bind(this.add_to_select, this);
       this.graph = graph;
       this.cy = graph.cy;
       this.init();
@@ -642,11 +658,6 @@
     PainlessSparql.prototype.init = function() {
       this.create_sidenav();
       return this.add_event_listener();
-    };
-
-    PainlessSparql.prototype.add_to_select = function() {
-      console.log(painless_graph.cy.nodes(":selected").id());
-      return console.log(painless_graph.sparql_text);
     };
 
     PainlessSparql.prototype.create_sidenav = function() {
@@ -720,6 +731,9 @@
       menu.append(button);
       button = document.createElement('button');
       button.innerHTML = 'center view';
+      button.onclick = function() {
+        return painless_graph.center_view();
+      };
       button.className = 'menu_button';
       menu.append(button);
       button = document.createElement('button');
@@ -729,11 +743,9 @@
       button = document.createElement('button');
       button.innerHTML = 'add to select';
       button.className = 'menu_button';
-      button.onclick = (function(_this) {
-        return function($) {
-          return _this.add_to_select();
-        };
-      })(this);
+      button.onclick = function($) {
+        return painless_graph.add_to_select(painless_graph.cy.nodes(':selected').id());
+      };
       menu.append(button);
       button = document.createElement('button');
       button.innerHTML = 'filter';

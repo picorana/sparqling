@@ -27,7 +27,7 @@ class window.PainlessGraph
 
     reshape: =>
         ###* resets node positions in the graph view 
-            TODO: it's ugly with complex graphs.
+            TODO: it's ugly.
         ###
         if @cy.nodes('.node-variable').length < 3
             @cy.layout({
@@ -40,6 +40,19 @@ class window.PainlessGraph
                 spacingFactor: 1 
                 fit:false
             }).run()
+
+
+    center_view: =>
+        ###* 
+        TODO: pan and center should actually be two different buttons!
+        ###
+        if @cy.nodes(':selected').length > 0
+            @cy.center(@cy.nodes(':selected'))
+        else @cy.fit()
+
+
+    add_to_select: (node_id) =>
+        sparql_text.add_to_select(node_id)
 
 
     save_state: ->
@@ -69,7 +82,6 @@ class window.PainlessGraph
 
 
     delete_node: =>
-
         @save_state()
 
         for node in @cy.nodes(':selected')

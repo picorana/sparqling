@@ -15,11 +15,6 @@ class window.PainlessSparql
         this.add_event_listener()
 
 
-    add_to_select: =>
-        console.log painless_graph.cy.nodes(":selected").id()
-        console.log painless_graph.sparql_text
-
-
     create_sidenav : =>
         side_nav = document.createElement("div");
         side_nav.id = "sidenav";
@@ -95,6 +90,7 @@ class window.PainlessSparql
 
         button = document.createElement('button')
         button.innerHTML = 'center view'
+        button.onclick = () -> painless_graph.center_view()
         button.className = 'menu_button'
         menu.append(button)
 
@@ -106,7 +102,7 @@ class window.PainlessSparql
         button = document.createElement('button')
         button.innerHTML = 'add to select'
         button.className = 'menu_button'
-        button.onclick = ($) => @add_to_select() 
+        button.onclick = ($) -> painless_graph.add_to_select(painless_graph.cy.nodes(':selected').id()) 
         menu.append(button)
 
         button = document.createElement('button')

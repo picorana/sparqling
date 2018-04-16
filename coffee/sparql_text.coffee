@@ -12,6 +12,7 @@ class window.SparqlText
 
     add_to_select: (id) ->
         select_boxes.push(id)
+        @update()
 
 
     create_tab: ->
@@ -63,10 +64,7 @@ class window.SparqlText
 
 
     remove_from_select_boxes: (node_id) =>
-        l_index = select_boxes.indexOf(node_id)
-        console.log l_index
-        select_boxes.splice(l_index, 1)
-        console.log select_boxes
+        select_boxes = select_boxes.filter((elem) -> return elem != node_id)
         @update()
 
 
@@ -100,7 +98,6 @@ class window.SparqlText
 
 
     update: =>
-
         div_sparql_text.innerHTML = ""
 
         init_string = document.createElement('div')
