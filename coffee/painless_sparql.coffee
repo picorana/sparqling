@@ -97,12 +97,13 @@ class window.PainlessSparql
         button = document.createElement('button')
         button.innerHTML = 'copy to clipboard'
         button.className = 'menu_button'
+        button.onclick = () -> painless_graph.copy_to_clipboard()
         menu.append(button)
 
         button = document.createElement('button')
         button.innerHTML = 'add to select'
         button.className = 'menu_button'
-        button.onclick = ($) -> painless_graph.add_to_select(painless_graph.cy.nodes(':selected').id()) 
+        button.onclick = () -> painless_graph.add_to_select(painless_graph.cy.nodes(':selected').id()) 
         menu.append(button)
 
         button = document.createElement('button')

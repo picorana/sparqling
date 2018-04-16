@@ -54,6 +54,10 @@ class window.PainlessGraph
     add_to_select: (node_id) =>
         sparql_text.add_to_select(node_id)
 
+    
+    copy_to_clipboard: ->
+        sparql_text.copy_to_clipboard()
+
 
     save_state: ->
         if state_buffer == null

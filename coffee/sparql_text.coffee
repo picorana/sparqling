@@ -6,7 +6,8 @@ class window.SparqlText
 
 
     constructor: (cy) ->
-       div_sparql_text = document.getElementById('sparql_textbox') 
+       div_sparql_text = document.getElementById('sparql_textbox')
+       div_sparql_text.className = "unselectable" 
        @cy = cy
 
 
@@ -68,6 +69,40 @@ class window.SparqlText
         @update()
 
 
+    generate_plaintext_query: =>
+        ###* warning: VERY HACKY ###
+        result = "Select "
+        if select_boxes.length == 0
+            result += '*'
+        else for elem in select_boxes
+            result += '?' + elem + ' '
+        result += '\r\nwhere {'
+        for elem in document.getElementsByClassName('q_line')
+            result += '\r\n'
+            count = 0
+            for d in elem.getElementsByClassName('highlighting_box')
+                result += d.innerHTML + ' '
+                count += 1
+                if count%3 == 0
+                    result += ' .\r\n'
+        result += '}'
+        console.log result
+        return result
+
+
+    copy_to_clipboard: =>
+        ###* ugly hack to make you able to copy text to clipboard.
+        ###
+        tmp_div = document.createElement('textarea') 
+        tmp_div.value = @generate_plaintext_query()
+        tmp_div.id = "tmp_div"
+        document.body.appendChild(tmp_div)
+        thing = document.getElementById('tmp_div')
+        thing.select()
+        document.execCommand('Copy')
+        tmp_div.style.display = 'none'
+        document.body.removeChild(tmp_div)
+
     dragslot_drop: (ev, index) =>
         ev.preventDefault()
         data = ev.dataTransfer.getData("text");
@@ -110,7 +145,6 @@ class window.SparqlText
         if select_boxes.length == 0
             s_line.innerHTML = "&nbsp;*"
         else
-
             s_line.append(@create_tab())
 
             count = 0

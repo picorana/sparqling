@@ -91,9 +91,12 @@
       this.update = bind(this.update, this);
       this.create_dragslot = bind(this.create_dragslot, this);
       this.dragslot_drop = bind(this.dragslot_drop, this);
+      this.copy_to_clipboard = bind(this.copy_to_clipboard, this);
+      this.generate_plaintext_query = bind(this.generate_plaintext_query, this);
       this.remove_from_select_boxes = bind(this.remove_from_select_boxes, this);
       this.create_highlighting_box = bind(this.create_highlighting_box, this);
       div_sparql_text = document.getElementById('sparql_textbox');
+      div_sparql_text.className = "unselectable";
       this.cy = cy;
     }
 
@@ -161,6 +164,56 @@
         return elem !== node_id;
       });
       return this.update();
+    };
+
+    SparqlText.prototype.generate_plaintext_query = function() {
+
+      /** warning: VERY HACKY */
+      var count, d, elem, i, j, k, len, len1, len2, ref, ref1, result;
+      result = "Select ";
+      if (select_boxes.length === 0) {
+        result += '*';
+      } else {
+        for (i = 0, len = select_boxes.length; i < len; i++) {
+          elem = select_boxes[i];
+          result += '?' + elem + ' ';
+        }
+      }
+      result += '\r\nwhere {';
+      ref = document.getElementsByClassName('q_line');
+      for (j = 0, len1 = ref.length; j < len1; j++) {
+        elem = ref[j];
+        result += '\r\n';
+        count = 0;
+        ref1 = elem.getElementsByClassName('highlighting_box');
+        for (k = 0, len2 = ref1.length; k < len2; k++) {
+          d = ref1[k];
+          result += d.innerHTML + ' ';
+          count += 1;
+          if (count % 3 === 0) {
+            result += ' .\r\n';
+          }
+        }
+      }
+      result += '}';
+      console.log(result);
+      return result;
+    };
+
+    SparqlText.prototype.copy_to_clipboard = function() {
+
+      /** ugly hack to make you able to copy text to clipboard.
+       */
+      var thing, tmp_div;
+      tmp_div = document.createElement('textarea');
+      tmp_div.value = this.generate_plaintext_query();
+      tmp_div.id = "tmp_div";
+      document.body.appendChild(tmp_div);
+      thing = document.getElementById('tmp_div');
+      thing.select();
+      document.execCommand('Copy');
+      tmp_div.style.display = 'none';
+      return document.body.removeChild(tmp_div);
     };
 
     SparqlText.prototype.dragslot_drop = function(ev, index) {
@@ -347,6 +400,10 @@
 
     PainlessGraph.prototype.add_to_select = function(node_id) {
       return sparql_text.add_to_select(node_id);
+    };
+
+    PainlessGraph.prototype.copy_to_clipboard = function() {
+      return sparql_text.copy_to_clipboard();
     };
 
     PainlessGraph.prototype.save_state = function() {
@@ -739,11 +796,14 @@
       button = document.createElement('button');
       button.innerHTML = 'copy to clipboard';
       button.className = 'menu_button';
+      button.onclick = function() {
+        return painless_graph.copy_to_clipboard();
+      };
       menu.append(button);
       button = document.createElement('button');
       button.innerHTML = 'add to select';
       button.className = 'menu_button';
-      button.onclick = function($) {
+      button.onclick = function() {
         return painless_graph.add_to_select(painless_graph.cy.nodes(':selected').id());
       };
       menu.append(button);
