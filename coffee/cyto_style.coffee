@@ -24,7 +24,7 @@ generate_style = ->
                 'width' : 30
                 'height' : 30
             })
-        .selector('.node-link')
+        .selector('.node-role')
             .style({
                 'shape' : 'diamond'
                 'background-color' : 'white'
@@ -35,6 +35,18 @@ generate_style = ->
                 'width' : 90
                 'color' : 'white'
                 'height' : 60
+            })
+        .selector('.node-attribute')
+            .style({
+                'shape' : 'ellipse'
+                'background-color' : 'white'
+                'border-style' : 'solid'
+                'border-color' : 'black'
+                'border-width' : '2px' 
+                'content' : 'data(label)'
+                'width' : 30
+                'color' : 'white'
+                'height' : 30
             })
         .selector('.node-variable')
             .style({
@@ -59,10 +71,10 @@ generate_style = ->
             .style({
                 'shape' : 'rectangle'
                 'background-color' : 'white'
-                'content' : 'data(id)'
+                'content' : 'data(label)'
                 'text-valign' : 'center'
                 'width' : (ele) ->
-                    return ele.data('id').length * 10 #compute text length?
+                    return ele.data('label').length * 10 #compute text length?
                 'height' : '30'
                 'border-color' : '#000'
                 'border-width' : '2px'

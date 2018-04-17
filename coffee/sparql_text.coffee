@@ -1,15 +1,18 @@
 class window.SparqlText
 
+    select_boxes        = []
+    
+    div_sparql_text     = null
+    cy                  = null
+    links               = null
 
-    div_sparql_text = null
-    select_boxes = []
-    @cy = null
 
-    constructor: (cy) ->
+    constructor: (cy, links) ->
        div_sparql_text = document.getElementById('sparql_textbox')
        div_sparql_text.className = "unselectable" 
-       @cy = cy
-       console.log @cy
+   
+       @cy      = cy
+       @links   = links
 
 
     add_to_select: (id) ->
@@ -182,34 +185,25 @@ class window.SparqlText
        
         q_line = document.createElement('div')
         q_line.className = "q_line"
-        for node1 in @cy.nodes(".node-variable")
 
-            for node2 in node1.neighborhood(".node-concept")
-                q_line.append(@create_highlighting_box(node1))
+        for link in @links
+            if link.link_type == 'concept'
+                q_line.append(@create_highlighting_box(link.node_var1))
                 f = document.createElement("div")
-                f.innerHTML = ("&nbsp;rdf:type " + node2.id() + " .")
+                f.innerHTML = ("&nbsp;rdf:type " + link.node_concept.data('label') + " .")
                 q_line.append(f)
                 q_line.append(document.createElement('br'))
 
-            for node2 in node1.neighborhood(".node-domain")
-                for node3 in node2.neighborhood(".node-link")
-                    for node4 in node3.neighborhood(".node-range")
-                        for node5 in node4.neighborhood(".node-variable")
-                            
-                            q_line.append(@create_highlighting_box(node5))
-                            
-                            q_line.append(@create_tab())
-                            
-                            q_line.append(@create_highlighting_box(node3))
-
-                            q_line.append(@create_tab())
-
-                            q_line.append(@create_highlighting_box(node1))
-                            
-                            f = document.createElement("div")
-                            f.innerHTML = " ."
-                            q_line.append(f)
-                            q_line.append(document.createElement('br'))
+            else
+                q_line.append(@create_highlighting_box(link.node_var2))
+                q_line.append(@create_tab())
+                q_line.append(@create_highlighting_box(link.node_link))
+                q_line.append(@create_tab())
+                q_line.append(@create_highlighting_box(link.node_var1))
+                f = document.createElement("div")
+                f.innerHTML = " ."
+                q_line.append(f)
+                q_line.append(document.createElement('br'))
         
         div_sparql_text.append(q_line)
 

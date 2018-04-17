@@ -10,6 +10,8 @@ class window.PainlessLink
     node_quad2  = null
     node_link   = null
 
+    node_concept = null
+
     link_name   = null
     link_type   = null
 
@@ -23,7 +25,10 @@ class window.PainlessLink
         @node_var1  = node_var1
         @node_var2  = node_var2
 
-        @create()
+        if link_type == 'concept'
+            @create_concept()
+        else
+            @create_link()
 
 
     find_new_name: ->
@@ -39,9 +44,17 @@ class window.PainlessLink
             data: {source: node1.id(), target: node2.id()}
         })
 
+
+    reverse: =>
+        console.log @node_quad1.classes
+        console.log @node_quad2.id()
+        tmp_node = @node_quad1
+        @node_quad1 = @node_quad2
+        @node_quad2 = tmp_node
+
     
     create_node: (type, label = null) =>
-        
+
         data = {}
 
         if type == 'node-variable' and label == null 
@@ -49,7 +62,12 @@ class window.PainlessLink
             data['id'] = label
             data['color'] = '#' + palette[label.substr(1) % palette.length]
         
-        data['label'] = label
+        if type == 'node-concept' 
+            data['label'] = @link_name
+        else
+            data['label'] = label
+        
+        data['links'] = @
 
         return @cy.add({
             group: 'nodes'
@@ -58,7 +76,7 @@ class window.PainlessLink
         })
 
 
-    create: =>
+    create_link: =>
         if @node_var1 == null
             @node_var1   = @create_node('node-variable')
         if @node_var2 == null
@@ -66,14 +84,24 @@ class window.PainlessLink
 
         @node_quad1      = @create_node('node-range')
         @node_quad2      = @create_node('node-domain')
+        
+        if @link_type == 'role'
+            @node_link       = @create_node('node-role', @link_name)
+        else
+            @node_link       = @create_node('node-attribute', @link_name)
 
-        @node_link       = @create_node('node-link', @link_name)
         @create_edge(@node_var2, @node_quad2)
         @create_edge(@node_quad1, @node_link)
         @create_edge(@node_link, @node_quad2)
         @create_edge(@node_var1, @node_quad1)
-        
+       
 
+    create_concept: =>
+        if @node_var1 == null
+            @node_var1  = @create_node('node-variable')
+
+        @node_concept     = @create_node('node-concept')
+        @create_edge(@node_var1, @node_concept)
             
 
 

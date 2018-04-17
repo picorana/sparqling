@@ -8,10 +8,9 @@ class window.PainlessGraph
         TODO: hardcoded collision distance should be in constants
     ###
     
-    cur_variable_value = 0
-    sparql_text = null
-    state_buffer = null
-    state_buffer_max_length = 20
+    sparql_text     = null
+    state_buffer    = null
+    links           = []
 
 
     constructor: ->
@@ -20,8 +19,8 @@ class window.PainlessGraph
         ###
         @init()
         @reshape()
-        
-        sparql_text = new SparqlText(@cy)
+       
+        sparql_text = new SparqlText(@cy, links)
         sparql_text.update()
 
 
@@ -83,6 +82,10 @@ class window.PainlessGraph
             if node.neighborhood('node').length == 0
                 @cy.remove(node)
                 sparql_text.remove_from_select_boxes(node.id())
+
+
+    reverse_relationship: =>
+        @cy.nodes(":selected").data('links').reverse()
 
 
     delete_node: =>
@@ -152,16 +155,24 @@ class window.PainlessGraph
             TODO: use an enum to represent link types instead of hardcoded strings
         ###
         @save_state()
+        if link_type == 'concept'
+            if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
+                link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
+            else
+                link = new PainlessLink(@cy, link_name, link_type)
+                sparql_text.add_to_select(link.node_var1.id())
+        else
+            if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
+                ###* if a var node is selected, the link is added to the var node and one new var node is created###
+                link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
+                sparql_text.add_to_select(link.node_var2.id())
+            else 
+                ###* otherwise, two new var nodes are created ###
+                link = new PainlessLink(@cy, link_name, link_type)
+                sparql_text.add_to_select(link.node_var1.id())
+                sparql_text.add_to_select(link.node_var2.id())
 
-        ###* if a var node is selected, the link is added to the var node and one new var node is created###
-        if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
-            link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
-            sparql_text.add_to_select(link.node_var2.id())
-        else ###* otherwise, two new var nodes are created ###
-            link = new PainlessLink(@cy, link_name, link_type)
-            sparql_text.add_to_select(link.node_var1.id())
-            sparql_text.add_to_select(link.node_var2.id())
-
+        links.push(link)
         sparql_text.update()
         @reshape()
    
