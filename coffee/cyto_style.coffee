@@ -24,7 +24,7 @@ generate_style = ->
                 'width' : 30
                 'height' : 30
             })
-        .selector('.node-attribute')
+        .selector('.node-link')
             .style({
                 'shape' : 'diamond'
                 'background-color' : 'white'

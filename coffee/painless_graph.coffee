@@ -1,6 +1,6 @@
 #_require cyto_style.coffee
 #_require sparql_text.coffee
-#_require painless_link.coffee
+#_require painless_link.coffee 
 
 class window.PainlessGraph
     ###* manages the graph visualization
@@ -8,7 +8,6 @@ class window.PainlessGraph
         TODO: hardcoded collision distance should be in constants
     ###
     
-    palette = [ "b58900", "cb4b16", "dc322f", "d33682", "6c71c4", "268bd2", "2aa198", "859900" ]
     cur_variable_value = 0
     sparql_text = null
     state_buffer = null
@@ -154,106 +153,14 @@ class window.PainlessGraph
         ###
         @save_state()
 
+        ###* if a var node is selected, the link is added to the var node and one new var node is created###
         if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
-            parent = @cy.nodes(":selected")
-        else 
-            par_id = "x" + cur_variable_value
-            
-            @cy.add({
-                group: 'nodes'
-                data: {
-                    id: par_id
-                    color: '#' + palette[cur_variable_value % palette.length];
-                    label: par_id
-                }
-                classes: 'node-variable'
-            })
-
-            parent = @cy.getElementById(par_id)
-            sparql_text.add_to_select(par_id)
-            cur_variable_value += 1
-
-        range_id = parent.id() + Math.round(Math.random()*1000)
-        attr_id = link_name + Math.round(Math.random()*1000)
-        dom_id = parent.id() + range_id + "d"
-        var_id = "x" + cur_variable_value
-        
-        if link_type == "concept"
-            @cy.add({
-                group: 'nodes'
-                data: {id: attr_id}
-                classes: 'node-concept'
-            })
-            @cy.add({
-                group: 'edges'
-                data: {
-                    source: parent.id()
-                    target: attr_id
-                }
-            })
-
-        else
-
-            @cy.add({
-                group: 'nodes'
-                data: {id: range_id}
-                classes: 'node-range'
-            })
-            @cy.add({
-                group: 'edges'
-                data: {
-                    source: parent.id()
-                    target: range_id
-                }
-            })
-            @cy.add({
-                group: 'nodes'
-                data: {
-                    id: attr_id
-                    label: link_name
-                }
-                classes: 'node-attribute'
-            })
-            @cy.add({
-                group: 'edges'
-                data: {
-                    source: range_id
-                    target: attr_id
-                }
-            })
-            @cy.add({
-                group: 'nodes'
-                data: {id: dom_id}
-                classes: 'node-domain'
-            })
-            @cy.add({
-                group: 'edges'
-                data: {
-                    source: attr_id
-                    target: dom_id
-                }}
-            )
-
-            @cy.add({
-                group: 'nodes'
-                data: {
-                    id: var_id
-                    color: '#' + palette[cur_variable_value % palette.length];
-                    label: var_id
-                }
-                classes: 'node-variable'
-            })
-
-            sparql_text.add_to_select(var_id)
-            cur_variable_value += 1
-            
-            @cy.add({
-                group: 'edges'
-                data: {
-                    source: dom_id
-                    target: var_id
-                }
-            })
+            link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
+            sparql_text.add_to_select(link.node_var2.id())
+        else ###* otherwise, two new var nodes are created ###
+            link = new PainlessLink(@cy, link_name, link_type)
+            sparql_text.add_to_select(link.node_var1.id())
+            sparql_text.add_to_select(link.node_var2.id())
 
         sparql_text.update()
         @reshape()
@@ -290,11 +197,13 @@ class window.PainlessGraph
             style: generate_style()
             wheelSensitivity: 0.5
         )
+
         @cy.on('click', '.node-variable',
             (event) =>
                 event.target.select()
                 @reshape()
             )
+
         @cy.on('mouseup',
             ($) => 
                 if @check_collisions() != undefined

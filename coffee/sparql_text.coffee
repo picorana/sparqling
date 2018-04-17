@@ -192,7 +192,7 @@ class window.SparqlText
                 q_line.append(document.createElement('br'))
 
             for node2 in node1.neighborhood(".node-domain")
-                for node3 in node2.neighborhood(".node-attribute")
+                for node3 in node2.neighborhood(".node-link")
                     for node4 in node3.neighborhood(".node-range")
                         for node5 in node4.neighborhood(".node-variable")
                             
