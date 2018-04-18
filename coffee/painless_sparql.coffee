@@ -21,6 +21,20 @@ class window.PainlessSparql
         side_nav.className = "sidenav";
         document.body.appendChild(side_nav);
 
+        slider = document.createElement("div")
+        slider.className = "slidecontainer"
+        slider_range = document.createElement("input")
+        slider_range.type = "range"
+        slider_range.min = 1
+        slider_range.max = 100
+        slider_range.value = 48
+        slider_range.step = 0.5
+        slider_range.className = 'slider'
+        slider.appendChild(slider_range)
+        slider_range.oninput = (s) -> 
+            side_nav.style.width = (100 - this.value - 2) + "%"
+        document.body.appendChild(slider)
+
         sparql_textbox = document.createElement("div");
         sparql_textbox.id = "sparql_textbox";
         sparql_textbox.innerHTML = "sparql_query_here";

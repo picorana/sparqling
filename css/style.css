@@ -114,7 +114,7 @@
 	height: 30%;
     margin-left: 3%;
     margin-right: 3%;
-    margin-top: 3%;
+    margin-top: 20px;
     transition: 0.5s;
 }
 
@@ -195,4 +195,65 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+
+/* 	
+*	--- 
+* 	SIDENAV HANDLE
+*	---
+*/
+.slidecontainer {
+	z-index: 1;
+	bottom: 5%;
+	width: 100%;
+	position: fixed;
+	pointer-events: none;
+}
+
+.slider:focus {outline: none;}
+
+::-moz-range-track {
+  	opacity: 0;
+  	border: 0;
+}
+
+input::-moz-focus-inner, input::-moz-focus-outer {
+	border: 0;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    border-radius: 5px;  
+    outline: none;
+    transition: .2s;
+	-webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+	pointer-events: auto;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%; 
+    background: #002b36;
+    cursor: pointer;
+	border: none;
+	transition: all ease-in-out 0.5s;
+}
+
+.slider::-moz-range-thumb {
+	pointer-events: auto;
+    width: 25px;
+	content: '....';
+	color: #fff;
+    height: 25px;
+    border-radius: 50%;
+	background: #002b36;
+    cursor: pointer;
+	border: none;
+	transition: all ease-in-out 0.5s;
 }

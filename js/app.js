@@ -529,11 +529,13 @@
 
     PainlessGraph.prototype.reshape = function() {
 
-      /** resets node positions in the graph view 
-          TODO: it's ugly.
-       */
+      /** resets node positions in the graph view */
       return this.cy.layout({
-        name: 'cola'
+        name: 'cola',
+        fit: false,
+        refresh: 2,
+        maxSimulationTime: 2000,
+        avoidOverlap: false
       }).run();
     };
 
@@ -808,11 +810,25 @@
     };
 
     PainlessSparql.prototype.create_sidenav = function() {
-      var button, down_button, menu, mid_button, nav_div, side_nav, sparql_textbox, up_button;
+      var button, down_button, menu, mid_button, nav_div, side_nav, slider, slider_range, sparql_textbox, up_button;
       side_nav = document.createElement("div");
       side_nav.id = "sidenav";
       side_nav.className = "sidenav";
       document.body.appendChild(side_nav);
+      slider = document.createElement("div");
+      slider.className = "slidecontainer";
+      slider_range = document.createElement("input");
+      slider_range.type = "range";
+      slider_range.min = 1;
+      slider_range.max = 100;
+      slider_range.value = 48;
+      slider_range.step = 0.5;
+      slider_range.className = 'slider';
+      slider.appendChild(slider_range);
+      slider_range.oninput = function(s) {
+        return side_nav.style.width = (100 - this.value - 2) + "%";
+      };
+      document.body.appendChild(slider);
       sparql_textbox = document.createElement("div");
       sparql_textbox.id = "sparql_textbox";
       sparql_textbox.innerHTML = "sparql_query_here";
