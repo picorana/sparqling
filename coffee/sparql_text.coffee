@@ -195,11 +195,11 @@ class window.SparqlText
                 q_line.append(document.createElement('br'))
 
             else
-                q_line.append(@create_highlighting_box(link.node_var2))
+                q_line.append(@create_highlighting_box(link.source))
                 q_line.append(@create_tab())
                 q_line.append(@create_highlighting_box(link.node_link))
                 q_line.append(@create_tab())
-                q_line.append(@create_highlighting_box(link.node_var1))
+                q_line.append(@create_highlighting_box(link.target))
                 f = document.createElement("div")
                 f.innerHTML = " ."
                 q_line.append(f)

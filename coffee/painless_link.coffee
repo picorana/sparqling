@@ -25,6 +25,9 @@ class window.PainlessLink
         @node_var1  = node_var1
         @node_var2  = node_var2
 
+        @node_quad1 = null
+        @node_quad2 = null
+
         if link_type == 'concept'
             @create_concept()
         else
@@ -46,13 +49,19 @@ class window.PainlessLink
 
 
     reverse: =>
-        console.log @node_quad1.classes
-        console.log @node_quad2.id()
-        tmp_node = @node_quad1
-        @node_quad1 = @node_quad2
-        @node_quad2 = tmp_node
+        ###* can only be applied to non-concept relationships ###
+        if @node_quad1.hasClass('node-range') 
+            @node_quad1.classes('node-domain')
+            @source = @node_var2
+            @target = @node_var1
+            @node_quad2.classes('node-range')
+        else 
+            @node_quad1.classes('node-range')
+            @node_quad2.classes('node-domain')
+            @source = @node_var1
+            @target = @node_var2
+   
 
-    
     create_node: (type, label = null) =>
 
         data = {}
@@ -84,7 +93,10 @@ class window.PainlessLink
 
         @node_quad1      = @create_node('node-range')
         @node_quad2      = @create_node('node-domain')
-        
+       
+        @source = @node_var1
+        @target = @node_var2
+
         if @link_type == 'role'
             @node_link       = @create_node('node-role', @link_name)
         else

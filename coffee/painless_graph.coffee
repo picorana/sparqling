@@ -8,7 +8,6 @@ class window.PainlessGraph
         TODO: hardcoded collision distance should be in constants
     ###
     
-    sparql_text     = null
     state_buffer    = null
     links           = []
 
@@ -20,25 +19,26 @@ class window.PainlessGraph
         @init()
         @reshape()
        
-        sparql_text = new SparqlText(@cy, links)
-        sparql_text.update()
+        @sparql_text = new SparqlText(@cy, links)
+        @sparql_text.update()
 
 
     reshape: =>
         ###* resets node positions in the graph view 
             TODO: it's ugly.
         ###
-        if @cy.nodes('.node-variable').length < 3
-            @cy.layout({
-                name: 'circle'
-            }).run()
-        else
-            @cy.layout({
-                name:'breadthfirst'
-                padding: 5
-                spacingFactor: 1 
-                fit:false
-            }).run()
+        @cy.layout({name:'cola'}).run()
+		#if @cy.nodes('.node-variable').length < 3
+            #@cy.layout({
+                #name: 'circle'
+            #}).run()
+        #else
+            #@cy.layout({
+                #name:'breadthfirst'
+                #padding: 5
+                #spacingFactor: 1 
+                #fit:false
+            #}).run()
 
 
     center_view: =>
@@ -51,11 +51,11 @@ class window.PainlessGraph
 
 
     add_to_select: (node_id) =>
-        sparql_text.add_to_select(node_id)
+        @sparql_text.add_to_select(node_id)
 
     
     copy_to_clipboard: ->
-        sparql_text.copy_to_clipboard()
+        @sparql_text.copy_to_clipboard()
 
 
     save_state: ->
@@ -81,11 +81,20 @@ class window.PainlessGraph
         for node in @cy.nodes('.node-variable')
             if node.neighborhood('node').length == 0
                 @cy.remove(node)
-                sparql_text.remove_from_select_boxes(node.id())
+                @sparql_text.remove_from_select_boxes(node.id())
 
 
     reverse_relationship: =>
-        @cy.nodes(":selected").data('links').reverse()
+        s_node = @cy.nodes(":selected")
+        if s_node == null
+            console.warn 'please select a node in the sparql graph'
+        else if s_node.hasClass("node-variable")
+            console.warn 'please select a role and not a variable'
+        else if s_node.data('links').link_type == 'attribute' 
+            console.warn 'attributes cannot be reversed'
+        else if s_node.hasClass("node-role") or s_node.hasClass("node-domain") or s_node.hasClass("node-range")
+            @cy.nodes(":selected").data('links').reverse()
+        else console.warn 'this action cannot be performed on the selected node'
 
 
     delete_node: =>
@@ -100,7 +109,7 @@ class window.PainlessGraph
                         @cy.remove(node3)
                     @cy.remove(node2) 
                 @cy.remove(node)
-                sparql_text.remove_from_select_boxes(node.id())
+                @sparql_text.remove_from_select_boxes(node.id())
             if node.hasClass('node-attribute')
                 for node2 in node.neighborhood('node')
                     @cy.remove(node2)
@@ -137,7 +146,7 @@ class window.PainlessGraph
                 })
 
         # remove node2 with all its connected edges
-        sparql_text.remove_from_select_boxes(node2.id())
+        @sparql_text.remove_from_select_boxes(node2.id())
         @cy.remove(node2) 
 
 
@@ -160,20 +169,20 @@ class window.PainlessGraph
                 link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
             else
                 link = new PainlessLink(@cy, link_name, link_type)
-                sparql_text.add_to_select(link.node_var1.id())
+                @sparql_text.add_to_select(link.node_var1.id())
         else
             if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
                 ###* if a var node is selected, the link is added to the var node and one new var node is created###
                 link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
-                sparql_text.add_to_select(link.node_var2.id())
+                @sparql_text.add_to_select(link.node_var2.id())
             else 
                 ###* otherwise, two new var nodes are created ###
                 link = new PainlessLink(@cy, link_name, link_type)
-                sparql_text.add_to_select(link.node_var1.id())
-                sparql_text.add_to_select(link.node_var2.id())
+                @sparql_text.add_to_select(link.node_var1.id())
+                @sparql_text.add_to_select(link.node_var2.id())
 
         links.push(link)
-        sparql_text.update()
+        @sparql_text.update()
         @reshape()
    
 

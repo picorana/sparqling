@@ -33,7 +33,7 @@ generate_style = ->
                 'border-width' : '2px' 
                 'content' : 'data(label)'
                 'width' : 90
-                'color' : 'white'
+                'color' : 'black'
                 'height' : 60
             })
         .selector('.node-attribute')
@@ -45,7 +45,7 @@ generate_style = ->
                 'border-width' : '2px' 
                 'content' : 'data(label)'
                 'width' : 30
-                'color' : 'white'
+                'color' : 'black'
                 'height' : 30
             })
         .selector('.node-variable')

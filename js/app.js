@@ -33,7 +33,7 @@
       'border-width': '2px',
       'content': 'data(label)',
       'width': 90,
-      'color': 'white',
+      'color': 'black',
       'height': 60
     }).selector('.node-attribute').style({
       'shape': 'ellipse',
@@ -43,7 +43,7 @@
       'border-width': '2px',
       'content': 'data(label)',
       'width': 30,
-      'color': 'white',
+      'color': 'black',
       'height': 30
     }).selector('.node-variable').style({
       'shape': 'ellipse',
@@ -334,11 +334,11 @@
           q_line.append(f);
           q_line.append(document.createElement('br'));
         } else {
-          q_line.append(this.create_highlighting_box(link.node_var2));
+          q_line.append(this.create_highlighting_box(link.source));
           q_line.append(this.create_tab());
           q_line.append(this.create_highlighting_box(link.node_link));
           q_line.append(this.create_tab());
-          q_line.append(this.create_highlighting_box(link.node_var1));
+          q_line.append(this.create_highlighting_box(link.target));
           f = document.createElement("div");
           f.innerHTML = " .";
           q_line.append(f);
@@ -393,6 +393,8 @@
       this.link_type = link_type;
       this.node_var1 = node_var1;
       this.node_var2 = node_var2;
+      this.node_quad1 = null;
+      this.node_quad2 = null;
       if (link_type === 'concept') {
         this.create_concept();
       } else {
@@ -420,12 +422,19 @@
     };
 
     PainlessLink.prototype.reverse = function() {
-      var tmp_node;
-      console.log(this.node_quad1.classes);
-      console.log(this.node_quad2.id());
-      tmp_node = this.node_quad1;
-      this.node_quad1 = this.node_quad2;
-      return this.node_quad2 = tmp_node;
+
+      /** can only be applied to non-concept relationships */
+      if (this.node_quad1.hasClass('node-range')) {
+        this.node_quad1.classes('node-domain');
+        this.source = this.node_var2;
+        this.target = this.node_var1;
+        return this.node_quad2.classes('node-range');
+      } else {
+        this.node_quad1.classes('node-range');
+        this.node_quad2.classes('node-domain');
+        this.source = this.node_var1;
+        return this.target = this.node_var2;
+      }
     };
 
     PainlessLink.prototype.create_node = function(type, label) {
@@ -461,6 +470,8 @@
       }
       this.node_quad1 = this.create_node('node-range');
       this.node_quad2 = this.create_node('node-domain');
+      this.source = this.node_var1;
+      this.target = this.node_var2;
       if (this.link_type === 'role') {
         this.node_link = this.create_node('node-role', this.link_name);
       } else {
@@ -490,9 +501,7 @@
         TODO: palette should be in constants
         TODO: hardcoded collision distance should be in constants
      */
-    var links, sparql_text, state_buffer;
-
-    sparql_text = null;
+    var links, state_buffer;
 
     state_buffer = null;
 
@@ -514,8 +523,8 @@
        */
       this.init();
       this.reshape();
-      sparql_text = new SparqlText(this.cy, links);
-      sparql_text.update();
+      this.sparql_text = new SparqlText(this.cy, links);
+      this.sparql_text.update();
     }
 
     PainlessGraph.prototype.reshape = function() {
@@ -523,18 +532,9 @@
       /** resets node positions in the graph view 
           TODO: it's ugly.
        */
-      if (this.cy.nodes('.node-variable').length < 3) {
-        return this.cy.layout({
-          name: 'circle'
-        }).run();
-      } else {
-        return this.cy.layout({
-          name: 'breadthfirst',
-          padding: 5,
-          spacingFactor: 1,
-          fit: false
-        }).run();
-      }
+      return this.cy.layout({
+        name: 'cola'
+      }).run();
     };
 
     PainlessGraph.prototype.center_view = function() {
@@ -550,11 +550,11 @@
     };
 
     PainlessGraph.prototype.add_to_select = function(node_id) {
-      return sparql_text.add_to_select(node_id);
+      return this.sparql_text.add_to_select(node_id);
     };
 
     PainlessGraph.prototype.copy_to_clipboard = function() {
-      return sparql_text.copy_to_clipboard();
+      return this.sparql_text.copy_to_clipboard();
     };
 
     PainlessGraph.prototype.save_state = function() {
@@ -588,7 +588,7 @@
         node = ref[j];
         if (node.neighborhood('node').length === 0) {
           this.cy.remove(node);
-          results.push(sparql_text.remove_from_select_boxes(node.id()));
+          results.push(this.sparql_text.remove_from_select_boxes(node.id()));
         } else {
           results.push(void 0);
         }
@@ -597,7 +597,19 @@
     };
 
     PainlessGraph.prototype.reverse_relationship = function() {
-      return this.cy.nodes(":selected").data('links').reverse();
+      var s_node;
+      s_node = this.cy.nodes(":selected");
+      if (s_node === null) {
+        return console.warn('please select a node in the sparql graph');
+      } else if (s_node.hasClass("node-variable")) {
+        return console.warn('please select a role and not a variable');
+      } else if (s_node.data('links').link_type === 'attribute') {
+        return console.warn('attributes cannot be reversed');
+      } else if (s_node.hasClass("node-role") || s_node.hasClass("node-domain") || s_node.hasClass("node-range")) {
+        return this.cy.nodes(":selected").data('links').reverse();
+      } else {
+        return console.warn('this action cannot be performed on the selected node');
+      }
     };
 
     PainlessGraph.prototype.delete_node = function() {
@@ -623,7 +635,7 @@
             this.cy.remove(node2);
           }
           this.cy.remove(node);
-          sparql_text.remove_from_select_boxes(node.id());
+          this.sparql_text.remove_from_select_boxes(node.id());
         }
         if (node.hasClass('node-attribute')) {
           ref4 = node.neighborhood('node');
@@ -665,7 +677,7 @@
           });
         }
       }
-      sparql_text.remove_from_select_boxes(node2.id());
+      this.sparql_text.remove_from_select_boxes(node2.id());
       return this.cy.remove(node2);
     };
 
@@ -690,24 +702,24 @@
           link = new PainlessLink(this.cy, link_name, link_type, this.cy.nodes(":selected"));
         } else {
           link = new PainlessLink(this.cy, link_name, link_type);
-          sparql_text.add_to_select(link.node_var1.id());
+          this.sparql_text.add_to_select(link.node_var1.id());
         }
       } else {
         if (this.cy.nodes(":selected").length > 0 && this.cy.nodes(":selected").hasClass('node-variable')) {
 
           /** if a var node is selected, the link is added to the var node and one new var node is created */
           link = new PainlessLink(this.cy, link_name, link_type, this.cy.nodes(":selected"));
-          sparql_text.add_to_select(link.node_var2.id());
+          this.sparql_text.add_to_select(link.node_var2.id());
         } else {
 
           /** otherwise, two new var nodes are created */
           link = new PainlessLink(this.cy, link_name, link_type);
-          sparql_text.add_to_select(link.node_var1.id());
-          sparql_text.add_to_select(link.node_var2.id());
+          this.sparql_text.add_to_select(link.node_var1.id());
+          this.sparql_text.add_to_select(link.node_var2.id());
         }
       }
       links.push(link);
-      sparql_text.update();
+      this.sparql_text.update();
       return this.reshape();
     };
 
@@ -860,7 +872,8 @@
       button.innerHTML = 'reverse relationship';
       button.className = 'menu_button';
       button.onclick = function() {
-        return painless_graph.reverse_relationship();
+        painless_graph.reverse_relationship();
+        return painless_graph.sparql_text.update();
       };
       menu.append(button);
       button = document.createElement('button');

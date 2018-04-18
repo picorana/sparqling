@@ -1,0 +1,146 @@
+#query_canvas {
+	position: absolute;
+	width: 100%;
+	height: 50%;
+    z-index: 2;
+	margin: 0%;
+    bottom: 0%;
+	border-radius: 10px;
+    transition: 0.5s;
+}
+
+#sidenav {
+	height: 100%; 
+	width: 50%; 
+	position: fixed; 
+	z-index: 1; 
+	top: 0; 
+	right: 0; 
+	background-color: #222;
+	overflow-x: hidden;
+    overflow-y: hidden; 
+	transition: 0.5s;
+}
+
+.highlighting_box {
+    background-color: #666;
+    border-radius: 10px;
+	padding: 3px;
+	margin: 0px;
+	color: #eee;
+    display: inline-block;
+    float: left;
+    transition: 0.5s;
+}
+
+.highlighting_box:hover {
+	cursor: grab;
+	-webkit-box-shadow: 2px 2px 2px 2px #888;
+  	-webkit-box-shadow: 2px 2px 2px 2px #888;
+  	box-shadow:         2px 2px 2px 2px #888;
+}
+
+#nav_div {
+    text-align: center;
+    color: #ccc;
+    vertical-align: middle;
+}
+
+.resize_button {
+    width: 25px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+#painless_menu {
+	padding: 1%;
+	margin-left: 3%;
+	margin-right: 3%;
+	bottom: 0%;
+	height: 10%;
+    text-align: center;
+    background-color: #444;
+}
+
+.dragslot_select {
+	background-color: gray;
+	border-radius: 10px;
+	opacity: 0;
+    height: 100%;
+}
+
+.minicross {
+    font-weight: bold;
+    float: left;
+    display: inline-block;
+    font-size: small;
+    color: red;
+}
+
+.minicross:hover {
+    cursor: pointer;
+}
+
+.highlighting_box_container {
+    padding-right: 10px;
+    transition: 0.5s;
+}
+
+.menu_button {
+	background-color: #333;
+	color: #ccc;
+	margin: 2px;
+	border-radius: 10px;
+    border: none;
+    font-size: x-small;
+}
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.menu_button:hover {
+	background-color: #555;
+}
+
+#sparql_textbox {
+    text-align: left;
+	color: #ccc;
+	font-family : "Courier New";
+	font-size: small;
+    width: 90%;
+	overflow-y: scroll;
+	height: 30%;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-top: 5%;
+    transition: 0.5s;
+}
+
+#sparql_text {
+    text-align: left;
+    font-family: "Courier New";
+    display: table;
+}
+
+.q_line {
+    display: table;
+}
+
+.init_string > div {
+	display: inline-block;
+}
+
+.s_line > div {
+	display: inline-block;
+}
+
+.q_line > div {
+    display: inline-block;
+}
+

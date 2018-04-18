@@ -83,6 +83,7 @@ class window.PainlessSparql
         button.className = 'menu_button'
         button.onclick = () ->
             painless_graph.reverse_relationship()
+            painless_graph.sparql_text.update()
         menu.append(button)
 
         button = document.createElement('button')
