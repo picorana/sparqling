@@ -248,8 +248,6 @@ input::-moz-focus-inner, input::-moz-focus-outer {
 .slider::-moz-range-thumb {
 	pointer-events: auto;
     width: 25px;
-	content: '....';
-	color: #fff;
     height: 25px;
     border-radius: 50%;
 	background: #002b36;
