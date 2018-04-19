@@ -55,10 +55,8 @@ generate_style = ->
                     return ele.data('color')
                 'width' : (ele) ->
                     return 100
-                    #return 50 + (ele.neighborhood('edge').length*50)
                 'height' : (ele) ->
                     return 100
-                    #return 50 + (ele.neighborhood('edge').length*50)
                 'text-valign' : 'center'
                 'font-size' : '40'
                 'font-family' : "Courier New";
@@ -93,14 +91,5 @@ generate_style = ->
                 'border-opacity' : '0.5'
                 'border-width' : '20px'
                 'border-style' : 'solid'
-            })
-        .selector(':parent')
-            .style({
-                'background-image' : 'resources/background-circle.svg'
-                'background-opacity' : '0'
-                'background-width' : '100%'
-                'background-height' : '100%'
-                'shape' : 'rectangle'
-                'border-color' : 'white'
             })
 

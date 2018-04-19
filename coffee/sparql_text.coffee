@@ -9,7 +9,8 @@ class window.SparqlText
 
     constructor: (cy, links) ->
        div_sparql_text = document.getElementById('sparql_textbox')
-       div_sparql_text.className = "unselectable" 
+       div_sparql_text.className = "unselectable"
+
    
        @cy      = cy
        @links   = links
@@ -33,6 +34,10 @@ class window.SparqlText
                 select_boxes[i] = st.innerHTML.substr(i)
         node.data('label', st.innerHTML.substr(1))
         console.log st.innerHTML
+
+
+    create_highlighting_box_2: ->
+        return null
 
 
     create_highlighting_box: (node) =>
@@ -120,38 +125,33 @@ class window.SparqlText
         tmp_div.style.display = 'none'
         document.body.removeChild(tmp_div)
 
-    dragslot_drop: (ev, index) =>
-        ev.preventDefault()
-        data = ev.dataTransfer.getData("text");
-        this_element_id = document.getElementById(data).dataset.node_id
-        select_boxes.splice(select_boxes.indexOf(this_element_id), 1)
-        console.log index
-        select_boxes.splice(index, 0, this_element_id)
-        @update()
-   
 
-    create_dragslot: (index) =>
-        nbsp = document.createElement('div')
-        nbsp.className = 'dragslot_select'
-        nbsp.dataset.index = index
-        
-        nbsp.addEventListener('dragover'
-            (ev) ->
-                ev.preventDefault()
-                for ds in document.getElementsByClassName('dragslot_select')
-                    ds.style.opacity = 1;
-        )
+    create_query_line: (link) =>
 
-        nbsp.addEventListener('drop'
-            (ev) => @dragslot_drop(ev, nbsp.dataset.index))
+        q_line = document.createElement('div')
 
-        nbsp.innerHTML = '&nbsp;&nbsp;'
-        return nbsp
+        if link.link_type == 'concept'
+            q_line.append(@create_highlighting_box(link.node_var1))
+            f = document.createElement("div")
+            f.innerHTML = ("&nbsp;rdf:type " + link.node_concept.data('label') + " .")
+            q_line.append(f)
+            q_line.append(document.createElement('br'))
+
+        else
+            q_line.append(@create_highlighting_box(link.source))
+            q_line.append(@create_highlighting_box(link.node_link))
+            q_line.append(@create_highlighting_box(link.target))
+            f = document.createElement("div")
+            f.innerHTML = " ."
+            q_line.append(f)
+
+        q_line.className = 'q_line'
+        return q_line
 
 
     update: =>
         div_sparql_text.innerHTML = ""
-
+        
         init_string = document.createElement('div')
         init_string.className = "init_string"
 
@@ -167,7 +167,6 @@ class window.SparqlText
             count = 0
             for elem in select_boxes
                 s_line.append(@create_highlighting_box(@cy.getElementById(elem)))
-                s_line.append(@create_dragslot(count))
                 count += 1
 
         select_div = document.createElement('div')
@@ -183,30 +182,11 @@ class window.SparqlText
         
         div_sparql_text.append(init_string)
        
-        q_line = document.createElement('div')
-        q_line.className = "q_line"
-
         for link in @links
-            if link.link_type == 'concept'
-                q_line.append(@create_highlighting_box(link.node_var1))
-                f = document.createElement("div")
-                f.innerHTML = ("&nbsp;rdf:type " + link.node_concept.data('label') + " .")
-                q_line.append(f)
-                q_line.append(document.createElement('br'))
-
-            else
-                q_line.append(@create_highlighting_box(link.source))
-                q_line.append(@create_tab())
-                q_line.append(@create_highlighting_box(link.node_link))
-                q_line.append(@create_tab())
-                q_line.append(@create_highlighting_box(link.target))
-                f = document.createElement("div")
-                f.innerHTML = " ."
-                q_line.append(f)
-                q_line.append(document.createElement('br'))
-        
-        div_sparql_text.append(q_line)
+            div_sparql_text.append(@create_query_line(link))
 
         f_string = document.createElement('div')
         f_string.innerHTML = '}'
         div_sparql_text.append(f_string)
+
+        dragula([s_line])

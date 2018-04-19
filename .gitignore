@@ -1,3 +1,4 @@
 coffee/core
 coffee/tmp.coffee
 lib/
+node_modules/

@@ -9,8 +9,6 @@ class window.PainlessSparql
         
         this.init()
 
-        dragula = window.dragula(document.getElementsByClassName('highlighting_box'))
-        console.log dragula
 
     init : ->
         this.create_sidenav()

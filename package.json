@@ -1,0 +1,34 @@
+{
+  "name": "painless_sparql",
+  "version": "1.0.0",
+  "description": "a graphical tool to write sparql queries",
+  "main": "gulpfile.js",
+  "devDependencies" : {
+    "gulp" : "^3.9.1",
+    "gulp-coffee" : "^3.0.2",
+    "gulp-concat" : "^2.6.1",
+    "gulp-uglify" : "^3.0.0",
+    "merge2" : "^1.2.1",
+    "dragula" : "^3.7.2",
+    "cytoscape-cola" : "^2.2.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/picorana/painless_sparql.git"
+  },
+  "keywords": [
+    "owl",
+    "graphol",
+    "sparql",
+    "queries"
+  ],
+  "author": "Sara Di Bartolomeo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/picorana/painless_sparql/issues"
+  },
+  "homepage": "https://github.com/picorana/painless_sparql#readme"
+}
