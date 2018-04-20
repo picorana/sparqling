@@ -1,5 +1,7 @@
 <div style='text-align: center'><h1><b>Painless Sparql</b></h1></div>
 
+<img src="https://david-dm.org/picorana/painless_sparql.svg"/>
+
 A graphical tool to write SPARQL queries.
 
 ## Usage
