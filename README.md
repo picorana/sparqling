@@ -23,7 +23,13 @@ After importing the script, initialize it with
 in which `graph` is an instance of a GrapholScape graph.
 
 An example graphol visualization can be found here: [GrapholScape](https://gianluca-pepe.github.io/GrapholScape/)   
-A working demo of this project can be found here: [demo]((https://picorana.github.io/GrapholScape/))
+A working demo of this project can be found here: [demo](https://picorana.github.io/GrapholScape/)
+
+CDN:   
+	
+	https://rawgit.com/picorana/painless_sparql/master/css/style.css
+	https://rawgit.com/picorana/painless_sparql/master/js/app.js
+
 
 ## Contribute
 
@@ -48,5 +54,5 @@ or to watch for changes with `gulp watch`
 The project is developed in `coffeescript`, and the source files are contained in the `coffee` folder of this repository. `gulp` is used to compile coffeescript to javascript and to bundle the project files together with the third party libraries. The final result is stored in the `js` folder.
 
 ## Disclaimer 
-Based on [GrapholScape](https://github.com/gianluca-pepe/GrapholScape) by [gianluca-pepe](https://github.com/gianluca-pepe).
-Developed with [cytoscape.js](http://js.cytoscape.org) in 
+Based on [GrapholScape](https://github.com/gianluca-pepe/GrapholScape) by [gianluca-pepe](https://github.com/gianluca-pepe).   
+Developed with [cytoscape.js](http://js.cytoscape.org) in [coffeescript](http://coffeescript.org)
