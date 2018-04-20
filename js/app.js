@@ -1731,6 +1731,14 @@ window.PainlessGraph = (function() {
   class PainlessGraph {
     constructor() {
       this.reshape = this.reshape.bind(this);
+      /** resets node positions in the graph view */
+      //@cy.layout({
+      //name:'cola'
+      //fit: false
+      //refresh: 2
+      //maxSimulationTime: 2000
+      //avoidOverlap: false
+      //}).run()
       this.center_view = this.center_view.bind(this);
       this.add_to_select = this.add_to_select.bind(this);
       this.cleanup_unlinked_variables = this.cleanup_unlinked_variables.bind(this);
@@ -1748,16 +1756,7 @@ window.PainlessGraph = (function() {
       this.sparql_text.update();
     }
 
-    reshape() {
-      /** resets node positions in the graph view */
-      return this.cy.layout({
-        name: 'cola',
-        fit: false,
-        refresh: 2,
-        maxSimulationTime: 2000,
-        avoidOverlap: false
-      }).run();
-    }
+    reshape() {}
 
     center_view() {
       /** 

@@ -25,13 +25,13 @@ class window.PainlessGraph
 
     reshape: =>
         ###* resets node positions in the graph view ###
-        @cy.layout({
-            name:'cola'
-            fit: false
-            refresh: 2
-            maxSimulationTime: 2000
-            avoidOverlap: false
-        }).run()
+        #@cy.layout({
+            #name:'cola'
+            #fit: false
+            #refresh: 2
+            #maxSimulationTime: 2000
+            #avoidOverlap: false
+        #}).run()
 
 
     center_view: =>
