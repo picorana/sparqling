@@ -63,7 +63,7 @@ class window.SparqlText
         st.onclick = ($) =>
             @cy.nodes().unselect()
             node.select()
-        st.innerHTML = "?" + node.data('label')
+        st.innerHTML = node.data('label')
         st.style.backgroundColor = node.data('color')
         
         container.append(st)

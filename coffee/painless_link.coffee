@@ -34,11 +34,14 @@ class window.PainlessLink
             @create_link()
 
 
-    find_new_name: ->
-        x = 0
-        while @cy.getElementById("x" + x).length != 0 
-            x += 1
-        return "x" + x
+    find_new_name: (base_name = null) ->
+        if base_name == null
+            base_name = "x"
+
+        i = 0
+        while @cy.getElementById(base_name + i).length != 0 
+            i += 1
+        return base_name + i
 
 
     create_edge: (node1, node2) =>
@@ -66,15 +69,18 @@ class window.PainlessLink
 
         data = {}
 
-        if type == 'node-variable' and label == null 
-            label = @find_new_name()
+        if type == 'node-variable' 
+            label = @find_new_name(label)
             data['id'] = label
-            data['color'] = '#' + palette[label.substr(1) % palette.length]
+            
+            if label.length == 2
+               data['color'] = '#' + palette[label.slice(-1) % palette.length]
+            else data['color'] = '#' + palette[Math.round(Math.random()*100) % palette.length]
         
         if type == 'node-concept' 
             data['label'] = @link_name
         else
-            data['label'] = label
+            data['label'] = "?" + label
         
         data['links'] = @
 
@@ -89,7 +95,9 @@ class window.PainlessLink
         if @node_var1 == null
             @node_var1   = @create_node('node-variable')
         if @node_var2 == null
-            @node_var2   = @create_node('node-variable')
+            if @link_type == 'attribute'
+                @node_var2   = @create_node('node-variable', @link_name)
+            else @node_var2 = @create_node('node-variable')
 
         @node_quad1      = @create_node('node-range')
         @node_quad2      = @create_node('node-domain')

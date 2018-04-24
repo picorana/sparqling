@@ -1,39 +1,26 @@
 class window.PainlessSparql
 
     painless_graph = null
-
-    
+   
+ 
     constructor: (graph) ->
         @graph = graph
         @cy = graph.cy
-        
-        this.init()
+ 
+        @init()
 
 
     init : ->
-        this.create_sidenav()
-        this.add_event_listener()
+        @create_sidenav()
+        @add_event_listener()
 
 
     create_sidenav : =>
+
         side_nav = document.createElement("div");
         side_nav.id = "sidenav";
         side_nav.className = "sidenav";
         document.body.appendChild(side_nav);
-
-        slider = document.createElement("div")
-        slider.className = "slidecontainer"
-        slider_range = document.createElement("input")
-        slider_range.type = "range"
-        slider_range.min = 1
-        slider_range.max = 100
-        slider_range.value = 48
-        slider_range.step = 0.5
-        slider_range.className = 'slider'
-        slider.appendChild(slider_range)
-        slider_range.oninput = (s) -> 
-            side_nav.style.width = (100 - this.value - 2) + "%"
-        document.body.appendChild(slider)
 
         sparql_textbox = document.createElement("div");
         sparql_textbox.id = "sparql_textbox";
@@ -59,7 +46,9 @@ class window.PainlessSparql
         up_button.onclick = ($) ->
             query_canvas.style.height = '80%'
             sparql_textbox.style.height = '0%'
-            query_canvas.style.height = '80%'
+            setTimeout(()=> 
+                painless_graph.cy.resize()
+            , 550)
         nav_div.append(up_button)
 
         mid_button = document.createElement('div')
@@ -68,6 +57,9 @@ class window.PainlessSparql
         mid_button.onclick = ($) ->
             query_canvas.style.height = '50%'
             sparql_textbox.style.height = '30%'
+            setTimeout(()=> 
+                painless_graph.cy.resize()
+            , 550)
         nav_div.append(mid_button)
 
         down_button = document.createElement('div')
@@ -76,6 +68,9 @@ class window.PainlessSparql
         down_button.onclick = ($) ->
             sparql_textbox.style.height = '80%'
             query_canvas.style.height = '0%'
+            setTimeout(()=> 
+                painless_graph.cy.resize()
+            , 550)
         nav_div.append(down_button)
 
         menu.append(nav_div)
@@ -129,6 +124,24 @@ class window.PainlessSparql
             painless_graph.sparql_text.add_filter(painless_graph.cy.nodes(':selected').id())
         button.className = 'menu_button'
         menu.append(button)
+
+        slider = document.createElement("div")
+        slider.className = "slidecontainer"
+        slider_range = document.createElement("input")
+        slider_range.type = "range"
+        slider_range.min = 1
+        slider_range.max = 100
+        slider_range.value = 48
+        slider_range.step = 0.5
+        slider_range.className = 'slider'
+        slider.appendChild(slider_range)
+        slider_range.oninput = (s) -> 
+            side_nav.style.width = (100 - this.value - 2) + "%"
+            setTimeout(()=> 
+                painless_graph.cy.resize()
+            , 550)
+        document.body.appendChild(slider)
+    
 
     open_nav : -> 
         document.getElementById("sidenav").style.width = "50%";

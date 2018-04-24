@@ -2035,13 +2035,16 @@ window.PainlessLink = (function() {
       }
     }
 
-    find_new_name() {
-      var x;
-      x = 0;
-      while (this.cy.getElementById("x" + x).length !== 0) {
-        x += 1;
+    find_new_name(base_name = null) {
+      var i;
+      if (base_name === null) {
+        base_name = "x";
       }
-      return "x" + x;
+      i = 0;
+      while (this.cy.getElementById(base_name + i).length !== 0) {
+        i += 1;
+      }
+      return base_name + i;
     }
 
     create_edge(node1, node2) {
@@ -2072,15 +2075,19 @@ window.PainlessLink = (function() {
     create_node(type, label = null) {
       var data;
       data = {};
-      if (type === 'node-variable' && label === null) {
-        label = this.find_new_name();
+      if (type === 'node-variable') {
+        label = this.find_new_name(label);
         data['id'] = label;
-        data['color'] = '#' + palette[label.substr(1) % palette.length];
+        if (label.length === 2) {
+          data['color'] = '#' + palette[label.slice(-1) % palette.length];
+        } else {
+          data['color'] = '#' + palette[Math.round(Math.random() * 100) % palette.length];
+        }
       }
       if (type === 'node-concept') {
         data['label'] = this.link_name;
       } else {
-        data['label'] = label;
+        data['label'] = "?" + label;
       }
       data['links'] = this;
       return this.cy.add({
@@ -2095,7 +2102,11 @@ window.PainlessLink = (function() {
         this.node_var1 = this.create_node('node-variable');
       }
       if (this.node_var2 === null) {
-        this.node_var2 = this.create_node('node-variable');
+        if (this.link_type === 'attribute') {
+          this.node_var2 = this.create_node('node-variable', this.link_name);
+        } else {
+          this.node_var2 = this.create_node('node-variable');
+        }
       }
       this.node_quad1 = this.create_node('node-range');
       this.node_quad2 = this.create_node('node-domain');
@@ -2167,20 +2178,6 @@ window.PainlessSparql = (function() {
       side_nav.id = "sidenav";
       side_nav.className = "sidenav";
       document.body.appendChild(side_nav);
-      slider = document.createElement("div");
-      slider.className = "slidecontainer";
-      slider_range = document.createElement("input");
-      slider_range.type = "range";
-      slider_range.min = 1;
-      slider_range.max = 100;
-      slider_range.value = 48;
-      slider_range.step = 0.5;
-      slider_range.className = 'slider';
-      slider.appendChild(slider_range);
-      slider_range.oninput = function(s) {
-        return side_nav.style.width = (100 - this.value - 2) + "%";
-      };
-      document.body.appendChild(slider);
       sparql_textbox = document.createElement("div");
       sparql_textbox.id = "sparql_textbox";
       sparql_textbox.innerHTML = "sparql_query_here";
@@ -2200,7 +2197,9 @@ window.PainlessSparql = (function() {
       up_button.onclick = function($) {
         query_canvas.style.height = '80%';
         sparql_textbox.style.height = '0%';
-        return query_canvas.style.height = '80%';
+        return setTimeout(() => {
+          return painless_graph.cy.resize();
+        }, 550);
       };
       nav_div.append(up_button);
       mid_button = document.createElement('div');
@@ -2208,7 +2207,10 @@ window.PainlessSparql = (function() {
       mid_button.className = 'resize_button';
       mid_button.onclick = function($) {
         query_canvas.style.height = '50%';
-        return sparql_textbox.style.height = '30%';
+        sparql_textbox.style.height = '30%';
+        return setTimeout(() => {
+          return painless_graph.cy.resize();
+        }, 550);
       };
       nav_div.append(mid_button);
       down_button = document.createElement('div');
@@ -2216,7 +2218,10 @@ window.PainlessSparql = (function() {
       down_button.className = 'resize_button';
       down_button.onclick = function($) {
         sparql_textbox.style.height = '80%';
-        return query_canvas.style.height = '0%';
+        query_canvas.style.height = '0%';
+        return setTimeout(() => {
+          return painless_graph.cy.resize();
+        }, 550);
       };
       nav_div.append(down_button);
       menu.append(nav_div);
@@ -2273,7 +2278,24 @@ window.PainlessSparql = (function() {
         return painless_graph.sparql_text.add_filter(painless_graph.cy.nodes(':selected').id());
       };
       button.className = 'menu_button';
-      return menu.append(button);
+      menu.append(button);
+      slider = document.createElement("div");
+      slider.className = "slidecontainer";
+      slider_range = document.createElement("input");
+      slider_range.type = "range";
+      slider_range.min = 1;
+      slider_range.max = 100;
+      slider_range.value = 48;
+      slider_range.step = 0.5;
+      slider_range.className = 'slider';
+      slider.appendChild(slider_range);
+      slider_range.oninput = function(s) {
+        side_nav.style.width = (100 - this.value - 2) + "%";
+        return setTimeout(() => {
+          return painless_graph.cy.resize();
+        }, 550);
+      };
+      return document.body.appendChild(slider);
     }
 
     open_nav() {
@@ -2472,7 +2494,7 @@ window.SparqlText = (function() {
         this.cy.nodes().unselect();
         return node.select();
       };
-      st.innerHTML = "?" + node.data('label');
+      st.innerHTML = node.data('label');
       st.style.backgroundColor = node.data('color');
       container.append(st);
       minicross = document.createElement('div');
