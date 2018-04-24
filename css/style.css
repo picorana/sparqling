@@ -168,6 +168,7 @@
 
 .q_line {
     display: table;
+	vertical-align: middle;
 }
 
 .init_string > div {
@@ -180,7 +181,18 @@
 
 .q_line > div {
     display: inline-block;
+	vertical-align: inherit;
+}
 
+.filter_condition_container {
+	display: inline-block;
+	padding: 3px;
+	background-color: #666;
+	border-radius: 10px;
+}
+
+.filter_condition_container > div, .filter_condition_container > div > div {
+	display: inline-block;
 }
 
 /* 	
@@ -227,9 +239,7 @@ input::-moz-focus-inner, input::-moz-focus-outer {
     width: 100%;
     border-radius: 5px;  
     outline: none;
-    transition: .2s;
-	-webkit-transition: .2s;
-    transition: opacity .2s;
+	background: transparent;
 }
 
 .slider::-webkit-slider-thumb {

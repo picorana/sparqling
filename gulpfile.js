@@ -6,7 +6,10 @@ var merge2 = require("merge2");
 
 gulp.task("build", function() {
   var c = gulp.src("./coffee/*.coffee").pipe(coffee({ bare: true }));
-  var j = gulp.src(["./node_modules/dragula/dist/dragula.js"]);
+  var j = gulp.src([
+    "./node_modules/dragula/dist/dragula.js",
+    "./node_modules/cytoscape-cola/cytoscape-cola.js"
+  ]);
 
   merge2([j, c])
     .pipe(gulpConcat("./js/app.js"))

@@ -125,6 +125,8 @@ class window.PainlessSparql
 
         button = document.createElement('button')
         button.innerHTML = 'filter'
+        button.onclick = () -> 
+            painless_graph.sparql_text.add_filter(painless_graph.cy.nodes(':selected').id())
         button.className = 'menu_button'
         menu.append(button)
 
