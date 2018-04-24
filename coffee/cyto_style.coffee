@@ -60,9 +60,9 @@ generate_style = ->
                 'text-valign' : 'center'
                 'font-size' : '40'
                 'font-family' : "Courier New";
-                'color' : 'white'
-                'text-outline-color' : 'black'
-                'text-outline-width' : '2px'
+                'color' : '#fdf6e3'
+                'text-outline-color' : '#fdf6e3'
+                'text-outline-width' : '0px'
                 'content' : 'data(label)'
             })
         .selector('.node-concept')
@@ -72,8 +72,8 @@ generate_style = ->
                 'content' : 'data(label)'
                 'text-valign' : 'center'
                 'width' : (ele) ->
-                    return ele.data('label').length * 10 #compute text length?
-                'height' : '30'
+                    return ele.data('label').length * 10 + 50 #compute text length?
+                'height' : '80'
                 'border-color' : '#000'
                 'border-width' : '2px'
                 'border-style' : 'solid'

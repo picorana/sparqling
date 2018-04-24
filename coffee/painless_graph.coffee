@@ -30,7 +30,6 @@ class window.PainlessGraph
             fit: false
             refresh: 2
             maxSimulationTime: 2000
-            avoidOverlap: false
         }).run()
 
 
