@@ -2009,6 +2009,136 @@ window.PainlessGraph = (function() {
 
 }).call(this);
 
+;(function(root, factory) {
+  if (typeof exports === 'object') {
+    module.exports = factory(window, document)
+  } else {
+    root.SimpleScrollbar = factory(window, document)
+  }
+})(this, function(w, d) {
+  var raf = w.requestAnimationFrame || w.setImmediate || function(c) { return setTimeout(c, 0); };
+
+  function initEl(el) {
+    if (Object.prototype.hasOwnProperty.call(el, 'data-simple-scrollbar')) return;
+    Object.defineProperty(el, 'data-simple-scrollbar', { value: new SimpleScrollbar(el) });
+  }
+
+  // Mouse drag handler
+  function dragDealer(el, context) {
+    var lastPageY;
+
+    el.addEventListener('mousedown', function(e) {
+      lastPageY = e.pageY;
+      el.classList.add('ss-grabbed');
+      d.body.classList.add('ss-grabbed');
+
+      d.addEventListener('mousemove', drag);
+      d.addEventListener('mouseup', stop);
+
+      return false;
+    });
+
+    function drag(e) {
+      var delta = e.pageY - lastPageY;
+      lastPageY = e.pageY;
+
+      raf(function() {
+        context.el.scrollTop += delta / context.scrollRatio;
+      });
+    }
+
+    function stop() {
+      el.classList.remove('ss-grabbed');
+      d.body.classList.remove('ss-grabbed');
+      d.removeEventListener('mousemove', drag);
+      d.removeEventListener('mouseup', stop);
+    }
+  }
+
+  // Constructor
+  function ss(el) {
+    this.target = el;
+
+    this.direction = w.getComputedStyle(this.target).direction;
+
+    this.bar = '<div class="ss-scroll">';
+
+    this.wrapper = d.createElement('div');
+    this.wrapper.setAttribute('class', 'ss-wrapper');
+
+    this.el = d.createElement('div');
+    this.el.setAttribute('class', 'ss-content');
+
+    if (this.direction === 'rtl') {
+      this.el.classList.add('rtl');
+    }
+
+    this.wrapper.appendChild(this.el);
+
+    while (this.target.firstChild) {
+      this.el.appendChild(this.target.firstChild);
+    }
+    this.target.appendChild(this.wrapper);
+
+    this.target.insertAdjacentHTML('beforeend', this.bar);
+    this.bar = this.target.lastChild;
+
+    dragDealer(this.bar, this);
+    this.moveBar();
+
+    w.addEventListener('resize', this.moveBar.bind(this));
+    this.el.addEventListener('scroll', this.moveBar.bind(this));
+    this.el.addEventListener('mouseenter', this.moveBar.bind(this));
+
+    this.target.classList.add('ss-container');
+
+    var css = w.getComputedStyle(el);
+  	if (css['height'] === '0px' && css['max-height'] !== '0px') {
+    	el.style.height = css['max-height'];
+    }
+  }
+
+  ss.prototype = {
+    moveBar: function(e) {
+      var totalHeight = this.el.scrollHeight,
+          ownHeight = this.el.clientHeight,
+          _this = this;
+
+      this.scrollRatio = ownHeight / totalHeight;
+
+      var isRtl = _this.direction === 'rtl';
+      var right = isRtl ?
+        (_this.target.clientWidth - _this.bar.clientWidth + 18) :
+        (_this.target.clientWidth - _this.bar.clientWidth) * -1;
+
+      raf(function() {
+        // Hide scrollbar if no scrolling is possible
+        if(_this.scrollRatio >= 1) {
+          _this.bar.classList.add('ss-hidden')
+        } else {
+          _this.bar.classList.remove('ss-hidden')
+          _this.bar.style.cssText = 'height:' + Math.max(_this.scrollRatio * 100, 10) + '%; top:' + (_this.el.scrollTop / totalHeight ) * 100 + '%;right:' + right + 'px;';
+        }
+      });
+    }
+  }
+
+  function initAll() {
+    var nodes = d.querySelectorAll('*[ss-container]');
+
+    for (var i = 0; i < nodes.length; i++) {
+      initEl(nodes[i]);
+    }
+  }
+
+  d.addEventListener('DOMContentLoaded', initAll);
+  ss.initEl = initEl;
+  ss.initAll = initAll;
+
+  var SimpleScrollbar = ss;
+  return SimpleScrollbar;
+});
+
 //_require constants.coffee
 window.PainlessLink = (function() {
   var cy, link_name, link_type, node_concept, node_link, node_quad1, node_quad2, node_var1, node_var2;
@@ -2154,11 +2284,83 @@ window.PainlessLink = (function() {
 
 }).call(this);
 
-window.PainlessSparql = (function() {
-  var painless_graph;
+window.PainlessMenu = class PainlessMenu {
+  constructor(context) {
+    this.change_size = this.change_size.bind(this);
+    this.create_navigation_div = this.create_navigation_div.bind(this);
+    this.init = this.init.bind(this);
+    this.context = context;
+    this.init();
+  }
 
+  change_size(query_canvas_size) {
+    this.context.query_canvas.style.height = query_canvas_size + "%";
+    sparql_textbox.style.height = (100 - 20 - query_canvas_size) + "%";
+    return setTimeout(() => {
+      return this.context.graph.cy.resize();
+    }, 550);
+  }
+
+  create_div(innerHTML = null, className = null, id = null, onclick = null) {
+    var div;
+    div = document.createElement('div');
+    div.innerHTML = innerHTML;
+    div.className = className;
+    div.id = id;
+    div.onclick = onclick;
+    return div;
+  }
+
+  create_navigation_div() {
+    var nav_div;
+    nav_div = this.create_div(null, null, 'nav_div');
+    nav_div.append(this.create_div('▲', 'resize_button', null, () => {
+      return this.change_size(80);
+    }));
+    nav_div.append(this.create_div('≡', 'resize_button', null, () => {
+      return this.change_size(50);
+    }));
+    nav_div.append(this.create_div('▼', 'resize_button', null, () => {
+      return this.change_size(50);
+    }));
+    return nav_div;
+  }
+
+  init() {
+    var menu;
+    menu = this.create_div(null, null, 'painless_menu');
+    document.getElementById('sidenav').append(menu);
+    menu.append(this.create_navigation_div());
+    menu.append(this.create_div('undo', 'menu_button', null, () => {
+      return this.context.graph.undo();
+    }));
+    menu.append(this.create_div('delete_node', 'menu_button', null, () => {
+      return this.context.graph.delete_node();
+    }));
+    menu.append(this.create_div('reverse_relationship', 'menu_button', null, () => {
+      return this.context.graph.reverse_relationship();
+    }));
+    menu.append(this.create_div('rename', 'menu_button', null));
+    /** TODO !! */    menu.append(this.create_div('center view', 'menu_button', null, () => {
+      return this.context.graph.center_view();
+    }));
+    menu.append(this.create_div('copy to clipboard', 'menu_button', null, () => {
+      return this.context.graph.copy_to_clipboard();
+    }));
+    menu.append(this.create_div('add to select', 'menu_button', null, () => {
+      return this.context.graph.add_to_select(this.context.graph.cy.nodes(':selected').id());
+    }));
+    return menu.append(this.create_div('filter', 'menu_button', null, () => {
+      return this.context.graph.sparql_text.add_filter(this.context.graph.cy.nodes(':selected').id());
+    }));
+  }
+
+};
+
+window.PainlessSparql = (function() {
   class PainlessSparql {
     constructor(graph) {
+      this.add_to_query = this.add_to_query.bind(this);
       this.create_sidenav = this.create_sidenav.bind(this);
       this.onkeypress_handler = this.onkeypress_handler.bind(this);
       this.graph = graph;
@@ -2168,15 +2370,42 @@ window.PainlessSparql = (function() {
 
     init() {
       this.create_sidenav();
-      return this.add_event_listener();
+      return this.menu = new window.PainlessMenu(this);
+    }
+
+    add_to_query() {
+      var selected_node;
+      console.log("hey");
+      selected_node = this.cy.nodes(":selected");
+      if (selected_node.length === 0) {
+        console.warn("please, select a node in the main graph");
+      }
+      switch (selected_node.data('type')) {
+        case "role":
+          return this.graph.add_link(selected_node.data('label'), 'role');
+        case "attribute":
+          return this.graph.add_link(selected_node.data('label'), 'attribute');
+        case "concept":
+          return this.graph.add_link(selected_node.data('label'), 'concept');
+      }
     }
 
     create_sidenav() {
-      var button, down_button, menu, mid_button, nav_div, side_nav, slider, slider_range, sparql_textbox, up_button;
+      var button, side_nav, side_nav_container, slider, slider_range, sparql_textbox;
+      side_nav_container = document.createElement("div");
+      side_nav_container.id = "sidenav_container";
+      document.body.appendChild(side_nav_container);
       side_nav = document.createElement("div");
       side_nav.id = "sidenav";
       side_nav.className = "sidenav";
-      document.body.appendChild(side_nav);
+      side_nav_container.appendChild(side_nav);
+      button = document.createElement("button");
+      button.innerHTML = "add to \n\r query";
+      button.id = "add_to_query_button";
+      button.onclick = () => {
+        return this.add_to_query();
+      };
+      side_nav.appendChild(button);
       sparql_textbox = document.createElement("div");
       sparql_textbox.id = "sparql_textbox";
       sparql_textbox.innerHTML = "sparql_query_here";
@@ -2184,100 +2413,7 @@ window.PainlessSparql = (function() {
       this.query_canvas = document.createElement("div");
       this.query_canvas.id = "query_canvas";
       side_nav.appendChild(this.query_canvas);
-      painless_graph = new PainlessGraph(this.query_canvas);
-      menu = document.createElement('div');
-      menu.id = 'painless_menu';
-      document.getElementById('sidenav').append(menu);
-      nav_div = document.createElement('div');
-      nav_div.id = 'nav_div';
-      up_button = document.createElement('div');
-      up_button.innerHTML = '▲';
-      up_button.className = 'resize_button';
-      up_button.onclick = function($) {
-        query_canvas.style.height = '80%';
-        sparql_textbox.style.height = '0%';
-        return setTimeout(() => {
-          return painless_graph.cy.resize();
-        }, 550);
-      };
-      nav_div.append(up_button);
-      mid_button = document.createElement('div');
-      mid_button.innerHTML = '≡';
-      mid_button.className = 'resize_button';
-      mid_button.onclick = function($) {
-        query_canvas.style.height = '50%';
-        sparql_textbox.style.height = '30%';
-        return setTimeout(() => {
-          return painless_graph.cy.resize();
-        }, 550);
-      };
-      nav_div.append(mid_button);
-      down_button = document.createElement('div');
-      down_button.innerHTML = '▼';
-      down_button.className = 'resize_button';
-      down_button.onclick = function($) {
-        sparql_textbox.style.height = '80%';
-        query_canvas.style.height = '0%';
-        return setTimeout(() => {
-          return painless_graph.cy.resize();
-        }, 550);
-      };
-      nav_div.append(down_button);
-      menu.append(nav_div);
-      button = document.createElement('button');
-      button.innerHTML = 'undo';
-      button.className = 'menu_button';
-      button.onclick = ($) => {
-        return painless_graph.undo();
-      };
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'delete node';
-      button.className = 'menu_button';
-      button.onclick = function() {
-        return painless_graph.delete_node();
-      };
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'reverse relationship';
-      button.className = 'menu_button';
-      button.onclick = function() {
-        painless_graph.reverse_relationship();
-        return painless_graph.sparql_text.update();
-      };
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'rename';
-      button.className = 'menu_button';
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'center view';
-      button.onclick = function() {
-        return painless_graph.center_view();
-      };
-      button.className = 'menu_button';
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'copy to clipboard';
-      button.className = 'menu_button';
-      button.onclick = function() {
-        return painless_graph.copy_to_clipboard();
-      };
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'add to select';
-      button.className = 'menu_button';
-      button.onclick = function() {
-        return painless_graph.add_to_select(painless_graph.cy.nodes(':selected').id());
-      };
-      menu.append(button);
-      button = document.createElement('button');
-      button.innerHTML = 'filter';
-      button.onclick = function() {
-        return painless_graph.sparql_text.add_filter(painless_graph.cy.nodes(':selected').id());
-      };
-      button.className = 'menu_button';
-      menu.append(button);
+      this.graph = new PainlessGraph(this.query_canvas);
       slider = document.createElement("div");
       slider.className = "slidecontainer";
       slider_range = document.createElement("input");
@@ -2289,9 +2425,10 @@ window.PainlessSparql = (function() {
       slider_range.className = 'slider';
       slider.appendChild(slider_range);
       slider_range.oninput = function(s) {
-        side_nav.style.width = (100 - this.value - 2) + "%";
+        console.log(this.getBoundingClientRect());
+        side_nav.style.width = (document.documentElement.clientWidth * (100 - this.value)) / 100 + "px";
         return setTimeout(() => {
-          return painless_graph.cy.resize();
+          return this.graph.cy.resize();
         }, 550);
       };
       return document.body.appendChild(slider);
@@ -2306,24 +2443,13 @@ window.PainlessSparql = (function() {
     }
 
     onkeypress_handler(event) {
-      var selected_node;
       if (event.key === "a") {
-        return this.open_nav();
+
+      
+      //@open_nav()
       } else if (event.key === "b") {
-        return this.close_nav();
-      } else if (event.key === "c") { // to be activated by a button
-        selected_node = this.cy.nodes(":selected");
-        if (selected_node.length === 0) {
-          console.warn("please, select a node in the main graph");
-        }
-        switch (selected_node.data('type')) {
-          case "role":
-            return painless_graph.add_link(selected_node.data('label'), 'role');
-          case "attribute":
-            return painless_graph.add_link(selected_node.data('label'), 'attribute');
-          case "concept":
-            return painless_graph.add_link(selected_node.data('label'), 'concept');
-        }
+
+      //@close_nav()
       } else if (event.key === "d") {
         return console.log(this.cy.nodes(":selected").data('type'));
       }
@@ -2335,7 +2461,7 @@ window.PainlessSparql = (function() {
 
   };
 
-  painless_graph = null;
+  PainlessSparql.graph = null;
 
   return PainlessSparql;
 
@@ -2578,6 +2704,7 @@ window.SparqlText = (function() {
     update() {
       var count, elem, f_string, filter, init_string, j, k, l, len, len1, len2, link, query_line, ref, ref1, s_line, select_div, select_div_f;
       div_sparql_text.innerHTML = "";
+      window.SimpleScrollbar.initEl(div_sparql_text);
       init_string = document.createElement('div');
       init_string.className = "init_string";
       s_line = document.createElement('div');

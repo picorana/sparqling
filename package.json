@@ -10,7 +10,8 @@
     "gulp-uglify" : "^3.0.0",
     "merge2" : "^1.2.1",
     "dragula" : "^3.7.2",
-    "cytoscape-cola" : "^2.2.3"
+    "cytoscape-cola" : "^2.2.3",
+    "simple-scrollbar" : "^0.4.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

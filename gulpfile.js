@@ -8,7 +8,8 @@ gulp.task("build", function() {
   var c = gulp.src("./coffee/*.coffee").pipe(coffee({ bare: true }));
   var j = gulp.src([
     "./node_modules/dragula/dist/dragula.js",
-    "./node_modules/cytoscape-cola/cytoscape-cola.js"
+    "./node_modules/cytoscape-cola/cytoscape-cola.js",
+    "./node_modules/simple-scrollbar/simple-scrollbar.js"
   ]);
 
   merge2([j, c])

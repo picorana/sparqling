@@ -39,31 +39,20 @@
 	transition: 0.1s;
 }
 
-
 #nav_div {
     text-align: center;
     color: #ccc;
     vertical-align: middle;
 }
 
-
 #add_to_query_button {
 	position: absolute;
-	cursor: pointer;
-	left: -60px;
-	bottom: 65px;
-	width: 50px;
-	background-color: #fdf6e3;
+	left: -20px;
+	width: 60px;
 	border-radius: 50px;
-	font-size: xx-small;
-	font-family: "Courier New";
-	border-color: #002b36;
+	border-color: blue;
+	background-color: red;
 	z-index: 3;
-}
-
-
-#add_to_query::hover{
-	cursor: grab;
 }
 
 /* 	
@@ -101,12 +90,9 @@
 }
 
 .menu_button {
-	display: inline-block;
 	background-color: #93a1a1;
 	color: #073642;
 	margin: 2px;
-	cursor: pointer;
-	padding: 2px;
 	border-radius: 10px;
     border: none;
     font-size: x-small;
@@ -133,7 +119,7 @@
 	font-family : "Courier New";
 	font-size: small;
     width: 95%;
-	/*overflow-y: scroll;*/
+	overflow-y: scroll;
 	height: 30%;
     margin-left: 3%;
     margin-right: 3%;

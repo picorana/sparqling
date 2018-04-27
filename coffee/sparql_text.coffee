@@ -132,6 +132,7 @@ class window.SparqlText
 
     update: =>
         div_sparql_text.innerHTML = ""
+        window.SimpleScrollbar.initEl(div_sparql_text)
         
         init_string = document.createElement('div')
         init_string.className = "init_string"
