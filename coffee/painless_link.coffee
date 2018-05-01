@@ -82,7 +82,7 @@ class window.PainlessLink
         else
             data['label'] = "?" + label
         
-        data['links'] = @
+        data['links'] = [@]
 
         return @cy.add({
             group: 'nodes'
@@ -91,13 +91,34 @@ class window.PainlessLink
         })
 
 
+    delete: =>
+        if @node_quad1 != null and @node_quad != undefined
+            @cy.remove(@node_quad1)
+        if @node_quad2 != null and @node_quad != undefined
+            @cy.remove @node_quad2
+        if @node_link != null and @node_link != undefined
+            @cy.remove @node_link
+        if @node_concept != null and @node_concept != undefined
+            @cy.remove @node_concept
+        for node_var in [@node_var1, @node_var2]
+            if node_var != null
+                index = node_var.data('links').indexOf(@)
+                node_var.data('links').splice(index, 1)
+                if node_var.data('links').length == 0
+                    @cy.remove node_var
+
+
+
     create_link: =>
         if @node_var1 == null
             @node_var1   = @create_node('node-variable')
+        else @node_var1.data('links').push(@)
+
         if @node_var2 == null
             if @link_type == 'attribute'
                 @node_var2   = @create_node('node-variable', @link_name)
             else @node_var2 = @create_node('node-variable')
+        else @node_var2.data('links').push(@)
 
         @node_quad1      = @create_node('node-range')
         @node_quad2      = @create_node('node-domain')

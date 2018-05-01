@@ -1756,6 +1756,12 @@ window.PainlessGraph = (function() {
             }
           },
           {
+            content: 'center view',
+            select: (ele) => {
+              return this.center_view(ele);
+            }
+          },
+          {
             content: 'add node to select statement'
           },
           {
@@ -1770,10 +1776,17 @@ window.PainlessGraph = (function() {
         selector: '.node-role',
         commands: [
           {
-            content: 'reverse relationship'
+            content: 'reverse',
+            select: (ele) => {
+              console.log(ele.data('links'));
+              return ele.data('links')[0].reverse();
+            }
           },
           {
-            content: 'delete link'
+            content: 'delete',
+            select: (ele) => {
+              return ele.data('links')[0].delete();
+            }
           }
         ]
       };
@@ -1791,14 +1804,18 @@ window.PainlessGraph = (function() {
       }).run();
     }
 
-    center_view() {
+    center_view(ele = null) {
       /** 
       TODO: pan and center should actually be two different buttons!
       */
-      if (this.cy.nodes(':selected').length > 0) {
-        return this.cy.center(this.cy.nodes(':selected'));
+      if (ele === null) {
+        if (this.cy.nodes(':selected').length > 0) {
+          return this.cy.center(this.cy.nodes(':selected'));
+        } else {
+          return this.cy.fit();
+        }
       } else {
-        return this.cy.fit();
+        return this.cy.center(ele);
       }
     }
 
@@ -2181,6 +2198,7 @@ window.PainlessLink = (function() {
       this.create_edge = this.create_edge.bind(this);
       this.reverse = this.reverse.bind(this);
       this.create_node = this.create_node.bind(this);
+      this.delete = this.delete.bind(this);
       this.create_link = this.create_link.bind(this);
       this.create_concept = this.create_concept.bind(this);
       this.cy = cy;
@@ -2251,7 +2269,7 @@ window.PainlessLink = (function() {
       } else {
         data['label'] = "?" + label;
       }
-      data['links'] = this;
+      data['links'] = [this];
       return this.cy.add({
         group: 'nodes',
         data: data,
@@ -2259,9 +2277,44 @@ window.PainlessLink = (function() {
       });
     }
 
+    delete() {
+      var index, j, len, node_var, ref, results;
+      if (this.node_quad1 !== null && this.node_quad !== void 0) {
+        this.cy.remove(this.node_quad1);
+      }
+      if (this.node_quad2 !== null && this.node_quad !== void 0) {
+        this.cy.remove(this.node_quad2);
+      }
+      if (this.node_link !== null && this.node_link !== void 0) {
+        this.cy.remove(this.node_link);
+      }
+      if (this.node_concept !== null && this.node_concept !== void 0) {
+        this.cy.remove(this.node_concept);
+      }
+      ref = [this.node_var1, this.node_var2];
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        node_var = ref[j];
+        if (node_var !== null) {
+          index = node_var.data('links').indexOf(this);
+          node_var.data('links').splice(index, 1);
+          if (node_var.data('links').length === 0) {
+            results.push(this.cy.remove(node_var));
+          } else {
+            results.push(void 0);
+          }
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
+    }
+
     create_link() {
       if (this.node_var1 === null) {
         this.node_var1 = this.create_node('node-variable');
+      } else {
+        this.node_var1.data('links').push(this);
       }
       if (this.node_var2 === null) {
         if (this.link_type === 'attribute') {
@@ -2269,6 +2322,8 @@ window.PainlessLink = (function() {
         } else {
           this.node_var2 = this.create_node('node-variable');
         }
+      } else {
+        this.node_var2.data('links').push(this);
       }
       this.node_quad1 = this.create_node('node-range');
       this.node_quad2 = this.create_node('node-domain');

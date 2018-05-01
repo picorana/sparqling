@@ -24,7 +24,8 @@ class window.PainlessGraph
         node_variable_context_menu = {
             selector: '.node-variable',
             commands: [
-                {content: 'delete node', select: ()=>console.log "delete node"},
+                {content: 'delete node', select: ()=> console.log "delete node"},
+                {content: 'center view', select: (ele)=> @center_view(ele)}
                 {content: 'add node to select statement'},
                 {content: 'rename node'},
                 {content: 'transform into constant'}
@@ -34,13 +35,20 @@ class window.PainlessGraph
         node_link_context_menu = {
             selector: '.node-role',
             commands: [
-                {content: 'reverse relationship'},
-                {content: 'delete link'}
+                {content: 'reverse', select: 
+                    (ele)=>
+                        console.log ele.data('links') 
+                        ele.data('links')[0].reverse()
+                },
+                {content: 'delete', select: 
+                    (ele)=> 
+                        ele.data('links')[0].delete()}
             ]
         }
 
         @cy.cxtmenu(node_variable_context_menu)
         @cy.cxtmenu(node_link_context_menu)
+
 
     reshape: =>
         ###* resets node positions in the graph view ###
@@ -52,13 +60,17 @@ class window.PainlessGraph
         }).run()
 
 
-    center_view: =>
+    center_view: (ele = null) =>
         ###* 
         TODO: pan and center should actually be two different buttons!
         ###
-        if @cy.nodes(':selected').length > 0
-            @cy.center(@cy.nodes(':selected'))
-        else @cy.fit()
+
+        if ele == null
+            if @cy.nodes(':selected').length > 0
+                @cy.center(@cy.nodes(':selected'))
+            else @cy.fit()
+        else
+            @cy.center(ele)
 
 
     add_to_select: (node_id) =>
