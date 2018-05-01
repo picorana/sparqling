@@ -4,7 +4,6 @@
 
 class window.PainlessGraph
     ###* manages the graph visualization
-        TODO: palette should be in constants
         TODO: hardcoded collision distance should be in constants
     ###
     
@@ -22,6 +21,26 @@ class window.PainlessGraph
         @sparql_text = new SparqlText(@cy, links)
         @sparql_text.update()
 
+        node_variable_context_menu = {
+            selector: '.node-variable',
+            commands: [
+                {content: 'delete node', select: ()=>console.log "delete node"},
+                {content: 'add node to select statement'},
+                {content: 'rename node'},
+                {content: 'transform into constant'}
+            ] 
+        }
+
+        node_link_context_menu = {
+            selector: '.node-role',
+            commands: [
+                {content: 'reverse relationship'},
+                {content: 'delete link'}
+            ]
+        }
+
+        @cy.cxtmenu(node_variable_context_menu)
+        @cy.cxtmenu(node_link_context_menu)
 
     reshape: =>
         ###* resets node positions in the graph view ###

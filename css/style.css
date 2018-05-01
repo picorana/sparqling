@@ -66,6 +66,11 @@
 	cursor: grab;
 }
 
+.cxtmenu-content{
+    font-size: xx-small;
+    font-family: "Courier New";
+}
+
 /* 	
 *	--- 
 * 	GRAPH CANVAS 
