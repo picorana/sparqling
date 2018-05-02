@@ -24,7 +24,15 @@ class window.PainlessGraph
         node_variable_context_menu = {
             selector: '.node-variable',
             commands: [
-                {content: 'delete node', select: ()=> console.log "delete node"},
+                {content: 'delete node', select: (ele)=> 
+                    to_remove = []
+                    for link in ele.data('links')
+                        if link != null and link != undefined
+                           to_remove.push(link)
+                    for link in to_remove
+                        link.delete()
+                    @cy.remove(ele)
+                },
                 {content: 'center view', select: (ele)=> @center_view(ele)}
                 {content: 'add node to select statement'},
                 {content: 'rename node'},

@@ -2,20 +2,6 @@
 
 class window.PainlessLink
 
-    cy          = null
-
-    node_var1   = null
-    node_var2   = null
-    node_quad1  = null
-    node_quad2  = null
-    node_link   = null
-
-    node_concept = null
-
-    link_name   = null
-    link_type   = null
-
-
     constructor: (cy, link_name, link_type, node_var1 = null, node_var2 = null) ->
         @cy         = cy
 
@@ -92,29 +78,29 @@ class window.PainlessLink
 
 
     delete: =>
-        if @node_quad1 != null and @node_quad != undefined
+        if @node_quad1 != null and @node_quad1 != undefined
             @cy.remove(@node_quad1)
-        if @node_quad2 != null and @node_quad != undefined
-            @cy.remove @node_quad2
+        if @node_quad2 != null and @node_quad2 != undefined
+            @cy.remove(@node_quad2)
         if @node_link != null and @node_link != undefined
-            @cy.remove @node_link
+            @cy.remove(@node_link)
         if @node_concept != null and @node_concept != undefined
-            @cy.remove @node_concept
+            @cy.remove(@node_concept)
         for node_var in [@node_var1, @node_var2]
-            if node_var != null
+            if node_var != null and node_var != undefined
                 index = node_var.data('links').indexOf(@)
                 node_var.data('links').splice(index, 1)
                 if node_var.data('links').length == 0
-                    @cy.remove node_var
+                    @cy.remove(node_var)
 
 
 
     create_link: =>
-        if @node_var1 == null
+        if @node_var1 == null or @node_var1 == undefined
             @node_var1   = @create_node('node-variable')
         else @node_var1.data('links').push(@)
 
-        if @node_var2 == null
+        if @node_var2 == null or @node_var2 == undefined
             if @link_type == 'attribute'
                 @node_var2   = @create_node('node-variable', @link_name)
             else @node_var2 = @create_node('node-variable')
