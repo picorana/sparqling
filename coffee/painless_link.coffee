@@ -65,8 +65,9 @@ class window.PainlessLink
         
         if type == 'node-concept' 
             data['label'] = @link_name
-        else
-            data['label'] = "?" + label
+        else if type == 'node-attribute' or type == 'node-role'
+            data['label'] = label
+        else data['label'] = '?' + label
         
         data['links'] = [@]
 

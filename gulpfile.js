@@ -10,7 +10,8 @@ gulp.task("build", function() {
     "./node_modules/dragula/dist/dragula.js",
     "./node_modules/cytoscape-cola/cytoscape-cola.js",
     "./node_modules/simple-scrollbar/simple-scrollbar.js",
-    "./node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js"
+    "./node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js",
+    "./node_modules/tinycolor2/dist/tinycolor-min.js"
   ]);
 
   merge2([j, c])

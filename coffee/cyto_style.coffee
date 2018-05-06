@@ -8,44 +8,52 @@ generate_style = ->
             })
         .selector('.node-domain')
             .style({
-                'background-color' : 'black'
-                'border-color' : 'black'
+                'background-color' : '#002b36'
+                'border-color' : '#002b36'
                 'border-style' : 'solid'
                 'border-width' : '0.5px'
-                'width' : 30
-                'height' : 30
+                'width' : 15
+                'height' : 15
             })
         .selector('.node-range')
             .style({
-                'background-color' : 'white'
-                'border-color' : 'black'
+                'background-color' : '#fdf6e3'
+                'border-color' : '#002b36'
                 'border-style' : 'solid'
                 'border-width' : '2px'
-                'width' : 30
-                'height' : 30
+                'width' : 15
+                'height' : 15
             })
         .selector('.node-role')
             .style({
                 'shape' : 'diamond'
-                'background-color' : 'white'
+                'background-color' : '#fdf6e3'
                 'border-style' : 'solid'
-                'border-color' : 'black'
-                'border-width' : '2px' 
+                'border-color' : '#002b36'
+                'color' : '#002b36'
+                'border-width' : '4px' 
                 'content' : 'data(label)'
+                'text-valign' : 'center'
+                'font-family' : "Courier New";
+                'text-outline-color' : '#fdf6e3'
+                'text-outline-width' : '3px'
                 'width' : 90
-                'color' : 'black'
                 'height' : 60
             })
         .selector('.node-attribute')
             .style({
                 'shape' : 'ellipse'
-                'background-color' : 'white'
+                'background-color' : '#fdf6e3'
                 'border-style' : 'solid'
-                'border-color' : 'black'
-                'border-width' : '2px' 
+                'border-color' : '#002b36'
+                'color' : '#002b36'
+                'border-width' : '4px' 
                 'content' : 'data(label)'
+                'text-valign' : 'center'
+                'font-family' : "Courier New";
+                'text-outline-color' : '#fdf6e3'
+                'text-outline-width' : '3px'
                 'width' : 30
-                'color' : 'black'
                 'height' : 30
             })
         .selector('.node-variable')
@@ -58,7 +66,41 @@ generate_style = ->
                 'height' : (ele) ->
                     return 100
                 'text-valign' : 'center'
-                'font-size' : '40'
+                'font-size' : '30'
+                'font-family' : "Courier New";
+                'color' : '#fdf6e3'
+                'text-outline-color' : (ele) -> return ele.data('color')
+                'text-outline-width' : '5px'
+                'content' : 'data(label)'
+            })
+        .selector('.node-constant-value')
+            .style({
+                'shape' : 'ellipse'
+                'background-color' : (ele) ->
+                    return ele.data('color')
+                'width' : (ele) ->
+                    return 100
+                'height' : (ele) ->
+                    return 100
+                'text-valign' : 'center'
+                'font-size' : '20'
+                'font-family' : "Courier New";
+                'color' : '#fdf6e3'
+                'text-outline-color' : '#fdf6e3'
+                'text-outline-width' : '0px'
+                'content' : 'data(label)'
+            })
+        .selector('.node-constant-object')
+            .style({
+                'shape' : 'ellipse'
+                'background-color' : (ele) ->
+                    return ele.data('color')
+                'width' : (ele) ->
+                    return 100
+                'height' : (ele) ->
+                    return 100
+                'text-valign' : 'center'
+                'font-size' : '20'
                 'font-family' : "Courier New";
                 'color' : '#fdf6e3'
                 'text-outline-color' : '#fdf6e3'
@@ -68,14 +110,17 @@ generate_style = ->
         .selector('.node-concept')
             .style({
                 'shape' : 'rectangle'
-                'background-color' : 'white'
+                'background-color' : '#073642'
                 'content' : 'data(label)'
                 'text-valign' : 'center'
                 'width' : (ele) ->
                     return ele.data('label').length * 10 + 50 #compute text length?
                 'height' : '80'
-                'border-color' : '#000'
+                'border-color' : '#073642'
                 'border-width' : '2px'
+                'font-family' : "Courier New";
+                'font-size' : '20'
+                'color' : '#fdf6e3'
                 'border-style' : 'solid'
             })
         .selector('node.highlight')
