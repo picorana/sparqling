@@ -20,7 +20,7 @@ class window.PainlessGraph
        
         @sparql_text = new SparqlText(@cy, links)
         @sparql_text.update()
-        new window.PainlessContextMenu(@cy)
+        new window.PainlessContextMenu(@cy, this)
 
 
     reshape: =>
