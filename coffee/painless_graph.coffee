@@ -15,11 +15,15 @@ class window.PainlessGraph
         ###*
         TODO: sparql_text should be managed by painless_sparql.coffee
         ###
+
+        @utils = new window.PainlessUtils()
+
         @init()
         @reshape()
        
         @sparql_text = new SparqlText(@cy, links)
         @sparql_text.update()
+
         new window.PainlessContextMenu(@cy, this)
 
 
@@ -70,7 +74,7 @@ class window.PainlessGraph
             console.warn "no saved states"
         else
             @cy.json(state_buffer[state_buffer.length - 1])
-            @cy.style(generate_style())
+            @cy.style(@utils.generate_style())
             state_buffer.pop()
             @reshape()
 
@@ -199,9 +203,10 @@ class window.PainlessGraph
  
     
     init: =>
+
         @cy = new cytoscape(
             container: document.getElementById("query_canvas"),
-            style: generate_style()
+            style: @utils.generate_style()
             wheelSensitivity: 0.5
         )
 
