@@ -6,6 +6,26 @@ generate_style = ->
                 'background-color' : 'black',
                 'shape' : 'rectangle'
             })
+        .selector('edge')
+            .style({
+                'curve-style': 'bezier'
+                'width' : 3
+                'source-endpoint' : 'outside-to-node'
+                'target-endpoint' : 'outside-to-node'
+                'arrow-scale' : 1.5
+                'line-color' : '#839496'
+            })
+        .selector('.source-edge')
+            .style({
+                'source-arrow-shape' : 'square'
+                'source-arrow-fill' : 'hollow'
+                'source-arrow-color' : '#002b36'
+            })
+        .selector('.target-edge')
+            .style({
+                'target-arrow-shape' : 'square'
+                'target-arrow-color' : '#002b36'
+            })
         .selector('.node-domain')
             .style({
                 'background-color' : '#002b36'

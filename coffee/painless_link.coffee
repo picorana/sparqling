@@ -30,10 +30,11 @@ class window.PainlessLink
         return base_name + i
 
 
-    create_edge: (node1, node2) =>
+    create_edge: (node1, node2, classes = null) =>
         return @cy.add({
             group: 'edges'
             data: {source: node1.id(), target: node2.id()}
+            classes: classes
         })
 
 
@@ -79,10 +80,6 @@ class window.PainlessLink
 
 
     delete: =>
-        if @node_quad1 != null and @node_quad1 != undefined
-            @cy.remove(@node_quad1)
-        if @node_quad2 != null and @node_quad2 != undefined
-            @cy.remove(@node_quad2)
         if @node_link != null and @node_link != undefined
             @cy.remove(@node_link)
         if @node_concept != null and @node_concept != undefined
@@ -106,9 +103,6 @@ class window.PainlessLink
                 @node_var2   = @create_node('node-variable', @link_name)
             else @node_var2 = @create_node('node-variable')
         else @node_var2.data('links').push(@)
-
-        @node_quad1      = @create_node('node-range')
-        @node_quad2      = @create_node('node-domain')
        
         @source = @node_var1
         @target = @node_var2
@@ -118,10 +112,8 @@ class window.PainlessLink
         else
             @node_link       = @create_node('node-attribute', @link_name)
 
-        @create_edge(@node_var2, @node_quad2)
-        @create_edge(@node_quad1, @node_link)
-        @create_edge(@node_link, @node_quad2)
-        @create_edge(@node_var1, @node_quad1)
+        @create_edge(@source, @node_link, "source-edge")
+        @create_edge(@node_link, @target, "target-edge")
        
 
     create_concept: =>
