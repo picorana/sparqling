@@ -11,8 +11,8 @@ class window.PainlessLink
         @node_var1  = node_var1
         @node_var2  = node_var2
 
-        @node_quad1 = null
-        @node_quad2 = null
+        @edge_source = null
+        @edge_target = null
 
         if link_type == 'concept'
             @create_concept()
@@ -40,14 +40,14 @@ class window.PainlessLink
 
     reverse: =>
         ###* can only be applied to non-concept relationships ###
-        if @node_quad1.hasClass('node-range') 
-            @node_quad1.classes('node-domain')
+        if @source == @node_var1
+            @edge_source.classes('target-edge')
+            @edge_target.classes('source-edge')
             @source = @node_var2
             @target = @node_var1
-            @node_quad2.classes('node-range')
         else 
-            @node_quad1.classes('node-range')
-            @node_quad2.classes('node-domain')
+            @edge_source.classes('source-edge')
+            @edge_target.classes('target-edge')
             @source = @node_var1
             @target = @node_var2
    
@@ -112,8 +112,8 @@ class window.PainlessLink
         else
             @node_link       = @create_node('node-attribute', @link_name)
 
-        @create_edge(@source, @node_link, "source-edge")
-        @create_edge(@node_link, @target, "target-edge")
+        @edge_source = @create_edge(@node_link, @source, "source-edge")
+        @edge_target = @create_edge(@node_link, @target, "target-edge")
        
 
     create_concept: =>

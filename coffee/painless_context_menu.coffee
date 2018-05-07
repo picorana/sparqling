@@ -4,6 +4,7 @@ class window.PainlessContextMenu
         @cy = cy
         @init()
 
+
     init: =>
         node_variable_context_menu = {
             selector: '.node-variable',

@@ -17,9 +17,9 @@ generate_style = ->
             })
         .selector('.source-edge')
             .style({
-                'source-arrow-shape' : 'square'
-                'source-arrow-fill' : 'hollow'
-                'source-arrow-color' : '#002b36'
+                'target-arrow-shape' : 'square'
+                'target-arrow-fill' : 'hollow'
+                'target-arrow-color' : '#002b36'
             })
         .selector('.target-edge')
             .style({
