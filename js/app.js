@@ -1795,6 +1795,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
 window.PainlessContextMenu = class PainlessContextMenu {
   constructor(cy, context) {
     this.init = this.init.bind(this);
+    this.rename_const = this.rename_const.bind(this);
     this.rename_var = this.rename_var.bind(this);
     this.context = context;
     this.cy = cy;
@@ -1802,9 +1803,9 @@ window.PainlessContextMenu = class PainlessContextMenu {
   }
 
   init() {
-    var node_concept_menu, node_constant_object_menu, node_constant_value_menu, node_link_context_menu, node_variable_context_menu;
+    var node_attr_range_menu, node_concept_menu, node_constant_object_menu, node_constant_value_menu, node_link_attr_context_menu, node_link_context_menu, node_variable_context_menu;
     node_variable_context_menu = {
-      selector: '.node-variable',
+      selector: '.node-variable-full-options',
       commands: [
         {
           content: 'delete node',
@@ -1848,26 +1849,6 @@ window.PainlessContextMenu = class PainlessContextMenu {
           select: (ele) => {
             return this.rename_var(ele);
           }
-        },
-        {
-          content: 'transform into constant [object]',
-          select: (ele) => {
-            ele.data('color',
-        tinycolor(ele.data('color')).desaturate(50).toString());
-            ele.data('label',
-        'const.');
-            return ele.classes('node-constant-object');
-          }
-        },
-        {
-          content: 'transform into constant [value]',
-          select: (ele) => {
-            ele.data('color',
-        tinycolor(ele.data('color')).desaturate(50).toString());
-            ele.data('label',
-        'const.');
-            return ele.classes('node-constant-value');
-          }
         }
       ]
     };
@@ -1889,6 +1870,48 @@ window.PainlessContextMenu = class PainlessContextMenu {
         }
       ]
     };
+    node_link_attr_context_menu = {
+      selector: '.node-attribute',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_attr_range_menu = {
+      selector: '.attr-range',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        },
+        {
+          content: 'transform into constant [object]',
+          select: (ele) => {
+            ele.data('color',
+        tinycolor(ele.data('color')).desaturate(50).toString());
+            ele.data('label',
+        'const[o]');
+            return ele.classes('node-constant-object');
+          }
+        },
+        {
+          content: 'transform into constant [value]',
+          select: (ele) => {
+            ele.data('color',
+        tinycolor(ele.data('color')).desaturate(50).toString());
+            ele.data('label',
+        'const[v]');
+            return ele.classes('node-constant-value');
+          }
+        }
+      ]
+    };
     node_concept_menu = {
       selector: '.node-concept',
       commands: [
@@ -1904,27 +1927,9 @@ window.PainlessContextMenu = class PainlessContextMenu {
       selector: '.node-constant-value',
       commands: [
         {
-          content: 'string',
+          content: 'define value',
           select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        },
-        {
-          content: 'int',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        },
-        {
-          content: 'float',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        },
-        {
-          content: 'bool',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
+            return this.rename_const(ele);
           }
         },
         {
@@ -1939,6 +1944,12 @@ window.PainlessContextMenu = class PainlessContextMenu {
       selector: '.node-constant-object',
       commands: [
         {
+          content: 'define value',
+          select: (ele) => {
+            return this.rename_const(ele);
+          }
+        },
+        {
           content: 'delete',
           select: (ele) => {
             return ele.data('links')[0].delete();
@@ -1948,20 +1959,46 @@ window.PainlessContextMenu = class PainlessContextMenu {
     };
     this.cy.cxtmenu(node_variable_context_menu);
     this.cy.cxtmenu(node_link_context_menu);
+    this.cy.cxtmenu(node_link_attr_context_menu);
     this.cy.cxtmenu(node_concept_menu);
-    return this.cy.cxtmenu(node_constant_value_menu);
+    this.cy.cxtmenu(node_constant_value_menu);
+    return this.cy.cxtmenu(node_attr_range_menu);
   }
 
-  rename_var(ele) {
-    var container, div, keypresshandler, outclickhandler, question_mark;
+  rename_const(ele) {
+    var container, div, keypresshandler, outclickhandler, prevlabel;
+    prevlabel = ele.data('label');
+    ele.data('label', '');
     container = document.createElement(div);
-    question_mark = document.createElement('div');
-    question_mark.innerHTML = '?';
-    question_mark.style.display = 'inline-block';
-    container.appendChild(question_mark);
     div = document.createElement('div');
     div.innerHTML = ele.data('label').slice(1);
     div.style.display = 'inline-block';
+    outclickhandler = (event) => {
+      if (event.target !== div) {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    keypresshandler = (event) => {
+      if (event.key === 'Enter') {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    document.addEventListener('click', outclickhandler);
+    document.addEventListener('keypress', keypresshandler);
+    div.setAttribute('contenteditable', true);
+    container.appendChild(div);
     container.style.position = "absolute";
     container.id = "rename_div";
     container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
@@ -1972,8 +2009,28 @@ window.PainlessContextMenu = class PainlessContextMenu {
     container.style.borderRadius = '100px';
     container.style.fontFamily = 'Courier New';
     container.style.padding = '2px';
+    container.style.textAlign = 'center';
+    document.body.appendChild(container);
+    return div.focus();
+  }
+
+  rename_var(ele) {
+    var container, div, keypresshandler, outclickhandler, prevlabel, question_mark;
+    prevlabel = ele.data('label').slice(1);
+    ele.data('label', '');
+    container = document.createElement(div);
+    question_mark = document.createElement('div');
+    question_mark.innerHTML = '?';
+    question_mark.style.display = 'inline-block';
+    container.appendChild(question_mark);
+    div = document.createElement('div');
+    div.innerHTML = ele.data('label').slice(1);
+    div.style.display = 'inline-block';
     outclickhandler = (event) => {
       if (event.target !== div) {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
         ele.data('label', '?' + div.innerHTML);
         container.parentNode.removeChild(container);
         document.removeEventListener('click', outclickhandler);
@@ -1982,17 +2039,30 @@ window.PainlessContextMenu = class PainlessContextMenu {
     };
     keypresshandler = (event) => {
       if (event.key === 'Enter') {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
         ele.data('label', '?' + div.innerHTML);
         container.parentNode.removeChild(container);
         document.removeEventListener('click', outclickhandler);
-        document.removeEventListener('keypress', keypresshandler);
+        return document.removeEventListener('keypress', keypresshandler);
       }
-      return ele.data('label', '?' + div.innerHTML);
     };
     document.addEventListener('click', outclickhandler);
     document.addEventListener('keypress', keypresshandler);
     div.setAttribute('contenteditable', true);
     container.appendChild(div);
+    container.style.position = "absolute";
+    container.id = "rename_div";
+    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
+    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
+    container.style.backgroundColor = ele.data('color');
+    container.style.fontSize = 'xx-large';
+    container.style.color = '#fdf6e3';
+    container.style.borderRadius = '100px';
+    container.style.fontFamily = 'Courier New';
+    container.style.padding = '2px';
+    container.style.textAlign = 'center';
     document.body.appendChild(container);
     return div.focus();
   }
@@ -2166,7 +2236,8 @@ window.PainlessGraph = (function() {
         fit: false,
         refresh: 2,
         maxSimulationTime: 2000,
-        nodeDimensionsIncludeLabels: true
+        nodeDimensionsIncludeLabels: true,
+        edgeLength: 1
       }).run();
     }
 
@@ -2287,36 +2358,26 @@ window.PainlessGraph = (function() {
     }
 
     merge(node1, node2) {
-      var edge, i, len, ref;
+      var i, len, link, node_var1, node_var2, ref;
       /** merges node1 and node2, repositioning all node2's edges into node1 */
       this.save_state();
-      ref = node2.neighborhood('edge');
+      ref = node2.data('links');
       for (i = 0, len = ref.length; i < len; i++) {
-        edge = ref[i];
-        
-        // if this edge has node2 as target
-        if (edge.target().id() === node2.id()) {
-          this.cy.add({
-            group: 'edges',
-            data: {
-              source: edge.source().id(),
-              target: node1.id()
-            }
-          });
+        link = ref[i];
+        if (link.link_type === 'concept') {
+          //links.push(new PainlessLink(@cy, link.link_name, link.link_type, node_var1 = node1))
+          console.log('a');
+        } else {
+          if (link.node_var1 === node2 && link.node_var2 === node2) {
+            links.push(new PainlessLink(this.cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1));
+          } else if (link.node_var1 === node2) {
+            links.push(new PainlessLink(this.cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2));
+          } else {
+            links.push(new PainlessLink(this.cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1));
+          }
         }
-        // if this edge has node2 as source
-        if (edge.source().id() === node2.id()) {
-          this.cy.add({
-            group: 'edges',
-            data: {
-              source: node1.id(),
-              target: edge.target().id()
-            }
-          });
-        }
+        link.delete();
       }
-      // remove node2 with all its connected edges
-      this.sparql_text.remove_from_select_boxes(node2.id());
       return this.cy.remove(node2);
     }
 
@@ -3189,183 +3250,196 @@ module.exports = register;
 /******/ ]);
 });
 //_require constants.coffee
-window.PainlessLink = class PainlessLink {
-  constructor(cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) {
-    this.create_edge = this.create_edge.bind(this);
-    this.reverse = this.reverse.bind(this);
-    this.add_datatype = this.add_datatype.bind(this);
-    this.create_node = this.create_node.bind(this);
-    this.delete = this.delete.bind(this);
-    this.create_link = this.create_link.bind(this);
-    this.create_concept = this.create_concept.bind(this);
-    this.cy = cy;
-    this.link_name = link_name;
-    this.link_type = link_type;
-    this.node_var1 = node_var1;
-    this.node_var2 = node_var2;
-    this.edge_source = null;
-    this.edge_target = null;
-    this.datatype = datatype;
-    this.datatype_node = null;
-    if (link_type === 'concept') {
-      this.create_concept();
-    } else {
-      this.create_link();
-    }
-  }
+window.PainlessLink = (function() {
+  var color_index;
 
-  find_new_name(base_name = null) {
-    var i;
-    if (base_name === null) {
-      base_name = "x";
-    }
-    i = 0;
-    while (this.cy.getElementById(base_name + i).length !== 0) {
-      i += 1;
-    }
-    return base_name + i;
-  }
-
-  create_edge(node1, node2, classes = null) {
-    return this.cy.add({
-      group: 'edges',
-      data: {
-        source: node1.id(),
-        target: node2.id()
-      },
-      classes: classes
-    });
-  }
-
-  reverse() {
-    /** can only be applied to non-concept relationships */
-    if (this.source === this.node_var1) {
-      this.edge_source.classes('target-edge');
-      this.edge_target.classes('source-edge');
-      this.source = this.node_var2;
-      return this.target = this.node_var1;
-    } else {
-      this.edge_source.classes('source-edge');
-      this.edge_target.classes('target-edge');
-      this.source = this.node_var1;
-      return this.target = this.node_var2;
-    }
-  }
-
-  add_datatype(node, datatype) {
-    this.datatype_node = this.cy.add({
-      group: 'nodes',
-      data: {
-        label: datatype
-      },
-      classes: 'node-datatype'
-    });
-    return this.edge_datatype = this.cy.add({
-      group: 'edges',
-      data: {
-        source: node.id(),
-        target: this.datatype_node.id(),
-        weight: 99
-      },
-      classes: 'edge-datatype'
-    });
-  }
-
-  create_node(type, label = null) {
-    var data;
-    data = {};
-    if (type === 'node-variable') {
-      label = this.find_new_name(label);
-      data['id'] = label;
-      if (label.length === 2) {
-        data['color'] = '#' + palette[label.slice(-1) % palette.length];
+  class PainlessLink {
+    constructor(cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) {
+      this.create_edge = this.create_edge.bind(this);
+      this.reverse = this.reverse.bind(this);
+      this.add_datatype = this.add_datatype.bind(this);
+      this.create_node = this.create_node.bind(this);
+      this.delete = this.delete.bind(this);
+      this.create_link = this.create_link.bind(this);
+      this.create_concept = this.create_concept.bind(this);
+      this.cy = cy;
+      this.link_name = link_name;
+      this.link_type = link_type;
+      this.node_var1 = node_var1;
+      this.node_var2 = node_var2;
+      this.edge_source = null;
+      this.edge_target = null;
+      this.datatype = datatype;
+      this.datatype_node = null;
+      if (link_type === 'concept') {
+        this.create_concept();
       } else {
-        data['color'] = '#' + palette[Math.round(Math.random() * 100) % palette.length];
+        this.create_link();
       }
     }
-    if (type === 'node-concept') {
-      data['label'] = this.link_name;
-    } else if (type === 'node-attribute' || type === 'node-role') {
-      data['label'] = label;
-    } else {
-      data['label'] = '?' + label;
-    }
-    data['links'] = [this];
-    return this.cy.add({
-      group: 'nodes',
-      data: data,
-      classes: type
-    });
-  }
 
-  delete() {
-    var index, j, len, node_var, ref, results;
-    if (this.node_link !== null && this.node_link !== void 0) {
-      this.cy.remove(this.node_link);
+    find_new_name(base_name = null) {
+      var i;
+      if (base_name === null) {
+        base_name = "x";
+      }
+      i = 0;
+      while (this.cy.getElementById(base_name + i).length !== 0) {
+        i += 1;
+      }
+      return base_name + i;
     }
-    if (this.node_concept !== null && this.node_concept !== void 0) {
-      this.cy.remove(this.node_concept);
+
+    create_edge(node1, node2, classes = null) {
+      return this.cy.add({
+        group: 'edges',
+        data: {
+          source: node1.id(),
+          target: node2.id()
+        },
+        classes: classes
+      });
     }
-    if (this.datatype_node !== null && this.datatype_node !== void 0) {
-      this.cy.remove(this.datatype_node);
+
+    reverse() {
+      /** can only be applied to non-concept relationships */
+      if (this.source === this.node_var1) {
+        this.edge_source.classes('target-edge');
+        this.edge_target.classes('source-edge');
+        this.source = this.node_var2;
+        return this.target = this.node_var1;
+      } else {
+        this.edge_source.classes('source-edge');
+        this.edge_target.classes('target-edge');
+        this.source = this.node_var1;
+        return this.target = this.node_var2;
+      }
     }
-    ref = [this.node_var1, this.node_var2];
-    results = [];
-    for (j = 0, len = ref.length; j < len; j++) {
-      node_var = ref[j];
-      if (node_var !== null && node_var !== void 0) {
-        index = node_var.data('links').indexOf(this);
-        node_var.data('links').splice(index, 1);
-        if (node_var.data('links').length === 0) {
-          results.push(this.cy.remove(node_var));
+
+    add_datatype(node, datatype) {
+      this.datatype_node = this.cy.add({
+        group: 'nodes',
+        data: {
+          label: datatype
+        },
+        classes: 'node-datatype'
+      });
+      return this.edge_datatype = this.cy.add({
+        group: 'edges',
+        data: {
+          source: node.id(),
+          target: this.datatype_node.id(),
+          weight: 99
+        },
+        classes: 'edge-datatype'
+      });
+    }
+
+    create_node(type, label = null) {
+      var data;
+      data = {};
+      if (type === 'node-variable') {
+        label = this.find_new_name(label);
+        data['id'] = label;
+        data['color'] = '#' + palette[color_index % palette.length];
+        color_index += 1;
+      }
+      if (type === 'node-concept') {
+        data['label'] = this.link_name;
+      } else if (type === 'node-attribute' || type === 'node-role') {
+        data['label'] = label;
+      } else {
+        data['label'] = '?' + label;
+      }
+      data['links'] = [this];
+      return this.cy.add({
+        group: 'nodes',
+        data: data,
+        classes: type
+      });
+    }
+
+    delete() {
+      var index, j, len, node_var, ref, results;
+      if (this.node_link !== null && this.node_link !== void 0) {
+        this.cy.remove(this.node_link);
+      }
+      if (this.node_concept !== null && this.node_concept !== void 0) {
+        this.cy.remove(this.node_concept);
+      }
+      if (this.datatype_node !== null && this.datatype_node !== void 0) {
+        this.cy.remove(this.datatype_node);
+      }
+      ref = [this.node_var1, this.node_var2];
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        node_var = ref[j];
+        if (node_var !== null && node_var !== void 0) {
+          index = node_var.data('links').indexOf(this);
+          node_var.data('links').splice(index, 1);
+          if (node_var.data('links').length === 0) {
+            results.push(this.cy.remove(node_var));
+          } else {
+            results.push(void 0);
+          }
         } else {
           results.push(void 0);
         }
-      } else {
-        results.push(void 0);
       }
+      return results;
     }
-    return results;
-  }
 
-  create_link() {
-    if (this.node_var1 === null || this.node_var1 === void 0) {
-      this.node_var1 = this.create_node('node-variable');
-    } else {
-      this.node_var1.data('links').push(this);
-    }
-    if (this.node_var2 === null || this.node_var2 === void 0) {
-      if (this.link_type === 'attribute') {
-        this.node_var2 = this.create_node('node-variable', this.link_name);
-        if (this.datatype !== null && this.datatype !== void 0) {
-          this.add_datatype(this.node_var2, this.datatype);
+    create_link() {
+      if (this.node_var1 === null || this.node_var1 === void 0) {
+        this.node_var1 = this.create_node('node-variable');
+        this.node_var1.classes('node-variable node-variable-full-options');
+      } else if (this.node_var1.hasClass('attr-range')) {
+        console.warn('properties can\'t be added to the range of an attribute');
+        return;
+      } else {
+        this.node_var1.data('links').push(this);
+      }
+      if (this.node_var2 === null || this.node_var2 === void 0) {
+        if (this.link_type === 'attribute') {
+          this.node_var2 = this.create_node('node-variable', this.link_name);
+          this.node_var2.classes('node-variable attr-range');
+          if (this.datatype !== null && this.datatype !== void 0) {
+            this.add_datatype(this.node_var2, this.datatype);
+          }
+        } else {
+          this.node_var2 = this.create_node('node-variable');
+          this.node_var2.classes('node-variable node-variable-full-options');
         }
       } else {
-        this.node_var2 = this.create_node('node-variable');
+        this.node_var2.data('links').push(this);
       }
-    } else {
-      this.node_var2.data('links').push(this);
+      this.source = this.node_var1;
+      this.target = this.node_var2;
+      if (this.link_type === 'role') {
+        this.node_link = this.create_node('node-role', this.link_name);
+      } else {
+        this.node_link = this.create_node('node-attribute', this.link_name);
+      }
+      this.edge_source = this.create_edge(this.node_link, this.source, "source-edge");
+      return this.edge_target = this.create_edge(this.node_link, this.target, "target-edge");
     }
-    this.source = this.node_var1;
-    this.target = this.node_var2;
-    if (this.link_type === 'role') {
-      this.node_link = this.create_node('node-role', this.link_name);
-    } else {
-      this.node_link = this.create_node('node-attribute', this.link_name);
-    }
-    this.edge_source = this.create_edge(this.node_link, this.source, "source-edge");
-    return this.edge_target = this.create_edge(this.node_link, this.target, "target-edge");
-  }
 
-  create_concept() {
-    if (this.node_var1 === null) {
-      this.node_var1 = this.create_node('node-variable');
+    create_concept() {
+      if (this.node_var1 === null) {
+        this.node_var1 = this.create_node('node-variable');
+        this.node_var1.classes('node-variable node-variable-full-options');
+      }
+      this.node_concept = this.create_node('node-concept');
+      return this.create_edge(this.node_var1, this.node_concept);
     }
-    this.node_concept = this.create_node('node-concept');
-    return this.create_edge(this.node_var1, this.node_concept);
-  }
 
-};
+  };
+
+  color_index = 0;
+
+  return PainlessLink;
+
+}).call(this);
 
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor

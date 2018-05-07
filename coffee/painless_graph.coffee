@@ -31,7 +31,7 @@ class window.PainlessGraph
             refresh: 2
             maxSimulationTime: 2000
             nodeDimensionsIncludeLabels: true
-            
+            edgeLength: 1
         }).run()
 
 
@@ -121,30 +121,19 @@ class window.PainlessGraph
         ###* merges node1 and node2, repositioning all node2's edges into node1 ###
         @save_state()
 
-        for edge in node2.neighborhood('edge')
-        
-            # if this edge has node2 as target
-            if edge.target().id() == node2.id()
-                @cy.add({
-                    group: 'edges'
-                    data: {
-                        source: edge.source().id()
-                        target: node1.id()
-                    }
-                })
+        for link in node2.data('links')
+            if link.link_type == 'concept'
+                #links.push(new PainlessLink(@cy, link.link_name, link.link_type, node_var1 = node1))
+                console.log 'a'
+            else
+                if link.node_var1 == node2 and link.node_var2 == node2
+                    links.push(new PainlessLink(@cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
+                else if link.node_var1 == node2
+                    links.push(new PainlessLink(@cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
+                else links.push(new PainlessLink(@cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
+            
+            link.delete()
 
-            # if this edge has node2 as source
-            if edge.source().id() == node2.id()
-                @cy.add({
-                    group: 'edges'
-                    data: {
-                        source: node1.id()
-                        target: edge.target().id()
-                    }
-                })
-
-        # remove node2 with all its connected edges
-        @sparql_text.remove_from_select_boxes(node2.id())
         @cy.remove(node2) 
 
 

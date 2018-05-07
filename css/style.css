@@ -91,6 +91,8 @@
 #rename_div {
 	position: absolute;
 	z-index: 99999;
+	display: flex;
+	justify-content: center;
 }
 
 

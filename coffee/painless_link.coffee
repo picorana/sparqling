@@ -2,6 +2,8 @@
 
 class window.PainlessLink
 
+    color_index = 0
+
     constructor: (cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) ->
         @cy         = cy
 
@@ -79,10 +81,9 @@ class window.PainlessLink
             label = @find_new_name(label)
             data['id'] = label
             
-            if label.length == 2
-               data['color'] = '#' + palette[label.slice(-1) % palette.length]
-            else 
-                data['color'] = '#' + palette[Math.round(Math.random()*100) % palette.length]
+
+            data['color'] = '#' + palette[color_index % palette.length]
+            color_index += 1
         
         if type == 'node-concept' 
             data['label'] = @link_name
@@ -118,14 +119,21 @@ class window.PainlessLink
     create_link: =>
         if @node_var1 == null or @node_var1 == undefined
             @node_var1   = @create_node('node-variable')
+            @node_var1.classes('node-variable node-variable-full-options')
+        else if @node_var1.hasClass('attr-range') 
+            console.warn 'properties can\'t be added to the range of an attribute'
+            return 
         else @node_var1.data('links').push(@)
 
         if @node_var2 == null or @node_var2 == undefined
             if @link_type == 'attribute'
                 @node_var2   = @create_node('node-variable', @link_name)
+                @node_var2.classes('node-variable attr-range')
                 if @datatype != null and @datatype != undefined
                     @add_datatype(@node_var2, @datatype)
-            else @node_var2 = @create_node('node-variable')
+            else 
+                @node_var2 = @create_node('node-variable')
+                @node_var2.classes('node-variable node-variable-full-options')
         else @node_var2.data('links').push(@)
        
         @source = @node_var1
@@ -143,6 +151,7 @@ class window.PainlessLink
     create_concept: =>
         if @node_var1 == null
             @node_var1  = @create_node('node-variable')
+            @node_var1.classes('node-variable node-variable-full-options')
 
         @node_concept     = @create_node('node-concept')
         @create_edge(@node_var1, @node_concept)
