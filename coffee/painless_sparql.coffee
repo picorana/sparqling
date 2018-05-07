@@ -15,7 +15,6 @@ class window.PainlessSparql
         @menu = new window.PainlessMenu(this) 
 
     add_to_query: =>
-        console.log "hey"
         selected_node = @cy.nodes(":selected")
         
         if selected_node.length == 0
@@ -23,8 +22,17 @@ class window.PainlessSparql
         
         switch selected_node.data('type')
             when "role"         then @graph.add_link(selected_node.data('label'), 'role')
-            when "attribute"    then @graph.add_link(selected_node.data('label'), 'attribute')
+            when "attribute"    then @graph.add_link(selected_node.data('label'), 'attribute', @extract_datatype(selected_node))
             when "concept"      then @graph.add_link(selected_node.data('label'), 'concept')
+
+
+    extract_datatype: (inode) =>
+        for neighbor in inode.neighborhood('node')
+                if neighbor.data('type') == "range-restriction"
+                    for node in neighbor.neighborhood('node')
+                        if node.data('type') == "value-domain"
+                            return node.data('label')
+
 
     create_sidenav : =>
 

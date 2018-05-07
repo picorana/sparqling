@@ -2,7 +2,7 @@
 
 class window.PainlessLink
 
-    constructor: (cy, link_name, link_type, node_var1 = null, node_var2 = null) ->
+    constructor: (cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) ->
         @cy         = cy
 
         @link_name  = link_name
@@ -13,6 +13,9 @@ class window.PainlessLink
 
         @edge_source = null
         @edge_target = null
+
+        @datatype = datatype
+        @datatype_node = null
 
         if link_type == 'concept'
             @create_concept()
@@ -50,6 +53,22 @@ class window.PainlessLink
             @edge_target.classes('target-edge')
             @source = @node_var1
             @target = @node_var2
+
+
+    add_datatype: (node, datatype) =>
+        @datatype_node = @cy.add({
+            group: 'nodes'
+            data: {
+                label: datatype
+            }
+            classes: 'node-datatype'
+        })
+
+        @edge_datatype = @cy.add({
+            group: 'edges'
+            data: {source: node.id(), target: @datatype_node.id(), weight: 99}
+            classes: 'edge-datatype'
+        })
    
 
     create_node: (type, label = null) =>
@@ -62,7 +81,8 @@ class window.PainlessLink
             
             if label.length == 2
                data['color'] = '#' + palette[label.slice(-1) % palette.length]
-            else data['color'] = '#' + palette[Math.round(Math.random()*100) % palette.length]
+            else 
+                data['color'] = '#' + palette[Math.round(Math.random()*100) % palette.length]
         
         if type == 'node-concept' 
             data['label'] = @link_name
@@ -84,6 +104,8 @@ class window.PainlessLink
             @cy.remove(@node_link)
         if @node_concept != null and @node_concept != undefined
             @cy.remove(@node_concept)
+        if @datatype_node != null and @datatype_node != undefined
+            @cy.remove(@datatype_node)
         for node_var in [@node_var1, @node_var2]
             if node_var != null and node_var != undefined
                 index = node_var.data('links').indexOf(@)
@@ -101,6 +123,8 @@ class window.PainlessLink
         if @node_var2 == null or @node_var2 == undefined
             if @link_type == 'attribute'
                 @node_var2   = @create_node('node-variable', @link_name)
+                if @datatype != null and @datatype != undefined
+                    @add_datatype(@node_var2, @datatype)
             else @node_var2 = @create_node('node-variable')
         else @node_var2.data('links').push(@)
        

@@ -26,6 +26,10 @@ generate_style = ->
                 'target-arrow-shape' : 'square'
                 'target-arrow-color' : '#002b36'
             })
+        .selector('.edge-datatype')
+            .style({
+                'line-style' : 'dotted'
+            })
         .selector('.node-domain')
             .style({
                 'background-color' : '#002b36'
@@ -41,6 +45,17 @@ generate_style = ->
                 'border-color' : '#002b36'
                 'border-style' : 'solid'
                 'border-width' : '2px'
+                'width' : 15
+                'height' : 15
+            })
+        .selector('.node-datatype')
+            .style({
+                'shape' : 'ellipse'
+                'background-color' : '#93a1a1'
+                'content' : 'data(label)'
+                'text-valign' : 'center'
+                'font-family' : "Courier New";
+                'font-size' : '12'
                 'width' : 15
                 'height' : 15
             })

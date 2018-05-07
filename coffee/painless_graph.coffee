@@ -30,6 +30,8 @@ class window.PainlessGraph
             fit: false
             refresh: 2
             maxSimulationTime: 2000
+            nodeDimensionsIncludeLabels: true
+            
         }).run()
 
 
@@ -146,7 +148,7 @@ class window.PainlessGraph
         @cy.remove(node2) 
 
 
-    add_link: (link_name, link_type) =>
+    add_link: (link_name, link_type, datatype) =>
         ###* adds a new link in the graph. 
             links that are not concepts (roles and attributes) add a new variable into the graph.
             links are always added to the selected variable in the graph, if there are no selected variables,   
@@ -169,11 +171,11 @@ class window.PainlessGraph
         else
             if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
                 ###* if a var node is selected, the link is added to the var node and one new var node is created###
-                link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
+                link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"), null, datatype)
                 @sparql_text.add_to_select(link.node_var2.id())
             else 
                 ###* otherwise, two new var nodes are created ###
-                link = new PainlessLink(@cy, link_name, link_type)
+                link = new PainlessLink(@cy, link_name, link_type, null, null, datatype)
                 @sparql_text.add_to_select(link.node_var1.id())
                 @sparql_text.add_to_select(link.node_var2.id())
 
