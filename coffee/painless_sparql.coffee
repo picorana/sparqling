@@ -12,7 +12,9 @@ class window.PainlessSparql
 
     init : ->
         @create_sidenav()
-        @menu = new window.PainlessMenu(this) 
+        @sparql_text = @graph.sparql_text
+        @menu = new window.PainlessMenu(this)
+         
 
     add_to_query: =>
         selected_node = @cy.nodes(":selected")
@@ -28,10 +30,10 @@ class window.PainlessSparql
 
     extract_datatype: (inode) =>
         for neighbor in inode.neighborhood('node')
-                if neighbor.data('type') == "range-restriction"
-                    for node in neighbor.neighborhood('node')
-                        if node.data('type') == "value-domain"
-                            return node.data('label')
+            if neighbor.data('type') == "range-restriction"
+                for node in neighbor.neighborhood('node')
+                    if node.data('type') == "value-domain"
+                        return node.data('label')
 
 
     create_sidenav : =>

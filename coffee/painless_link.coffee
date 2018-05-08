@@ -4,8 +4,10 @@ class window.PainlessLink
 
     color_index = 0
 
-    constructor: (cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) ->
+    constructor: (context, cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) ->
         @cy         = cy
+        @context    = context
+        console.log @context
 
         @link_name  = link_name
         @link_type  = link_type
@@ -101,6 +103,11 @@ class window.PainlessLink
 
 
     delete: =>
+
+        index = @context.links.indexOf(this)
+        @context.links.splice(index, 1)
+        @context.sparql_text.update()
+
         if @node_link != null and @node_link != undefined
             @cy.remove(@node_link)
         if @node_concept != null and @node_concept != undefined
@@ -108,12 +115,20 @@ class window.PainlessLink
         if @datatype_node != null and @datatype_node != undefined
             @cy.remove(@datatype_node)
         for node_var in [@node_var1, @node_var2]
-            if node_var != null and node_var != undefined
+            if node_var != null and node_var != undefined    
+
                 index = node_var.data('links').indexOf(@)
                 node_var.data('links').splice(index, 1)
                 if node_var.data('links').length == 0
+                    console.log @context.sparql_text.select_boxes
+                    for i in [0 ... @context.sparql_text.select_boxes.length]
+                        if @context.sparql_text.select_boxes[i] == node_var.id()
+                            @context.sparql_text.select_boxes.splice(i, 1)
                     @cy.remove(node_var)
 
+                    
+
+        @context.sparql_text.update()
 
 
     create_link: =>
@@ -154,7 +169,7 @@ class window.PainlessLink
             @node_var1.classes('node-variable node-variable-full-options')
 
         @node_concept     = @create_node('node-concept')
-        @create_edge(@node_var1, @node_concept)
+        @create_edge(@node_var1, @node_concept, 'edge-concept')
             
 
 

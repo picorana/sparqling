@@ -5,6 +5,9 @@ class window.PainlessUtils
 
     generate_style: ->
         return new cytoscape.stylesheet()
+
+            ###* EDGES ###
+
             .selector('edge')
                 .style({
                     'curve-style': 'bezier'
@@ -13,6 +16,11 @@ class window.PainlessUtils
                     'target-endpoint' : 'outside-to-node'
                     'arrow-scale' : 1.5
                     'line-color' : '#839496'
+                    'font-family' : "Courier New"
+                    'font-size' : '10'
+                    'text-outline-color' : '#fdf6e3'
+                    'text-outline-width' : '2px'
+                    'color' : '#002b36'
                 })
             .selector('.source-edge')
                 .style({
@@ -29,6 +37,13 @@ class window.PainlessUtils
                 .style({
                     'line-style' : 'dotted'
                 })
+            .selector('.edge-concept')
+                .style({
+                    'content' : 'rdf:type'
+                })
+
+            ###* NODES ###
+
             .selector('node')
                 .style({
                     'background-color' : 'black',

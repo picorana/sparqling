@@ -28,7 +28,7 @@ class window.PainlessMenu
 
         nav_div.append(@create_div('▲', 'resize_button', null, => @change_size(80)))
         nav_div.append(@create_div('≡', 'resize_button', null, => @change_size(50)))
-        nav_div.append(@create_div('▼', 'resize_button', null, => @change_size(50)))
+        nav_div.append(@create_div('▼', 'resize_button', null, => @change_size(0)))
 
         return nav_div
         
@@ -42,12 +42,7 @@ class window.PainlessMenu
         menu.append(@create_navigation_div())
 
         menu.append(@create_div('undo',                 'menu_button', null, => @context.graph.undo()))
-        menu.append(@create_div('delete_node',          'menu_button', null, => @context.graph.delete_node()))
-        menu.append(@create_div('reverse_relationship', 'menu_button', null, => @context.graph.reverse_relationship()))
-        menu.append(@create_div('rename',               'menu_button', null, ###* TODO !! ###))
         menu.append(@create_div('center view',          'menu_button', null, => @context.graph.center_view()))
         menu.append(@create_div('copy to clipboard',    'menu_button', null, => @context.graph.copy_to_clipboard()))
-        menu.append(@create_div('add to select',        'menu_button', null, 
-            => @context.graph.add_to_select(@context.graph.cy.nodes(':selected').id()) ))
         menu.append(@create_div('filter',               'menu_button', null, 
             => @context.graph.sparql_text.add_filter(@context.graph.cy.nodes(':selected').id()) ))

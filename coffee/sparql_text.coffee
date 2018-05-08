@@ -13,6 +13,7 @@ class window.SparqlText
        div_sparql_text = document.getElementById('sparql_textbox')
        div_sparql_text.className = "unselectable"
 
+       @select_boxes = select_boxes
    
        @cy      = cy
        @links   = links
@@ -73,14 +74,14 @@ class window.SparqlText
         minicross.className = 'minicross'
         minicross.dataset.linkedhbox = st.id
         minicross.dataset.node_id = st.dataset.node_id
-        minicross.style.display = 'none'
+        minicross.style.visibility = 'hidden'
         minicross.onclick = ($) =>
             @remove_from_select_boxes(minicross.dataset.node_id)
         container.append(minicross)
         container.onmouseover = ($) ->
-            minicross.style.display = 'inline-block'
+            minicross.style.visibility = 'visible'
         container.onmouseout = ($) ->
-            minicross.style.display = 'none'
+            minicross.style.visibility = 'hidden'
 
         return container
 
@@ -132,7 +133,7 @@ class window.SparqlText
 
     update: =>
         div_sparql_text.innerHTML = ""
-        window.SimpleScrollbar.initEl(div_sparql_text)
+        #window.SimpleScrollbar.initEl(div_sparql_text)
         
         init_string = document.createElement('div')
         init_string.className = "init_string"
