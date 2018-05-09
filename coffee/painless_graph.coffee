@@ -4,7 +4,6 @@
 
 class window.PainlessGraph
     ###* manages the graph visualization
-        TODO: palette should be in constants
         TODO: hardcoded collision distance should be in constants
     ###
     
@@ -12,35 +11,55 @@ class window.PainlessGraph
     links           = []
 
 
-    constructor: ->
+    constructor: (context) ->
         ###*
         TODO: sparql_text should be managed by painless_sparql.coffee
         ###
+
+        @utils = new window.PainlessUtils()
+        @context = context
+
+        @links = links
+
         @init()
         @reshape()
        
         @sparql_text = new SparqlText(@cy, links)
         @sparql_text.update()
 
+        new window.PainlessContextMenu(@cy, this)
+
 
     reshape: =>
         ###* resets node positions in the graph view ###
-        #@cy.layout({
-            #name:'cola'
-            #fit: false
-            #refresh: 2
-            #maxSimulationTime: 2000
-            #avoidOverlap: false
-        #}).run()
+
+        #for node in @cy.nodes('.node-role')
+        #    node.neighborhood().layout({name: 'circle'}).run()
+
+        @cy.layout({
+            name:'cola'
+            fit: false
+            refresh: 2
+            maxSimulationTime: 2000
+            #nodeDimensionsIncludeLabels: true
+            edgeLength: 100
+            #flow: { axis: 'x', minSeparation: 30 }
+            avoidOverlap: true
+            nodeSpacing: 30
+        }).run()
 
 
-    center_view: =>
+    center_view: (ele = null) =>
         ###* 
         TODO: pan and center should actually be two different buttons!
         ###
-        if @cy.nodes(':selected').length > 0
-            @cy.center(@cy.nodes(':selected'))
-        else @cy.fit()
+
+        if ele == null
+            if @cy.nodes(':selected').length > 0
+                @cy.center(@cy.nodes(':selected'))
+            else @cy.fit()
+        else
+            @cy.center(ele)
 
 
     add_to_select: (node_id) =>
@@ -65,16 +84,9 @@ class window.PainlessGraph
             console.warn "no saved states"
         else
             @cy.json(state_buffer[state_buffer.length - 1])
-            @cy.style(generate_style())
+            @cy.style(@utils.generate_style())
             state_buffer.pop()
             @reshape()
-
-
-    cleanup_unlinked_variables: =>
-        for node in @cy.nodes('.node-variable')
-            if node.neighborhood('node').length == 0
-                @cy.remove(node)
-                @sparql_text.remove_from_select_boxes(node.id())
 
 
     reverse_relationship: =>
@@ -90,60 +102,27 @@ class window.PainlessGraph
         else console.warn 'this action cannot be performed on the selected node'
 
 
-    delete_node: =>
-        @save_state()
-
-        for node in @cy.nodes(':selected')
-            if node.hasClass('node-variable')
-                for node2 in node.neighborhood('node')
-                    for node3 in node2.neighborhood('node')
-                        for node4 in node3.neighborhood('node')
-                            @cy.remove(node4)
-                        @cy.remove(node3)
-                    @cy.remove(node2) 
-                @cy.remove(node)
-                @sparql_text.remove_from_select_boxes(node.id())
-            if node.hasClass('node-attribute')
-                for node2 in node.neighborhood('node')
-                    @cy.remove(node2)
-                @cy.remove(node)
-        
-        @cleanup_unlinked_variables()
-        @reshape()
-
 
     merge: (node1, node2) ->
         ###* merges node1 and node2, repositioning all node2's edges into node1 ###
         @save_state()
 
-        for edge in node2.neighborhood('edge')
-        
-            # if this edge has node2 as target
-            if edge.target().id() == node2.id()
-                @cy.add({
-                    group: 'edges'
-                    data: {
-                        source: edge.source().id()
-                        target: node1.id()
-                    }
-                })
+        for link in node2.data('links')
+            if link.link_type == 'concept'
+                links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
+            else
+                if link.node_var1 == node2 and link.node_var2 == node2
+                    links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
+                else if link.node_var1 == node2
+                    links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
+                else links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
+            
+            link.delete()
 
-            # if this edge has node2 as source
-            if edge.source().id() == node2.id()
-                @cy.add({
-                    group: 'edges'
-                    data: {
-                        source: node1.id()
-                        target: edge.target().id()
-                    }
-                })
-
-        # remove node2 with all its connected edges
-        @sparql_text.remove_from_select_boxes(node2.id())
         @cy.remove(node2) 
 
 
-    add_link: (link_name, link_type) =>
+    add_link: (link_name, link_type, datatype) =>
         ###* adds a new link in the graph. 
             links that are not concepts (roles and attributes) add a new variable into the graph.
             links are always added to the selected variable in the graph, if there are no selected variables,   
@@ -159,18 +138,18 @@ class window.PainlessGraph
         @save_state()
         if link_type == 'concept'
             if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
-                link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
+                link = new PainlessLink(this, @cy, link_name, link_type, @cy.nodes(":selected"))
             else
-                link = new PainlessLink(@cy, link_name, link_type)
+                link = new PainlessLink(this, @cy, link_name, link_type)
                 @sparql_text.add_to_select(link.node_var1.id())
         else
             if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')
                 ###* if a var node is selected, the link is added to the var node and one new var node is created###
-                link = new PainlessLink(@cy, link_name, link_type, @cy.nodes(":selected"))
+                link = new PainlessLink(this, @cy, link_name, link_type, @cy.nodes(":selected"), null, datatype)
                 @sparql_text.add_to_select(link.node_var2.id())
             else 
                 ###* otherwise, two new var nodes are created ###
-                link = new PainlessLink(@cy, link_name, link_type)
+                link = new PainlessLink(this, @cy, link_name, link_type, null, null, datatype)
                 @sparql_text.add_to_select(link.node_var1.id())
                 @sparql_text.add_to_select(link.node_var2.id())
 
@@ -205,9 +184,10 @@ class window.PainlessGraph
  
     
     init: =>
+
         @cy = new cytoscape(
             container: document.getElementById("query_canvas"),
-            style: generate_style()
+            style: @utils.generate_style()
             wheelSensitivity: 0.5
         )
 

@@ -27,16 +27,16 @@
 *	---
 */
 #sidenav {
+	display: inline-block;
 	height: 100%; 
 	width: 50%; 
 	position: fixed; 
-	z-index: 1; 
+	z-index: 2; 
 	top: 0; 
 	right: 0; 
 	background-color: #002b36;
-	overflow-x: hidden;
-    overflow-y: hidden; 
-	transition: 0.5s;
+    /*overflow-y: hidden; */
+	transition: 0.1s;
 }
 
 
@@ -46,6 +46,31 @@
     vertical-align: middle;
 }
 
+
+#add_to_query_button {
+	position: absolute;
+	cursor: pointer;
+	left: -60px;
+	bottom: 65px;
+	width: 50px;
+	background-color: #fdf6e3;
+	border-radius: 50px;
+	font-size: xx-small;
+	font-family: "Courier New";
+	border-color: #002b36;
+	z-index: 3;
+}
+
+
+#add_to_query::hover{
+	cursor: grab;
+}
+
+.cxtmenu-content{
+    font-size: xx-small;
+    font-family: "Courier New";
+}
+
 /* 	
 *	--- 
 * 	GRAPH CANVAS 
@@ -53,14 +78,22 @@
 */
 #query_canvas {
 	position: absolute;
-	width: 100%;
-	height: 50%;
+	width: 98%;
+	height: 60%;
     z-index: 2;
 	margin: 1%;
+	right: 0%;
     bottom: 0%;
 	border-radius: 10px;
     transition: 0.5s;
-	background-color: #fdf6e3; 
+	background-color: #fdf6e3;
+}
+
+#rename_div {
+	position: absolute;
+	z-index: 99999;
+	display: flex;
+	justify-content: center;
 }
 
 
@@ -81,9 +114,12 @@
 }
 
 .menu_button {
+	display: inline-block;
 	background-color: #93a1a1;
 	color: #073642;
 	margin: 2px;
+	cursor: pointer;
+	padding: 2px;
 	border-radius: 10px;
     border: none;
     font-size: x-small;
@@ -168,6 +204,7 @@
 
 .q_line {
     display: table;
+	vertical-align: middle;
 }
 
 .init_string > div {
@@ -180,7 +217,18 @@
 
 .q_line > div {
     display: inline-block;
+	vertical-align: inherit;
+}
 
+.filter_condition_container {
+	display: inline-block;
+	padding: 3px;
+	background-color: #666;
+	border-radius: 10px;
+}
+
+.filter_condition_container > div, .filter_condition_container > div > div {
+	display: inline-block;
 }
 
 /* 	
@@ -205,7 +253,7 @@
 */
 .slidecontainer {
 	z-index: 1;
-	bottom: 5%;
+	bottom: 2%;
 	width: 100%;
 	position: fixed;
 	pointer-events: none;
@@ -224,37 +272,41 @@ input::-moz-focus-inner, input::-moz-focus-outer {
 
 .slider {
     -webkit-appearance: none;
+	appearance: none;
     width: 100%;
     border-radius: 5px;  
     outline: none;
-    transition: .2s;
-	-webkit-transition: .2s;
-    transition: opacity .2s;
+	background: transparent;
 }
 
-.slider::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none;
 	pointer-events: auto;
     appearance: none;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%; 
-    background: #002b36;
+    width: 160px;
+    height: 50px;
+    border-radius: 50%;
+	/*background: #cccccc;*/
+    background: url('../res/slider_thumb_long.svg') left no-repeat;
+	background-size: 160px 50px;
+	background-position: 0px 0px;
     cursor: pointer;
-	border: none;
 	transition: all ease-in-out 0.5s;
 }
 
 .slider::-moz-range-thumb {
 	pointer-events: auto;
-    width: 25px;
-    height: 25px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-	background: #002b36;
+	background: url('../res/slider_thumb_long.svg') center no-repeat;
+	background-size: 80px 80px;
+	background-position: 0px 0px;
     cursor: pointer;
 	border: none;
 	transition: all ease-in-out 0.5s;
 }
+
 
 /* 	
 *	--- 

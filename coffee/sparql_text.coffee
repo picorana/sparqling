@@ -1,3 +1,5 @@
+#_require query_filter.coffee
+
 class window.SparqlText
 
     select_boxes        = []
@@ -11,9 +13,11 @@ class window.SparqlText
        div_sparql_text = document.getElementById('sparql_textbox')
        div_sparql_text.className = "unselectable"
 
+       @select_boxes = select_boxes
    
        @cy      = cy
        @links   = links
+       @filters = []
 
 
     add_to_select: (id) ->
@@ -33,14 +37,10 @@ class window.SparqlText
             if select_boxes[i] == st.dataset.prevname
                 select_boxes[i] = st.innerHTML.substr(i)
         node.data('label', st.innerHTML.substr(1))
-        console.log st.innerHTML
-
-
-    create_highlighting_box_2: ->
-        return null
 
 
     create_highlighting_box: (node) =>
+
         ###* creates a box in the sparql text that helps locate in the graph where the node is ###
         container = document.createElement('div')
         container.className = 'highlighting_box_container'
@@ -64,7 +64,7 @@ class window.SparqlText
         st.onclick = ($) =>
             @cy.nodes().unselect()
             node.select()
-        st.innerHTML = "?" + node.data('label')
+        st.innerHTML = node.data('label')
         st.style.backgroundColor = node.data('color')
         
         container.append(st)
@@ -74,14 +74,14 @@ class window.SparqlText
         minicross.className = 'minicross'
         minicross.dataset.linkedhbox = st.id
         minicross.dataset.node_id = st.dataset.node_id
-        minicross.style.display = 'none'
+        minicross.style.visibility = 'hidden'
         minicross.onclick = ($) =>
             @remove_from_select_boxes(minicross.dataset.node_id)
         container.append(minicross)
         container.onmouseover = ($) ->
-            minicross.style.display = 'inline-block'
+            minicross.style.visibility = 'visible'
         container.onmouseout = ($) ->
-            minicross.style.display = 'none'
+            minicross.style.visibility = 'hidden'
 
         return container
 
@@ -126,27 +126,9 @@ class window.SparqlText
         document.body.removeChild(tmp_div)
 
 
-    create_query_line: (link) =>
-
-        q_line = document.createElement('div')
-
-        if link.link_type == 'concept'
-            q_line.append(@create_highlighting_box(link.node_var1))
-            f = document.createElement("div")
-            f.innerHTML = ("&nbsp;rdf:type " + link.node_concept.data('label') + " .")
-            q_line.append(f)
-            q_line.append(document.createElement('br'))
-
-        else
-            q_line.append(@create_highlighting_box(link.source))
-            q_line.append(@create_highlighting_box(link.node_link))
-            q_line.append(@create_highlighting_box(link.target))
-            f = document.createElement("div")
-            f.innerHTML = " ."
-            q_line.append(f)
-
-        q_line.className = 'q_line'
-        return q_line
+    add_filter: (node_id) =>
+        @filters.push(new window.QueryFilter(node_id))
+        @update()
 
 
     update: =>
@@ -166,8 +148,9 @@ class window.SparqlText
 
             count = 0
             for elem in select_boxes
-                s_line.append(@create_highlighting_box(@cy.getElementById(elem)))
-                count += 1
+                if @cy.getElementById(elem).id() != undefined
+                    s_line.append(@create_highlighting_box(@cy.getElementById(elem)))
+                    count += 1
 
         select_div = document.createElement('div')
         select_div.innerHTML = "Select "
@@ -183,10 +166,15 @@ class window.SparqlText
         div_sparql_text.append(init_string)
        
         for link in @links
-            div_sparql_text.append(@create_query_line(link))
+            query_line = new window.QueryLine(link, this)
+            div_sparql_text.append(query_line.to_html())
 
+        for filter in @filters
+            div_sparql_text.append(filter.to_html())
+        
         f_string = document.createElement('div')
         f_string.innerHTML = '}'
         div_sparql_text.append(f_string)
+
 
         dragula([s_line])
