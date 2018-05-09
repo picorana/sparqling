@@ -37,10 +37,10 @@ class window.SparqlText
             if select_boxes[i] == st.dataset.prevname
                 select_boxes[i] = st.innerHTML.substr(i)
         node.data('label', st.innerHTML.substr(1))
-        console.log st.innerHTML
 
 
     create_highlighting_box: (node) =>
+
         ###* creates a box in the sparql text that helps locate in the graph where the node is ###
         container = document.createElement('div')
         container.className = 'highlighting_box_container'
@@ -133,7 +133,6 @@ class window.SparqlText
 
     update: =>
         div_sparql_text.innerHTML = ""
-        #window.SimpleScrollbar.initEl(div_sparql_text)
         
         init_string = document.createElement('div')
         init_string.className = "init_string"
@@ -149,8 +148,9 @@ class window.SparqlText
 
             count = 0
             for elem in select_boxes
-                s_line.append(@create_highlighting_box(@cy.getElementById(elem)))
-                count += 1
+                if @cy.getElementById(elem).id() != undefined
+                    s_line.append(@create_highlighting_box(@cy.getElementById(elem)))
+                    count += 1
 
         select_div = document.createElement('div')
         select_div.innerHTML = "Select "

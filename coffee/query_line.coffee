@@ -16,7 +16,6 @@ class window.QueryLine
             f.innerHTML = ("&nbsp;rdf:type " + @link.node_concept.data('label') + " .")
             
             q_line.append(f)
-            q_line.append(document.createElement('br'))
 
         else
             q_line.append(@create_highlighting_box(@link.source))
@@ -33,16 +32,17 @@ class window.QueryLine
         button_div = document.createElement('div')
         button_div.style.visibility = 'hidden'
 
-        reverse_button = document.createElement('div')
-        reverse_button.innerHTML = '🔄'
-        reverse_button.style.color = '#ADD8E6'
-        reverse_button.style.fontSize = 'large'
-        reverse_button.style.marginLeft = '8px'
-        reverse_button.style.display = 'inline-block'
-        reverse_button.onclick = () =>
-            @link.reverse()
-            @sparql_text.update()
-        button_div.append(reverse_button)
+        if @link.link_type != 'concept'
+            reverse_button = document.createElement('div')
+            reverse_button.innerHTML = '🔄'
+            reverse_button.style.color = '#ADD8E6'
+            reverse_button.style.fontSize = 'large'
+            reverse_button.style.marginLeft = '8px'
+            reverse_button.style.display = 'inline-block'
+            reverse_button.onclick = () =>
+                @link.reverse()
+                @sparql_text.update()
+            button_div.append(reverse_button)
 
         remove_button = document.createElement('div')
         remove_button.innerHTML = '❎'

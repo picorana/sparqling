@@ -83,7 +83,6 @@ class window.PainlessLink
             label = @find_new_name(label)
             data['id'] = label
             
-
             data['color'] = '#' + palette[color_index % palette.length]
             color_index += 1
         
@@ -164,9 +163,11 @@ class window.PainlessLink
        
 
     create_concept: =>
-        if @node_var1 == null
+        if @node_var1 == null or @node_var1 == undefined
             @node_var1  = @create_node('node-variable')
             @node_var1.classes('node-variable node-variable-full-options')
+
+        @node_var1.data('links').push(@) 
 
         @node_concept     = @create_node('node-concept')
         @create_edge(@node_var1, @node_concept, 'edge-concept')

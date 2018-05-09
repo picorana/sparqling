@@ -2331,15 +2331,14 @@ window.PainlessGraph = (function() {
       for (i = 0, len = ref.length; i < len; i++) {
         link = ref[i];
         if (link.link_type === 'concept') {
-          //links.push(new PainlessLink(@cy, link.link_name, link.link_type, node_var1 = node1))
-          console.log('a');
+          links.push(new PainlessLink(this, this.cy, link.link_name, link.link_type, node_var1 = node1));
         } else {
           if (link.node_var1 === node2 && link.node_var2 === node2) {
-            links.push(new PainlessLink(this.cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1));
+            links.push(new PainlessLink(this, this.cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1));
           } else if (link.node_var1 === node2) {
-            links.push(new PainlessLink(this.cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2));
+            links.push(new PainlessLink(this, this.cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2));
           } else {
-            links.push(new PainlessLink(this.cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1));
+            links.push(new PainlessLink(this, this.cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1));
           }
         }
         link.delete();
@@ -3397,10 +3396,11 @@ window.PainlessLink = (function() {
     }
 
     create_concept() {
-      if (this.node_var1 === null) {
+      if (this.node_var1 === null || this.node_var1 === void 0) {
         this.node_var1 = this.create_node('node-variable');
         this.node_var1.classes('node-variable node-variable-full-options');
       }
+      this.node_var1.data('links').push(this);
       this.node_concept = this.create_node('node-concept');
       return this.create_edge(this.node_var1, this.node_concept, 'edge-concept');
     }
@@ -3495,7 +3495,8 @@ window.PainlessSparql = (function() {
     init() {
       this.create_sidenav();
       this.sparql_text = this.graph.sparql_text;
-      return this.menu = new window.PainlessMenu(this);
+      this.menu = new window.PainlessMenu(this);
+      return this.add_event_listener();
     }
 
     add_to_query() {
@@ -3566,7 +3567,6 @@ window.PainlessSparql = (function() {
       slider_range.className = 'slider';
       slider.appendChild(slider_range);
       slider_range.oninput = function(s) {
-        console.log(this.getBoundingClientRect());
         side_nav.style.width = (document.documentElement.clientWidth * (100 - this.value)) / 100 + "px";
         return setTimeout(() => {
           return this.graph.cy.resize();
@@ -3592,7 +3592,7 @@ window.PainlessSparql = (function() {
 
       //@close_nav()
       } else if (event.key === "d") {
-        return console.log(this.cy.nodes(":selected").data('type'));
+        return console.log(this.graph.cy.nodes(":selected").data('links'));
       }
     }
 
@@ -3673,7 +3673,6 @@ window.QueryLine = class QueryLine {
       f = document.createElement("div");
       f.innerHTML = "&nbsp;rdf:type " + this.link.node_concept.data('label') + " .";
       q_line.append(f);
-      q_line.append(document.createElement('br'));
     } else {
       q_line.append(this.create_highlighting_box(this.link.source));
       link_div = document.createElement('div');
@@ -3686,17 +3685,19 @@ window.QueryLine = class QueryLine {
     }
     button_div = document.createElement('div');
     button_div.style.visibility = 'hidden';
-    reverse_button = document.createElement('div');
-    reverse_button.innerHTML = '🔄';
-    reverse_button.style.color = '#ADD8E6';
-    reverse_button.style.fontSize = 'large';
-    reverse_button.style.marginLeft = '8px';
-    reverse_button.style.display = 'inline-block';
-    reverse_button.onclick = () => {
-      this.link.reverse();
-      return this.sparql_text.update();
-    };
-    button_div.append(reverse_button);
+    if (this.link.link_type !== 'concept') {
+      reverse_button = document.createElement('div');
+      reverse_button.innerHTML = '🔄';
+      reverse_button.style.color = '#ADD8E6';
+      reverse_button.style.fontSize = 'large';
+      reverse_button.style.marginLeft = '8px';
+      reverse_button.style.display = 'inline-block';
+      reverse_button.onclick = () => {
+        this.link.reverse();
+        return this.sparql_text.update();
+      };
+      button_div.append(reverse_button);
+    }
     remove_button = document.createElement('div');
     remove_button.innerHTML = '❎';
     remove_button.style.color = '#F08080';
@@ -3795,8 +3796,7 @@ window.SparqlText = (function() {
           select_boxes[i] = st.innerHTML.substr(i);
         }
       }
-      node.data('label', st.innerHTML.substr(1));
-      return console.log(st.innerHTML);
+      return node.data('label', st.innerHTML.substr(1));
     }
 
     create_highlighting_box(node) {
@@ -3912,7 +3912,6 @@ window.SparqlText = (function() {
     update() {
       var count, elem, f_string, filter, init_string, j, k, l, len, len1, len2, link, query_line, ref, ref1, s_line, select_div, select_div_f;
       div_sparql_text.innerHTML = "";
-      //window.SimpleScrollbar.initEl(div_sparql_text)
       init_string = document.createElement('div');
       init_string.className = "init_string";
       s_line = document.createElement('div');
@@ -3924,8 +3923,10 @@ window.SparqlText = (function() {
         count = 0;
         for (j = 0, len = select_boxes.length; j < len; j++) {
           elem = select_boxes[j];
-          s_line.append(this.create_highlighting_box(this.cy.getElementById(elem)));
-          count += 1;
+          if (this.cy.getElementById(elem).id() !== void 0) {
+            s_line.append(this.create_highlighting_box(this.cy.getElementById(elem)));
+            count += 1;
+          }
         }
       }
       select_div = document.createElement('div');

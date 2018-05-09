@@ -14,7 +14,8 @@ class window.PainlessSparql
         @create_sidenav()
         @sparql_text = @graph.sparql_text
         @menu = new window.PainlessMenu(this)
-         
+        @add_event_listener()
+
 
     add_to_query: =>
         selected_node = @cy.nodes(":selected")
@@ -76,7 +77,6 @@ class window.PainlessSparql
         slider_range.className = 'slider'
         slider.appendChild(slider_range)
         slider_range.oninput = (s) ->
-            console.log this.getBoundingClientRect()
             side_nav.style.width = (document.documentElement.clientWidth * (100-this.value))/100 + "px"
             setTimeout(()=> 
                 @graph.cy.resize()
@@ -100,7 +100,7 @@ class window.PainlessSparql
             #@close_nav()
         
         else if event.key == "d"
-            console.log @cy.nodes(":selected").data('type')
+            console.log @graph.cy.nodes(":selected").data('links')
 
 
     add_event_listener : ->
