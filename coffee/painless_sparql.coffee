@@ -76,13 +76,18 @@ class window.PainlessSparql
         slider_range.step = 0.5
         slider_range.className = 'slider'
         slider.appendChild(slider_range)
+
+        slider_val = 50
         slider_range.oninput = (s) ->
-            side_nav.style.width = (document.documentElement.clientWidth * (100-this.value))/100 + "px"
+            slider_val = this.value
+            console.log slider_val
+        slider_range.onmousemove = slider_range.onmouseup = () =>
+            side_nav.style.width = (document.documentElement.clientWidth * (100-slider_val))/100 + "px"
             setTimeout(()=> 
                 @graph.cy.resize()
             , 550)
         document.body.appendChild(slider)
-    
+
 
     open_nav : -> 
         document.getElementById("sidenav").style.width = "50%";

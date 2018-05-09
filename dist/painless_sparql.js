@@ -3533,7 +3533,7 @@ window.PainlessSparql = (function() {
     }
 
     create_sidenav() {
-      var button, side_nav, side_nav_container, slider, slider_range, sparql_textbox;
+      var button, side_nav, side_nav_container, slider, slider_range, slider_val, sparql_textbox;
       side_nav_container = document.createElement("div");
       side_nav_container.id = "sidenav_container";
       document.body.appendChild(side_nav_container);
@@ -3566,8 +3566,13 @@ window.PainlessSparql = (function() {
       slider_range.step = 0.5;
       slider_range.className = 'slider';
       slider.appendChild(slider_range);
+      slider_val = 50;
       slider_range.oninput = function(s) {
-        side_nav.style.width = (document.documentElement.clientWidth * (100 - this.value)) / 100 + "px";
+        slider_val = this.value;
+        return console.log(slider_val);
+      };
+      slider_range.onmousemove = slider_range.onmouseup = () => {
+        side_nav.style.width = (document.documentElement.clientWidth * (100 - slider_val)) / 100 + "px";
         return setTimeout(() => {
           return this.graph.cy.resize();
         }, 550);
