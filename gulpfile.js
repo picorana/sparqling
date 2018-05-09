@@ -9,7 +9,6 @@ gulp.task("build", function() {
   var j = gulp.src([
     "./node_modules/dragula/dist/dragula.js",
     "./node_modules/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js",
-    "./node_modules/cytoscape-cola/cytoscape-cola.js",
     "./node_modules/simple-scrollbar/simple-scrollbar.js",
     "./node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js",
     "./node_modules/tinycolor2/dist/tinycolor-min.js"
@@ -25,7 +24,6 @@ gulp.task("compress", function() {
   var j = gulp.src([
     "./node_modules/dragula/dist/dragula.js",
     "./node_modules/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js",
-    "./node_modules/cytoscape-cola/cytoscape-cola.js",
     "./node_modules/simple-scrollbar/simple-scrollbar.js",
     "./node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js",
     "./node_modules/tinycolor2/dist/tinycolor-min.js"
