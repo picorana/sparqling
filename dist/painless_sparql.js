@@ -1863,6 +1863,12 @@ window.PainlessContextMenu = class PainlessContextMenu {
           select: (ele) => {
             return this.rename_var(ele);
           }
+        },
+        {
+          content: 'filter',
+          select: (ele) => {
+            return this.context.sparql_text.add_filter(ele.id());
+          }
         }
       ]
     };
@@ -3428,7 +3434,7 @@ window.PainlessMenu = class PainlessMenu {
 
   change_size(query_canvas_size) {
     this.context.query_canvas.style.height = query_canvas_size + "%";
-    sparql_textbox.style.height = (100 - 20 - query_canvas_size) + "%";
+    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
     return setTimeout(() => {
       return this.context.graph.cy.resize();
     }, 550);
@@ -3448,10 +3454,10 @@ window.PainlessMenu = class PainlessMenu {
     var nav_div;
     nav_div = this.create_div(null, null, 'nav_div');
     nav_div.append(this.create_div('▲', 'resize_button', null, () => {
-      return this.change_size(80);
+      return this.change_size(90);
     }));
     nav_div.append(this.create_div('≡', 'resize_button', null, () => {
-      return this.change_size(50);
+      return this.change_size(60);
     }));
     nav_div.append(this.create_div('▼', 'resize_button', null, () => {
       return this.change_size(0);
@@ -3470,11 +3476,8 @@ window.PainlessMenu = class PainlessMenu {
     menu.append(this.create_div('center view', 'menu_button', null, () => {
       return this.context.graph.center_view();
     }));
-    menu.append(this.create_div('copy to clipboard', 'menu_button', null, () => {
+    return menu.append(this.create_div('copy to clipboard', 'menu_button', null, () => {
       return this.context.graph.copy_to_clipboard();
-    }));
-    return menu.append(this.create_div('filter', 'menu_button', null, () => {
-      return this.context.graph.sparql_text.add_filter(this.context.graph.cy.nodes(':selected').id());
     }));
   }
 
