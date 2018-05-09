@@ -36,6 +36,7 @@ class window.PainlessGraph
         #for node in @cy.nodes('.node-role')
         #    node.neighborhood().layout({name: 'circle'}).run()
 
+        ###*
         @cy.layout({
             name:'cola'
             fit: false
@@ -46,6 +47,10 @@ class window.PainlessGraph
             #flow: { axis: 'x', minSeparation: 30 }
             avoidOverlap: true
             nodeSpacing: 30
+        }).run()
+        ###
+        @cy.layout({
+            name:'cose-bilkent'
         }).run()
 
 
