@@ -1,7 +1,6 @@
 class window.PainlessSparql
 
     @graph = null
-   
  
     constructor: (graph) ->
         @graph = graph
@@ -106,6 +105,11 @@ class window.PainlessSparql
         
         else if event.key == "d"
             console.log @graph.cy.nodes(":selected").data('links')
+
+        else if event.key == "l"
+            @graph.layout_index += 1
+            @graph.reshape()
+            console.log @graph.layout
 
 
     add_event_listener : ->

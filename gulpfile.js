@@ -11,7 +11,8 @@ gulp.task("build", function() {
     "./node_modules/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js",
     "./node_modules/simple-scrollbar/simple-scrollbar.js",
     "./node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js",
-    "./node_modules/tinycolor2/dist/tinycolor-min.js"
+    "./node_modules/tinycolor2/dist/tinycolor-min.js",
+    "./node_modules/cytoscape-dagre/cytoscape-dagre.js"
   ]);
 
   merge2([j, c])
@@ -26,7 +27,8 @@ gulp.task("compress", function() {
     "./node_modules/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js",
     "./node_modules/simple-scrollbar/simple-scrollbar.js",
     "./node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js",
-    "./node_modules/tinycolor2/dist/tinycolor-min.js"
+    "./node_modules/tinycolor2/dist/tinycolor-min.js",
+    "./node_modules/cytoscape-dagre/cytoscape-dagre.js"
   ]);
 
   merge2([j, c])

@@ -21,6 +21,9 @@ class window.PainlessGraph
 
         @links = links
 
+        @layout_names   = ['cose-bilkent', 'circle', 'cose', 'grid', 'breadthfirst', 'concentric']
+        @layout_index   = 0
+
         @init()
         @reshape()
        
@@ -29,6 +32,7 @@ class window.PainlessGraph
 
         new window.PainlessContextMenu(@cy, this)
 
+        
 
     reshape: =>
         ###* resets node positions in the graph view ###
@@ -49,9 +53,11 @@ class window.PainlessGraph
             nodeSpacing: 30
         }).run()
         ###
+        @layout = @layout_names[@layout_index % @layout_names.length]
         @cy.layout({
-            name:'cose-bilkent'
+            name: @layout
             fit: false
+            animate: true
         }).run()
 
 
