@@ -1084,308 +1084,6 @@ window.PainlessUtils = class PainlessUtils {
 
 };
 
-/*!
-Copyright (c) The Cytoscape Consortium
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the “Software”), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-;(function(){ 'use strict';
-
-  // registers the extension on a cytoscape lib ref
-  var register = function( cytoscape, Springy ){
-    if( !cytoscape || !Springy ){ return; } // can't register if cytoscape unspecified
-
-    var defaults = {
-      animate: true, // whether to show the layout as it's running
-      maxSimulationTime: 4000, // max length in ms to run the layout
-      ungrabifyWhileSimulating: false, // so you can't drag nodes during layout
-      fit: true, // whether to fit the viewport to the graph
-      padding: 30, // padding on fit
-      boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      randomize: false, // whether to use random initial positions
-      infinite: false, // overrides all other options for a forces-all-the-time mode
-      ready: undefined, // callback on layoutready
-      stop: undefined, // callback on layoutstop
-
-      // springy forces and config
-      stiffness: 400,
-      repulsion: 400,
-      damping: 0.5,
-      edgeLength: function( edge ){
-        var length = edge.data('length');
-
-        if( length !== undefined && !isNaN(length) ){
-          return length;
-        }
-      }
-    };
-
-    function SpringyLayout( options ){
-      var opts = this.options = {};
-      for( var i in defaults ){ opts[i] = defaults[i]; }
-      for( var i in options ){ opts[i] = options[i]; }
-    }
-
-    SpringyLayout.prototype.run = function(){
-      var layout = this;
-      var self = this;
-      var options = this.options;
-
-      options.random = options.randomize; // backwards compatibility
-
-      var simUpdatingPos = false;
-
-      var cy = options.cy;
-      layout.trigger({ type: 'layoutstart', layout: layout });
-
-      var eles = options.eles;
-      var nodes = eles.nodes().not(':parent');
-      var edges = eles.edges();
-
-      var bb = options.boundingBox || { x1: 0, y1: 0, w: cy.width(), h: cy.height() };
-      if( bb.x2 === undefined ){ bb.x2 = bb.x1 + bb.w; }
-      if( bb.w === undefined ){ bb.w = bb.x2 - bb.x1; }
-      if( bb.y2 === undefined ){ bb.y2 = bb.y1 + bb.h; }
-      if( bb.h === undefined ){ bb.h = bb.y2 - bb.y1; }
-
-      // make a new graph
-      var graph = new Springy.Graph();
-
-      // make some nodes
-      for(var i = nodes.length - 1; i >= 0; i--) {
-        nodes[i].scratch('springy', {
-          model: graph.newNode({
-            element: nodes[i]
-          })
-        });
-      }
-
-      // connect them with edges
-      for(var i = edges.length - 1; i >= 0; i--) {
-        var edge = edges[i];
-        var fdSrc = edge.source().scratch('springy').model;
-        var fdTgt = edge.target().scratch('springy').model;
-
-        edge.scratch('springy', {
-          model: graph.newEdge(fdSrc, fdTgt, {
-            element: edge,
-            length: options.edgeLength.call(edge, edge)
-          })
-        });
-      }
-
-      var sim = window.sim = new Springy.Layout.ForceDirected(graph, options.stiffness, options.repulsion, options.damping);
-
-      if( options.infinite ){
-        sim.minEnergyThreshold = -Infinity;
-      }
-
-      var currentBB = sim.getBoundingBox();
-      // var targetBB = {bottomleft: new Springy.Vector(-2, -2), topright: new Springy.Vector(2, 2)};
-
-      // convert to/from screen coordinates
-      var toScreen = function(p) {
-        currentBB = sim.getBoundingBox();
-
-        var size = currentBB.topright.subtract(currentBB.bottomleft);
-        var sx = p.subtract(currentBB.bottomleft).divide(size.x).x * bb.w + bb.x1;
-        var sy = p.subtract(currentBB.bottomleft).divide(size.y).y * bb.h + bb.x1;
-
-        return new Springy.Vector(sx, sy);
-      };
-
-      var fromScreen = function(s) {
-        currentBB = sim.getBoundingBox();
-
-        var size = currentBB.topright.subtract(currentBB.bottomleft);
-        var px = ((s.x - bb.x1) / bb.w) * size.x + currentBB.bottomleft.x;
-        var py = ((s.y - bb.y1) / bb.h) * size.y + currentBB.bottomleft.y;
-
-        return new Springy.Vector(px, py);
-      };
-
-      var movedNodes = cy.collection();
-
-      var numNodes = cy.nodes().size();
-      var drawnNodes = 1;
-      var fdRenderer = new Springy.Renderer(sim,
-        function clear() {
-          if( self.stopped ){ return; } // because springy is a buggy layout
-
-          if( movedNodes.length > 0 && options.animate ){
-            simUpdatingPos = true;
-
-            movedNodes.positions(function(node, i){
-              // Perform 2.x and 1.x backwards compatibility check
-              if(typeof node === "number"){
-                node = i;
-              }
-              return node.scratch('springy').position;
-            });
-
-            if( options.fit ){
-              cy.fit( options.padding );
-            }
-
-            movedNodes = cy.collection();
-
-            simUpdatingPos = false;
-          }
-        },
-
-        function drawEdge(edge, p1, p2) {
-          // draw an edge
-        },
-
-        function drawNode(node, p) {
-          if( self.stopped ){ return; } // because springy is a buggy layout
-
-          var v = toScreen(p);
-          var element = node.data.element;
-
-          if( !element.locked() && !element.grabbed() ){
-            element.scratch('springy').position = {
-              x: v.x,
-              y: v.y
-            };
-
-            movedNodes.merge(element);
-          } else {
-            //setLayoutPositionForElement(element);
-          }
-
-          if( drawnNodes == numNodes ){
-            layout.one('layoutready', options.ready);
-            layout.trigger({ type: 'layoutready', layout: layout });
-          }
-
-          drawnNodes++;
-
-        }
-      );
-
-      // set initial node points
-      nodes.each(function(ele, i){
-        // Perform 2.x and 1.x backwards compatibility check
-        if(typeof ele === "number"){
-          ele = i;
-        }
-        
-        setLayoutPositionForElement(ele);
-      });
-
-      // update node positions when dragging
-      var dragHandler;
-      nodes.on('position', dragHandler = function(){
-        if( simUpdatingPos ){ return; }
-
-        setLayoutPositionForElement(this);
-      });
-
-      function setLayoutPositionForElement(element){
-        var fdId = element.scratch('springy').model.id;
-        var fdP = fdRenderer.layout.nodePoints[fdId].p;
-        var pos = element.position();
-        var positionInFd = (pos.x != null && pos.y != null && !options.random) ? fromScreen(element.position()) : {
-          x: Math.random() * 4 - 2,
-          y: Math.random() * 4 - 2
-        };
-
-        fdP.x = positionInFd.x;
-        fdP.y = positionInFd.y;
-      }
-
-      var grabbableNodes = nodes.filter(":grabbable");
-
-      function start(){
-        self.stopped = false;
-
-        // disable grabbing if so set
-        if( options.ungrabifyWhileSimulating ){
-          grabbableNodes.ungrabify();
-        }
-
-        fdRenderer.start();
-      }
-
-      self.stopSystem = function(){
-        self.stopped = true;
-
-        graph.filterNodes(function(){
-          return false; // remove all nodes
-        });
-
-        if( options.ungrabifyWhileSimulating ){
-          grabbableNodes.grabify();
-        }
-
-        if( options.fit ){
-          cy.fit( options.padding );
-        }
-
-        nodes.off('drag position', dragHandler);
-
-        layout.one('layoutstop', options.stop);
-        layout.trigger({ type: 'layoutstop', layout: layout });
-
-        self.stopSystem = null;
-      };
-
-      start();
-      if( !options.infinite ){
-        setTimeout(function(){
-          self.stop();
-        }, options.maxSimulationTime);
-      }
-
-      return this; // chaining
-    };
-
-    SpringyLayout.prototype.stop = function(){
-      if( this.stopSystem != null ){
-        this.stopSystem();
-      }
-
-      return this; // chaining
-    };
-
-    cytoscape('layout', 'springy', SpringyLayout);
-
-  };
-
-  if( typeof module !== 'undefined' && module.exports ){ // expose as a commonjs module
-    module.exports = function( cytoscape, Springy ){
-      register( cytoscape, Springy || require('springy') );
-    };
-  } else if( typeof define !== 'undefined' && define.amd ){ // expose as an amd/requirejs module
-    define('cytoscape-springy', function(){
-      return register;
-    });
-  }
-
-  if( typeof cytoscape !== 'undefined' && typeof Springy !== 'undefined' ){ // expose to global cytoscape (i.e. window.cytoscape)
-    register( cytoscape, Springy );
-  }
-
-})();
-
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -7205,728 +6903,136 @@ window.PainlessContextMenu = class PainlessContextMenu {
 
 };
 
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("webcola"));
-	else if(typeof define === 'function' && define.amd)
-		define(["webcola"], factory);
-	else if(typeof exports === 'object')
-		exports["cytoscapeCola"] = factory(require("webcola"));
-	else
-		root["cytoscapeCola"] = factory(root["webcola"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_5__) {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var assign = __webpack_require__(1);
-var defaults = __webpack_require__(2);
-var cola = __webpack_require__(5) || (typeof window !== 'undefined' ? window.cola : null);
-var raf = __webpack_require__(4);
-var isString = function isString(o) {
-  return (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === _typeof('');
-};
-var isNumber = function isNumber(o) {
-  return (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === _typeof(0);
-};
-var isObject = function isObject(o) {
-  return o != null && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === _typeof({});
-};
-var isFunction = function isFunction(o) {
-  return o != null && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === _typeof(function () {});
-};
-var nop = function nop() {};
-
-var getOptVal = function getOptVal(val, ele) {
-  if (isFunction(val)) {
-    var fn = val;
-    return fn.apply(ele, [ele]);
+;(function(root, factory) {
+  if (typeof exports === 'object') {
+    module.exports = factory(window, document)
   } else {
-    return val;
+    root.SimpleScrollbar = factory(window, document)
   }
-};
+})(this, function(w, d) {
+  var raf = w.requestAnimationFrame || w.setImmediate || function(c) { return setTimeout(c, 0); };
 
-// constructor
-// options : object containing layout options
-function ColaLayout(options) {
-  this.options = assign({}, defaults, options);
-}
-
-// runs the layout
-ColaLayout.prototype.run = function () {
-  var layout = this;
-  var options = this.options;
-
-  layout.manuallyStopped = false;
-
-  var cy = options.cy; // cy is automatically populated for us in the constructor
-  var eles = options.eles;
-  var nodes = eles.nodes();
-  var edges = eles.edges();
-  var ready = false;
-
-  var isParent = function isParent(ele) {
-    return ele.isParent();
-  };
-
-  var parentNodes = nodes.filter(isParent);
-
-  var nonparentNodes = nodes.subtract(parentNodes);
-
-  var bb = options.boundingBox || { x1: 0, y1: 0, w: cy.width(), h: cy.height() };
-  if (bb.x2 === undefined) {
-    bb.x2 = bb.x1 + bb.w;
-  }
-  if (bb.w === undefined) {
-    bb.w = bb.x2 - bb.x1;
-  }
-  if (bb.y2 === undefined) {
-    bb.y2 = bb.y1 + bb.h;
-  }
-  if (bb.h === undefined) {
-    bb.h = bb.y2 - bb.y1;
+  function initEl(el) {
+    if (Object.prototype.hasOwnProperty.call(el, 'data-simple-scrollbar')) return;
+    Object.defineProperty(el, 'data-simple-scrollbar', { value: new SimpleScrollbar(el) });
   }
 
-  var updateNodePositions = function updateNodePositions() {
+  // Mouse drag handler
+  function dragDealer(el, context) {
+    var lastPageY;
+
+    el.addEventListener('mousedown', function(e) {
+      lastPageY = e.pageY;
+      el.classList.add('ss-grabbed');
+      d.body.classList.add('ss-grabbed');
+
+      d.addEventListener('mousemove', drag);
+      d.addEventListener('mouseup', stop);
+
+      return false;
+    });
+
+    function drag(e) {
+      var delta = e.pageY - lastPageY;
+      lastPageY = e.pageY;
+
+      raf(function() {
+        context.el.scrollTop += delta / context.scrollRatio;
+      });
+    }
+
+    function stop() {
+      el.classList.remove('ss-grabbed');
+      d.body.classList.remove('ss-grabbed');
+      d.removeEventListener('mousemove', drag);
+      d.removeEventListener('mouseup', stop);
+    }
+  }
+
+  // Constructor
+  function ss(el) {
+    this.target = el;
+
+    this.direction = w.getComputedStyle(this.target).direction;
+
+    this.bar = '<div class="ss-scroll">';
+
+    this.wrapper = d.createElement('div');
+    this.wrapper.setAttribute('class', 'ss-wrapper');
+
+    this.el = d.createElement('div');
+    this.el.setAttribute('class', 'ss-content');
+
+    if (this.direction === 'rtl') {
+      this.el.classList.add('rtl');
+    }
+
+    this.wrapper.appendChild(this.el);
+
+    while (this.target.firstChild) {
+      this.el.appendChild(this.target.firstChild);
+    }
+    this.target.appendChild(this.wrapper);
+
+    this.target.insertAdjacentHTML('beforeend', this.bar);
+    this.bar = this.target.lastChild;
+
+    dragDealer(this.bar, this);
+    this.moveBar();
+
+    w.addEventListener('resize', this.moveBar.bind(this));
+    this.el.addEventListener('scroll', this.moveBar.bind(this));
+    this.el.addEventListener('mouseenter', this.moveBar.bind(this));
+
+    this.target.classList.add('ss-container');
+
+    var css = w.getComputedStyle(el);
+  	if (css['height'] === '0px' && css['max-height'] !== '0px') {
+    	el.style.height = css['max-height'];
+    }
+  }
+
+  ss.prototype = {
+    moveBar: function(e) {
+      var totalHeight = this.el.scrollHeight,
+          ownHeight = this.el.clientHeight,
+          _this = this;
+
+      this.scrollRatio = ownHeight / totalHeight;
+
+      var isRtl = _this.direction === 'rtl';
+      var right = isRtl ?
+        (_this.target.clientWidth - _this.bar.clientWidth + 18) :
+        (_this.target.clientWidth - _this.bar.clientWidth) * -1;
+
+      raf(function() {
+        // Hide scrollbar if no scrolling is possible
+        if(_this.scrollRatio >= 1) {
+          _this.bar.classList.add('ss-hidden')
+        } else {
+          _this.bar.classList.remove('ss-hidden')
+          _this.bar.style.cssText = 'height:' + Math.max(_this.scrollRatio * 100, 10) + '%; top:' + (_this.el.scrollTop / totalHeight ) * 100 + '%;right:' + right + 'px;';
+        }
+      });
+    }
+  }
+
+  function initAll() {
+    var nodes = d.querySelectorAll('*[ss-container]');
+
     for (var i = 0; i < nodes.length; i++) {
-      var node = nodes[i];
-      var dimensions = node.layoutDimensions(options);
-      var scratch = node.scratch('cola');
-
-      // update node dims
-      if (!scratch.updatedDims) {
-        var padding = getOptVal(options.nodeSpacing, node);
-
-        scratch.width = dimensions.w + 2 * padding;
-        scratch.height = dimensions.h + 2 * padding;
-      }
-    }
-
-    nodes.positions(function (node) {
-      var scratch = node.scratch().cola;
-      var retPos = void 0;
-
-      if (!node.grabbed() && nonparentNodes.contains(node)) {
-        retPos = {
-          x: bb.x1 + scratch.x,
-          y: bb.y1 + scratch.y
-        };
-
-        if (!isNumber(retPos.x) || !isNumber(retPos.y)) {
-          retPos = undefined;
-        }
-      }
-
-      return retPos;
-    });
-
-    nodes.updateCompoundBounds(); // because the way this layout sets positions is buggy for some reason; ref #878
-
-    if (!ready) {
-      onReady();
-      ready = true;
-    }
-
-    if (options.fit) {
-      cy.fit(options.padding);
-    }
-  };
-
-  var onDone = function onDone() {
-    if (options.ungrabifyWhileSimulating) {
-      grabbableNodes.grabify();
-    }
-
-    cy.off('destroy', destroyHandler);
-
-    nodes.off('grab free position', grabHandler);
-    nodes.off('lock unlock', lockHandler);
-
-    // trigger layoutstop when the layout stops (e.g. finishes)
-    layout.one('layoutstop', options.stop);
-    layout.trigger({ type: 'layoutstop', layout: layout });
-  };
-
-  var onReady = function onReady() {
-    // trigger layoutready when each node has had its position set at least once
-    layout.one('layoutready', options.ready);
-    layout.trigger({ type: 'layoutready', layout: layout });
-  };
-
-  var ticksPerFrame = options.refresh;
-
-  if (options.refresh < 0) {
-    ticksPerFrame = 1;
-  } else {
-    ticksPerFrame = Math.max(1, ticksPerFrame); // at least 1
-  }
-
-  var adaptor = layout.adaptor = cola.adaptor({
-    trigger: function trigger(e) {
-      // on sim event
-      var TICK = cola.EventType ? cola.EventType.tick : null;
-      var END = cola.EventType ? cola.EventType.end : null;
-
-      switch (e.type) {
-        case 'tick':
-        case TICK:
-          if (options.animate) {
-            updateNodePositions();
-          }
-          break;
-
-        case 'end':
-        case END:
-          updateNodePositions();
-          if (!options.infinite) {
-            onDone();
-          }
-          break;
-      }
-    },
-
-    kick: function kick() {
-      // kick off the simulation
-      //let skip = 0;
-
-      var inftick = function inftick() {
-        if (layout.manuallyStopped) {
-          onDone();
-
-          return true;
-        }
-
-        var ret = adaptor.tick();
-
-        if (ret && options.infinite) {
-          // resume layout if done
-          adaptor.resume(); // resume => new kick
-        }
-
-        return ret; // allow regular finish b/c of new kick
-      };
-
-      var multitick = function multitick() {
-        // multiple ticks in a row
-        var ret = void 0;
-
-        for (var i = 0; i < ticksPerFrame && !ret; i++) {
-          ret = ret || inftick(); // pick up true ret vals => sim done
-        }
-
-        return ret;
-      };
-
-      if (options.animate) {
-        var frame = function frame() {
-          if (multitick()) {
-            return;
-          }
-
-          raf(frame);
-        };
-
-        raf(frame);
-      } else {
-        while (!inftick()) {
-          // keep going...
-        }
-      }
-    },
-
-    on: nop, // dummy; not needed
-
-    drag: nop // not needed for our case
-  });
-  layout.adaptor = adaptor;
-
-  // if set no grabbing during layout
-  var grabbableNodes = nodes.filter(':grabbable');
-  if (options.ungrabifyWhileSimulating) {
-    grabbableNodes.ungrabify();
-  }
-
-  var destroyHandler = void 0;
-  cy.one('destroy', destroyHandler = function destroyHandler() {
-    layout.stop();
-  });
-
-  // handle node dragging
-  var grabHandler = void 0;
-  nodes.on('grab free position', grabHandler = function grabHandler(e) {
-    var node = this;
-    var scrCola = node.scratch().cola;
-    var pos = node.position();
-    var nodeIsTarget = e.cyTarget === node || e.target === node;
-
-    if (!nodeIsTarget) {
-      return;
-    }
-
-    switch (e.type) {
-      case 'grab':
-        adaptor.dragstart(scrCola);
-        break;
-      case 'free':
-        adaptor.dragend(scrCola);
-        break;
-      case 'position':
-        // only update when different (i.e. manual .position() call or drag) so we don't loop needlessly
-        if (scrCola.px !== pos.x - bb.x1 || scrCola.py !== pos.y - bb.y1) {
-          scrCola.px = pos.x - bb.x1;
-          scrCola.py = pos.y - bb.y1;
-        }
-        break;
-    }
-  });
-
-  var lockHandler = void 0;
-  nodes.on('lock unlock', lockHandler = function lockHandler() {
-    var node = this;
-    var scrCola = node.scratch().cola;
-
-    scrCola.fixed = node.locked();
-
-    if (node.locked()) {
-      adaptor.dragstart(scrCola);
-    } else {
-      adaptor.dragend(scrCola);
-    }
-  });
-
-  // add nodes to cola
-  adaptor.nodes(nonparentNodes.map(function (node, i) {
-    var padding = getOptVal(options.nodeSpacing, node);
-    var pos = node.position();
-    var dimensions = node.layoutDimensions(options);
-
-    var struct = node.scratch().cola = {
-      x: options.randomize || pos.x === undefined ? Math.round(Math.random() * bb.w) : pos.x,
-      y: options.randomize || pos.y === undefined ? Math.round(Math.random() * bb.h) : pos.y,
-      width: dimensions.w + 2 * padding,
-      height: dimensions.h + 2 * padding,
-      index: i,
-      fixed: node.locked()
-    };
-
-    return struct;
-  }));
-
-  // the constraints to be added on nodes
-  var constraints = [];
-
-  if (options.alignment) {
-    // then set alignment constraints
-
-    var offsetsX = [];
-    var offsetsY = [];
-
-    nonparentNodes.forEach(function (node) {
-      var align = getOptVal(options.alignment, node);
-      var scrCola = node.scratch().cola;
-      var index = scrCola.index;
-
-      if (!align) {
-        return;
-      }
-
-      if (align.x != null) {
-        offsetsX.push({
-          node: index,
-          offset: align.x
-        });
-      }
-
-      if (align.y != null) {
-        offsetsY.push({
-          node: index,
-          offset: align.y
-        });
-      }
-    });
-
-    if (offsetsX.length > 0) {
-      constraints.push({
-        type: 'alignment',
-        axis: 'x',
-        offsets: offsetsX
-      });
-    }
-
-    if (offsetsY.length > 0) {
-      constraints.push({
-        type: 'alignment',
-        axis: 'y',
-        offsets: offsetsY
-      });
+      initEl(nodes[i]);
     }
   }
 
-  // if gapInequalities variable is set add each inequality constraint to list of constraints
-  if (options.gapInequalities) {
-    options.gapInequalities.forEach(function (inequality) {
-
-      // for the constraints to be passed to cola layout adaptor use indices of nodes,
-      // not the nodes themselves
-      var leftIndex = inequality.left.scratch().cola.index;
-      var rightIndex = inequality.right.scratch().cola.index;
-
-      constraints.push({
-        axis: inequality.axis,
-        left: leftIndex,
-        right: rightIndex,
-        gap: inequality.gap,
-        equality: inequality.equality
-      });
-    });
-  }
-
-  // add constraints if any
-  if (constraints.length > 0) {
-    adaptor.constraints(constraints);
-  }
-
-  // add compound nodes to cola
-  adaptor.groups(parentNodes.map(function (node, i) {
-    // add basic group incl leaf nodes
-    var optPadding = getOptVal(options.nodeSpacing, node);
-    var getPadding = function getPadding(d) {
-      return parseFloat(node.style('padding-' + d));
-    };
-
-    var pleft = getPadding('left') + optPadding;
-    var pright = getPadding('right') + optPadding;
-    var ptop = getPadding('top') + optPadding;
-    var pbottom = getPadding('bottom') + optPadding;
-
-    node.scratch().cola = {
-      index: i,
-
-      padding: Math.max(pleft, pright, ptop, pbottom),
-
-      // leaves should only contain direct descendants (children),
-      // not the leaves of nested compound nodes or any nodes that are compounds themselves
-      leaves: node.children().intersection(nonparentNodes).map(function (child) {
-        return child[0].scratch().cola.index;
-      }),
-
-      fixed: node.locked()
-    };
-
-    return node;
-  }).map(function (node) {
-    // add subgroups
-    node.scratch().cola.groups = node.children().intersection(parentNodes).map(function (child) {
-      return child.scratch().cola.index;
-    });
-
-    return node.scratch().cola;
-  }));
-
-  // get the edge length setting mechanism
-  var length = void 0;
-  var lengthFnName = void 0;
-  if (options.edgeLength != null) {
-    length = options.edgeLength;
-    lengthFnName = 'linkDistance';
-  } else if (options.edgeSymDiffLength != null) {
-    length = options.edgeSymDiffLength;
-    lengthFnName = 'symmetricDiffLinkLengths';
-  } else if (options.edgeJaccardLength != null) {
-    length = options.edgeJaccardLength;
-    lengthFnName = 'jaccardLinkLengths';
-  } else {
-    length = 100;
-    lengthFnName = 'linkDistance';
-  }
-
-  var lengthGetter = function lengthGetter(link) {
-    return link.calcLength;
-  };
-
-  // add the edges to cola
-  adaptor.links(edges.stdFilter(function (edge) {
-    return nonparentNodes.contains(edge.source()) && nonparentNodes.contains(edge.target());
-  }).map(function (edge) {
-    var c = edge.scratch().cola = {
-      source: edge.source()[0].scratch().cola.index,
-      target: edge.target()[0].scratch().cola.index
-    };
-
-    if (length != null) {
-      c.calcLength = getOptVal(length, edge);
-    }
-
-    return c;
-  }));
-
-  adaptor.size([bb.w, bb.h]);
-
-  if (length != null) {
-    adaptor[lengthFnName](lengthGetter);
-  }
-
-  // set the flow of cola
-  if (options.flow) {
-    var flow = void 0;
-    var defAxis = 'y';
-    var defMinSep = 50;
-
-    if (isString(options.flow)) {
-      flow = {
-        axis: options.flow,
-        minSeparation: defMinSep
-      };
-    } else if (isNumber(options.flow)) {
-      flow = {
-        axis: defAxis,
-        minSeparation: options.flow
-      };
-    } else if (isObject(options.flow)) {
-      flow = options.flow;
-
-      flow.axis = flow.axis || defAxis;
-      flow.minSeparation = flow.minSeparation != null ? flow.minSeparation : defMinSep;
-    } else {
-      // e.g. options.flow: true
-      flow = {
-        axis: defAxis,
-        minSeparation: defMinSep
-      };
-    }
-
-    adaptor.flowLayout(flow.axis, flow.minSeparation);
-  }
-
-  layout.trigger({ type: 'layoutstart', layout: layout });
-
-  adaptor.avoidOverlaps(options.avoidOverlap).handleDisconnected(options.handleDisconnected).start(options.unconstrIter, options.userConstIter, options.allConstIter);
-
-  if (!options.infinite) {
-    setTimeout(function () {
-      if (!layout.manuallyStopped) {
-        adaptor.stop();
-      }
-    }, options.maxSimulationTime);
-  }
-
-  return this; // chaining
-};
-
-// called on continuous layouts to stop them before they finish
-ColaLayout.prototype.stop = function () {
-  if (this.adaptor) {
-    this.manuallyStopped = true;
-    this.adaptor.stop();
-  }
-
-  return this; // chaining
-};
-
-module.exports = ColaLayout;
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// Simple, internal Object.assign() polyfill for options objects etc.
-
-module.exports = Object.assign != null ? Object.assign.bind(Object) : function (tgt) {
-  for (var _len = arguments.length, srcs = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    srcs[_key - 1] = arguments[_key];
-  }
-
-  srcs.forEach(function (src) {
-    Object.keys(src).forEach(function (k) {
-      return tgt[k] = src[k];
-    });
-  });
-
-  return tgt;
-};
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// default layout options
-var defaults = {
-  animate: true, // whether to show the layout as it's running
-  refresh: 1, // number of ticks per frame; higher is faster but more jerky
-  maxSimulationTime: 4000, // max length in ms to run the layout
-  ungrabifyWhileSimulating: false, // so you can't drag nodes during layout
-  fit: true, // on every layout reposition of nodes, fit the viewport
-  padding: 30, // padding around the simulation
-  boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-  nodeDimensionsIncludeLabels: false, // whether labels should be included in determining the space used by a node
-
-  // layout event callbacks
-  ready: function ready() {}, // on layoutready
-  stop: function stop() {}, // on layoutstop
-
-  // positioning options
-  randomize: false, // use random node positions at beginning of layout
-  avoidOverlap: true, // if true, prevents overlap of node bounding boxes
-  handleDisconnected: true, // if true, avoids disconnected components from overlapping
-  nodeSpacing: function nodeSpacing(node) {
-    return 10;
-  }, // extra spacing around nodes
-  flow: undefined, // use DAG/tree flow layout if specified, e.g. { axis: 'y', minSeparation: 30 }
-  alignment: undefined, // relative alignment constraints on nodes, e.g. function( node ){ return { x: 0, y: 1 } }
-  gapInequalities: undefined, // list of inequality constraints for the gap between the nodes, e.g. [{"axis":"y", "left":node1, "right":node2, "gap":25}]
-
-  // different methods of specifying edge length
-  // each can be a constant numerical value or a function like `function( edge ){ return 2; }`
-  edgeLength: undefined, // sets edge length directly in simulation
-  edgeSymDiffLength: undefined, // symmetric diff edge length in simulation
-  edgeJaccardLength: undefined, // jaccard edge length in simulation
-
-  // iterations of cola algorithm; uses default values on undefined
-  unconstrIter: undefined, // unconstrained initial layout iterations
-  userConstIter: undefined, // initial layout iterations with user-specified constraints
-  allConstIter: undefined, // initial layout iterations with all constraints including non-overlap
-
-  // infinite layout options
-  infinite: false // overrides all other options for a forces-all-the-time mode
-};
-
-module.exports = defaults;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var impl = __webpack_require__(0);
-
-// registers the extension on a cytoscape lib ref
-var register = function register(cytoscape) {
-  if (!cytoscape) {
-    return;
-  } // can't register if cytoscape unspecified
-
-  cytoscape('layout', 'cola', impl); // register with cytoscape.js
-};
-
-if (typeof cytoscape !== 'undefined') {
-  // expose to global cytoscape (i.e. window.cytoscape)
-  register(cytoscape);
-}
-
-module.exports = register;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var raf = void 0;
-
-if ((typeof window === "undefined" ? "undefined" : _typeof(window)) !== ( true ? "undefined" : _typeof(undefined))) {
-  raf = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame;
-} else {
-  // if not available, all you get is immediate calls
-  raf = function raf(cb) {
-    cb();
-  };
-}
-
-module.exports = raf;
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
-
-/***/ })
-/******/ ]);
+  d.addEventListener('DOMContentLoaded', initAll);
+  ss.initEl = initEl;
+  ss.initAll = initAll;
+
+  var SimpleScrollbar = ss;
+  return SimpleScrollbar;
 });
+
 //_require cyto_style.coffee
 //_require sparql_text.coffee
 //_require painless_link.coffee 
@@ -7976,7 +7082,8 @@ window.PainlessGraph = (function() {
       }).run()
        */
       return this.cy.layout({
-        name: 'cose-bilkent'
+        name: 'cose-bilkent',
+        fit: false
       }).run();
     }
 
@@ -8169,395 +7276,6 @@ window.PainlessGraph = (function() {
   return PainlessGraph;
 
 }).call(this);
-
-//_require constants.coffee
-window.PainlessLink = (function() {
-  var color_index;
-
-  class PainlessLink {
-    constructor(context, cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) {
-      this.create_edge = this.create_edge.bind(this);
-      this.reverse = this.reverse.bind(this);
-      this.add_datatype = this.add_datatype.bind(this);
-      this.create_node = this.create_node.bind(this);
-      this.delete = this.delete.bind(this);
-      this.create_link = this.create_link.bind(this);
-      this.create_concept = this.create_concept.bind(this);
-      this.cy = cy;
-      this.context = context;
-      console.log(this.context);
-      this.link_name = link_name;
-      this.link_type = link_type;
-      this.node_var1 = node_var1;
-      this.node_var2 = node_var2;
-      this.edge_source = null;
-      this.edge_target = null;
-      this.datatype = datatype;
-      this.datatype_node = null;
-      if (link_type === 'concept') {
-        this.create_concept();
-      } else {
-        this.create_link();
-      }
-    }
-
-    find_new_name(base_name = null) {
-      var i;
-      if (base_name === null) {
-        base_name = "x";
-      }
-      i = 0;
-      while (this.cy.getElementById(base_name + i).length !== 0) {
-        i += 1;
-      }
-      return base_name + i;
-    }
-
-    create_edge(node1, node2, classes = null) {
-      return this.cy.add({
-        group: 'edges',
-        data: {
-          source: node1.id(),
-          target: node2.id()
-        },
-        classes: classes
-      });
-    }
-
-    reverse() {
-      /** can only be applied to non-concept relationships */
-      if (this.source === this.node_var1) {
-        this.edge_source.classes('target-edge');
-        this.edge_target.classes('source-edge');
-        this.source = this.node_var2;
-        return this.target = this.node_var1;
-      } else {
-        this.edge_source.classes('source-edge');
-        this.edge_target.classes('target-edge');
-        this.source = this.node_var1;
-        return this.target = this.node_var2;
-      }
-    }
-
-    add_datatype(node, datatype) {
-      this.datatype_node = this.cy.add({
-        group: 'nodes',
-        data: {
-          label: datatype
-        },
-        classes: 'node-datatype'
-      });
-      return this.edge_datatype = this.cy.add({
-        group: 'edges',
-        data: {
-          source: node.id(),
-          target: this.datatype_node.id(),
-          weight: 99
-        },
-        classes: 'edge-datatype'
-      });
-    }
-
-    create_node(type, label = null) {
-      var data;
-      data = {};
-      if (type === 'node-variable') {
-        label = this.find_new_name(label);
-        data['id'] = label;
-        data['color'] = '#' + palette[color_index % palette.length];
-        color_index += 1;
-      }
-      if (type === 'node-concept') {
-        data['label'] = this.link_name;
-      } else if (type === 'node-attribute' || type === 'node-role') {
-        data['label'] = label;
-      } else {
-        data['label'] = '?' + label;
-      }
-      data['links'] = [this];
-      return this.cy.add({
-        group: 'nodes',
-        data: data,
-        classes: type
-      });
-    }
-
-    delete() {
-      var i, index, j, k, len, node_var, ref, ref1;
-      index = this.context.links.indexOf(this);
-      this.context.links.splice(index, 1);
-      this.context.sparql_text.update();
-      if (this.node_link !== null && this.node_link !== void 0) {
-        this.cy.remove(this.node_link);
-      }
-      if (this.node_concept !== null && this.node_concept !== void 0) {
-        this.cy.remove(this.node_concept);
-      }
-      if (this.datatype_node !== null && this.datatype_node !== void 0) {
-        this.cy.remove(this.datatype_node);
-      }
-      ref = [this.node_var1, this.node_var2];
-      for (j = 0, len = ref.length; j < len; j++) {
-        node_var = ref[j];
-        if (node_var !== null && node_var !== void 0) {
-          index = node_var.data('links').indexOf(this);
-          node_var.data('links').splice(index, 1);
-          if (node_var.data('links').length === 0) {
-            console.log(this.context.sparql_text.select_boxes);
-            for (i = k = 0, ref1 = this.context.sparql_text.select_boxes.length; (0 <= ref1 ? k < ref1 : k > ref1); i = 0 <= ref1 ? ++k : --k) {
-              if (this.context.sparql_text.select_boxes[i] === node_var.id()) {
-                this.context.sparql_text.select_boxes.splice(i, 1);
-              }
-            }
-            this.cy.remove(node_var);
-          }
-        }
-      }
-      return this.context.sparql_text.update();
-    }
-
-    create_link() {
-      if (this.node_var1 === null || this.node_var1 === void 0) {
-        this.node_var1 = this.create_node('node-variable');
-        this.node_var1.classes('node-variable node-variable-full-options');
-      } else if (this.node_var1.hasClass('attr-range')) {
-        console.warn('properties can\'t be added to the range of an attribute');
-        return;
-      } else {
-        this.node_var1.data('links').push(this);
-      }
-      if (this.node_var2 === null || this.node_var2 === void 0) {
-        if (this.link_type === 'attribute') {
-          this.node_var2 = this.create_node('node-variable', this.link_name);
-          this.node_var2.classes('node-variable attr-range');
-          if (this.datatype !== null && this.datatype !== void 0) {
-            this.add_datatype(this.node_var2, this.datatype);
-          }
-        } else {
-          this.node_var2 = this.create_node('node-variable');
-          this.node_var2.classes('node-variable node-variable-full-options');
-        }
-      } else {
-        this.node_var2.data('links').push(this);
-      }
-      this.source = this.node_var1;
-      this.target = this.node_var2;
-      if (this.link_type === 'role') {
-        this.node_link = this.create_node('node-role', this.link_name);
-      } else {
-        this.node_link = this.create_node('node-attribute', this.link_name);
-      }
-      this.edge_source = this.create_edge(this.node_link, this.source, "source-edge");
-      return this.edge_target = this.create_edge(this.node_link, this.target, "target-edge");
-    }
-
-    create_concept() {
-      if (this.node_var1 === null || this.node_var1 === void 0) {
-        this.node_var1 = this.create_node('node-variable');
-        this.node_var1.classes('node-variable node-variable-full-options');
-      }
-      this.node_var1.data('links').push(this);
-      this.node_concept = this.create_node('node-concept');
-      return this.create_edge(this.node_var1, this.node_concept, 'edge-concept');
-    }
-
-  };
-
-  color_index = 0;
-
-  return PainlessLink;
-
-}).call(this);
-
-;(function(root, factory) {
-  if (typeof exports === 'object') {
-    module.exports = factory(window, document)
-  } else {
-    root.SimpleScrollbar = factory(window, document)
-  }
-})(this, function(w, d) {
-  var raf = w.requestAnimationFrame || w.setImmediate || function(c) { return setTimeout(c, 0); };
-
-  function initEl(el) {
-    if (Object.prototype.hasOwnProperty.call(el, 'data-simple-scrollbar')) return;
-    Object.defineProperty(el, 'data-simple-scrollbar', { value: new SimpleScrollbar(el) });
-  }
-
-  // Mouse drag handler
-  function dragDealer(el, context) {
-    var lastPageY;
-
-    el.addEventListener('mousedown', function(e) {
-      lastPageY = e.pageY;
-      el.classList.add('ss-grabbed');
-      d.body.classList.add('ss-grabbed');
-
-      d.addEventListener('mousemove', drag);
-      d.addEventListener('mouseup', stop);
-
-      return false;
-    });
-
-    function drag(e) {
-      var delta = e.pageY - lastPageY;
-      lastPageY = e.pageY;
-
-      raf(function() {
-        context.el.scrollTop += delta / context.scrollRatio;
-      });
-    }
-
-    function stop() {
-      el.classList.remove('ss-grabbed');
-      d.body.classList.remove('ss-grabbed');
-      d.removeEventListener('mousemove', drag);
-      d.removeEventListener('mouseup', stop);
-    }
-  }
-
-  // Constructor
-  function ss(el) {
-    this.target = el;
-
-    this.direction = w.getComputedStyle(this.target).direction;
-
-    this.bar = '<div class="ss-scroll">';
-
-    this.wrapper = d.createElement('div');
-    this.wrapper.setAttribute('class', 'ss-wrapper');
-
-    this.el = d.createElement('div');
-    this.el.setAttribute('class', 'ss-content');
-
-    if (this.direction === 'rtl') {
-      this.el.classList.add('rtl');
-    }
-
-    this.wrapper.appendChild(this.el);
-
-    while (this.target.firstChild) {
-      this.el.appendChild(this.target.firstChild);
-    }
-    this.target.appendChild(this.wrapper);
-
-    this.target.insertAdjacentHTML('beforeend', this.bar);
-    this.bar = this.target.lastChild;
-
-    dragDealer(this.bar, this);
-    this.moveBar();
-
-    w.addEventListener('resize', this.moveBar.bind(this));
-    this.el.addEventListener('scroll', this.moveBar.bind(this));
-    this.el.addEventListener('mouseenter', this.moveBar.bind(this));
-
-    this.target.classList.add('ss-container');
-
-    var css = w.getComputedStyle(el);
-  	if (css['height'] === '0px' && css['max-height'] !== '0px') {
-    	el.style.height = css['max-height'];
-    }
-  }
-
-  ss.prototype = {
-    moveBar: function(e) {
-      var totalHeight = this.el.scrollHeight,
-          ownHeight = this.el.clientHeight,
-          _this = this;
-
-      this.scrollRatio = ownHeight / totalHeight;
-
-      var isRtl = _this.direction === 'rtl';
-      var right = isRtl ?
-        (_this.target.clientWidth - _this.bar.clientWidth + 18) :
-        (_this.target.clientWidth - _this.bar.clientWidth) * -1;
-
-      raf(function() {
-        // Hide scrollbar if no scrolling is possible
-        if(_this.scrollRatio >= 1) {
-          _this.bar.classList.add('ss-hidden')
-        } else {
-          _this.bar.classList.remove('ss-hidden')
-          _this.bar.style.cssText = 'height:' + Math.max(_this.scrollRatio * 100, 10) + '%; top:' + (_this.el.scrollTop / totalHeight ) * 100 + '%;right:' + right + 'px;';
-        }
-      });
-    }
-  }
-
-  function initAll() {
-    var nodes = d.querySelectorAll('*[ss-container]');
-
-    for (var i = 0; i < nodes.length; i++) {
-      initEl(nodes[i]);
-    }
-  }
-
-  d.addEventListener('DOMContentLoaded', initAll);
-  ss.initEl = initEl;
-  ss.initAll = initAll;
-
-  var SimpleScrollbar = ss;
-  return SimpleScrollbar;
-});
-
-window.PainlessMenu = class PainlessMenu {
-  constructor(context) {
-    this.change_size = this.change_size.bind(this);
-    this.create_navigation_div = this.create_navigation_div.bind(this);
-    this.init = this.init.bind(this);
-    this.context = context;
-    this.init();
-  }
-
-  change_size(query_canvas_size) {
-    this.context.query_canvas.style.height = query_canvas_size + "%";
-    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
-    return setTimeout(() => {
-      return this.context.graph.cy.resize();
-    }, 550);
-  }
-
-  create_div(innerHTML = null, className = null, id = null, onclick = null) {
-    var div;
-    div = document.createElement('div');
-    div.innerHTML = innerHTML;
-    div.className = className;
-    div.id = id;
-    div.onclick = onclick;
-    return div;
-  }
-
-  create_navigation_div() {
-    var nav_div;
-    nav_div = this.create_div(null, null, 'nav_div');
-    nav_div.append(this.create_div('▲', 'resize_button', null, () => {
-      return this.change_size(90);
-    }));
-    nav_div.append(this.create_div('≡', 'resize_button', null, () => {
-      return this.change_size(60);
-    }));
-    nav_div.append(this.create_div('▼', 'resize_button', null, () => {
-      return this.change_size(0);
-    }));
-    return nav_div;
-  }
-
-  init() {
-    var menu;
-    menu = this.create_div(null, null, 'painless_menu');
-    document.getElementById('sidenav').append(menu);
-    menu.append(this.create_navigation_div());
-    menu.append(this.create_div('undo', 'menu_button', null, () => {
-      return this.context.graph.undo();
-    }));
-    menu.append(this.create_div('center view', 'menu_button', null, () => {
-      return this.context.graph.center_view();
-    }));
-    return menu.append(this.create_div('copy to clipboard', 'menu_button', null, () => {
-      return this.context.graph.copy_to_clipboard();
-    }));
-  }
-
-};
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -9322,6 +8040,269 @@ module.exports = register;
 /***/ })
 /******/ ]);
 });
+//_require constants.coffee
+window.PainlessLink = (function() {
+  var color_index;
+
+  class PainlessLink {
+    constructor(context, cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) {
+      this.create_edge = this.create_edge.bind(this);
+      this.reverse = this.reverse.bind(this);
+      this.add_datatype = this.add_datatype.bind(this);
+      this.create_node = this.create_node.bind(this);
+      this.delete = this.delete.bind(this);
+      this.create_link = this.create_link.bind(this);
+      this.create_concept = this.create_concept.bind(this);
+      this.cy = cy;
+      this.context = context;
+      console.log(this.context);
+      this.link_name = link_name;
+      this.link_type = link_type;
+      this.node_var1 = node_var1;
+      this.node_var2 = node_var2;
+      this.edge_source = null;
+      this.edge_target = null;
+      this.datatype = datatype;
+      this.datatype_node = null;
+      if (link_type === 'concept') {
+        this.create_concept();
+      } else {
+        this.create_link();
+      }
+    }
+
+    find_new_name(base_name = null) {
+      var i;
+      if (base_name === null) {
+        base_name = "x";
+      }
+      i = 0;
+      while (this.cy.getElementById(base_name + i).length !== 0) {
+        i += 1;
+      }
+      return base_name + i;
+    }
+
+    create_edge(node1, node2, classes = null) {
+      return this.cy.add({
+        group: 'edges',
+        data: {
+          source: node1.id(),
+          target: node2.id()
+        },
+        classes: classes
+      });
+    }
+
+    reverse() {
+      /** can only be applied to non-concept relationships */
+      if (this.source === this.node_var1) {
+        this.edge_source.classes('target-edge');
+        this.edge_target.classes('source-edge');
+        this.source = this.node_var2;
+        return this.target = this.node_var1;
+      } else {
+        this.edge_source.classes('source-edge');
+        this.edge_target.classes('target-edge');
+        this.source = this.node_var1;
+        return this.target = this.node_var2;
+      }
+    }
+
+    add_datatype(node, datatype) {
+      this.datatype_node = this.cy.add({
+        group: 'nodes',
+        data: {
+          label: datatype
+        },
+        classes: 'node-datatype'
+      });
+      return this.edge_datatype = this.cy.add({
+        group: 'edges',
+        data: {
+          source: node.id(),
+          target: this.datatype_node.id(),
+          weight: 99
+        },
+        classes: 'edge-datatype'
+      });
+    }
+
+    create_node(type, label = null) {
+      var data;
+      data = {};
+      if (type === 'node-variable') {
+        label = this.find_new_name(label);
+        data['id'] = label;
+        data['color'] = '#' + palette[color_index % palette.length];
+        color_index += 1;
+      }
+      if (type === 'node-concept') {
+        data['label'] = this.link_name;
+      } else if (type === 'node-attribute' || type === 'node-role') {
+        data['label'] = label;
+      } else {
+        data['label'] = '?' + label;
+      }
+      data['links'] = [this];
+      return this.cy.add({
+        group: 'nodes',
+        data: data,
+        classes: type
+      });
+    }
+
+    delete() {
+      var i, index, j, k, len, node_var, ref, ref1;
+      index = this.context.links.indexOf(this);
+      this.context.links.splice(index, 1);
+      this.context.sparql_text.update();
+      if (this.node_link !== null && this.node_link !== void 0) {
+        this.cy.remove(this.node_link);
+      }
+      if (this.node_concept !== null && this.node_concept !== void 0) {
+        this.cy.remove(this.node_concept);
+      }
+      if (this.datatype_node !== null && this.datatype_node !== void 0) {
+        this.cy.remove(this.datatype_node);
+      }
+      ref = [this.node_var1, this.node_var2];
+      for (j = 0, len = ref.length; j < len; j++) {
+        node_var = ref[j];
+        if (node_var !== null && node_var !== void 0) {
+          index = node_var.data('links').indexOf(this);
+          node_var.data('links').splice(index, 1);
+          if (node_var.data('links').length === 0) {
+            console.log(this.context.sparql_text.select_boxes);
+            for (i = k = 0, ref1 = this.context.sparql_text.select_boxes.length; (0 <= ref1 ? k < ref1 : k > ref1); i = 0 <= ref1 ? ++k : --k) {
+              if (this.context.sparql_text.select_boxes[i] === node_var.id()) {
+                this.context.sparql_text.select_boxes.splice(i, 1);
+              }
+            }
+            this.cy.remove(node_var);
+          }
+        }
+      }
+      return this.context.sparql_text.update();
+    }
+
+    create_link() {
+      if (this.node_var1 === null || this.node_var1 === void 0) {
+        this.node_var1 = this.create_node('node-variable');
+        this.node_var1.classes('node-variable node-variable-full-options');
+      } else if (this.node_var1.hasClass('attr-range')) {
+        console.warn('properties can\'t be added to the range of an attribute');
+        return;
+      } else {
+        this.node_var1.data('links').push(this);
+      }
+      if (this.node_var2 === null || this.node_var2 === void 0) {
+        if (this.link_type === 'attribute') {
+          this.node_var2 = this.create_node('node-variable', this.link_name);
+          this.node_var2.classes('node-variable attr-range');
+          if (this.datatype !== null && this.datatype !== void 0) {
+            this.add_datatype(this.node_var2, this.datatype);
+          }
+        } else {
+          this.node_var2 = this.create_node('node-variable');
+          this.node_var2.classes('node-variable node-variable-full-options');
+        }
+      } else {
+        this.node_var2.data('links').push(this);
+      }
+      this.source = this.node_var1;
+      this.target = this.node_var2;
+      if (this.link_type === 'role') {
+        this.node_link = this.create_node('node-role', this.link_name);
+      } else {
+        this.node_link = this.create_node('node-attribute', this.link_name);
+      }
+      this.edge_source = this.create_edge(this.node_link, this.source, "source-edge");
+      return this.edge_target = this.create_edge(this.node_link, this.target, "target-edge");
+    }
+
+    create_concept() {
+      if (this.node_var1 === null || this.node_var1 === void 0) {
+        this.node_var1 = this.create_node('node-variable');
+        this.node_var1.classes('node-variable node-variable-full-options');
+      }
+      this.node_var1.data('links').push(this);
+      this.node_concept = this.create_node('node-concept');
+      return this.create_edge(this.node_var1, this.node_concept, 'edge-concept');
+    }
+
+  };
+
+  color_index = 0;
+
+  return PainlessLink;
+
+}).call(this);
+
+// TinyColor v1.4.1
+// https://github.com/bgrins/TinyColor
+// 2016-07-07, Brian Grinstead, MIT License
+!function(a){function b(a,d){if(a=a?a:"",d=d||{},a instanceof b)return a;if(!(this instanceof b))return new b(a,d);var e=c(a);this._originalInput=a,this._r=e.r,this._g=e.g,this._b=e.b,this._a=e.a,this._roundA=P(100*this._a)/100,this._format=d.format||e.format,this._gradientType=d.gradientType,this._r<1&&(this._r=P(this._r)),this._g<1&&(this._g=P(this._g)),this._b<1&&(this._b=P(this._b)),this._ok=e.ok,this._tc_id=O++}function c(a){var b={r:0,g:0,b:0},c=1,e=null,g=null,i=null,j=!1,k=!1;return"string"==typeof a&&(a=K(a)),"object"==typeof a&&(J(a.r)&&J(a.g)&&J(a.b)?(b=d(a.r,a.g,a.b),j=!0,k="%"===String(a.r).substr(-1)?"prgb":"rgb"):J(a.h)&&J(a.s)&&J(a.v)?(e=G(a.s),g=G(a.v),b=h(a.h,e,g),j=!0,k="hsv"):J(a.h)&&J(a.s)&&J(a.l)&&(e=G(a.s),i=G(a.l),b=f(a.h,e,i),j=!0,k="hsl"),a.hasOwnProperty("a")&&(c=a.a)),c=z(c),{ok:j,format:a.format||k,r:Q(255,R(b.r,0)),g:Q(255,R(b.g,0)),b:Q(255,R(b.b,0)),a:c}}function d(a,b,c){return{r:255*A(a,255),g:255*A(b,255),b:255*A(c,255)}}function e(a,b,c){a=A(a,255),b=A(b,255),c=A(c,255);var d,e,f=R(a,b,c),g=Q(a,b,c),h=(f+g)/2;if(f==g)d=e=0;else{var i=f-g;switch(e=h>.5?i/(2-f-g):i/(f+g),f){case a:d=(b-c)/i+(c>b?6:0);break;case b:d=(c-a)/i+2;break;case c:d=(a-b)/i+4}d/=6}return{h:d,s:e,l:h}}function f(a,b,c){function d(a,b,c){return 0>c&&(c+=1),c>1&&(c-=1),1/6>c?a+6*(b-a)*c:.5>c?b:2/3>c?a+6*(b-a)*(2/3-c):a}var e,f,g;if(a=A(a,360),b=A(b,100),c=A(c,100),0===b)e=f=g=c;else{var h=.5>c?c*(1+b):c+b-c*b,i=2*c-h;e=d(i,h,a+1/3),f=d(i,h,a),g=d(i,h,a-1/3)}return{r:255*e,g:255*f,b:255*g}}function g(a,b,c){a=A(a,255),b=A(b,255),c=A(c,255);var d,e,f=R(a,b,c),g=Q(a,b,c),h=f,i=f-g;if(e=0===f?0:i/f,f==g)d=0;else{switch(f){case a:d=(b-c)/i+(c>b?6:0);break;case b:d=(c-a)/i+2;break;case c:d=(a-b)/i+4}d/=6}return{h:d,s:e,v:h}}function h(b,c,d){b=6*A(b,360),c=A(c,100),d=A(d,100);var e=a.floor(b),f=b-e,g=d*(1-c),h=d*(1-f*c),i=d*(1-(1-f)*c),j=e%6,k=[d,h,g,g,i,d][j],l=[i,d,d,h,g,g][j],m=[g,g,i,d,d,h][j];return{r:255*k,g:255*l,b:255*m}}function i(a,b,c,d){var e=[F(P(a).toString(16)),F(P(b).toString(16)),F(P(c).toString(16))];return d&&e[0].charAt(0)==e[0].charAt(1)&&e[1].charAt(0)==e[1].charAt(1)&&e[2].charAt(0)==e[2].charAt(1)?e[0].charAt(0)+e[1].charAt(0)+e[2].charAt(0):e.join("")}function j(a,b,c,d,e){var f=[F(P(a).toString(16)),F(P(b).toString(16)),F(P(c).toString(16)),F(H(d))];return e&&f[0].charAt(0)==f[0].charAt(1)&&f[1].charAt(0)==f[1].charAt(1)&&f[2].charAt(0)==f[2].charAt(1)&&f[3].charAt(0)==f[3].charAt(1)?f[0].charAt(0)+f[1].charAt(0)+f[2].charAt(0)+f[3].charAt(0):f.join("")}function k(a,b,c,d){var e=[F(H(d)),F(P(a).toString(16)),F(P(b).toString(16)),F(P(c).toString(16))];return e.join("")}function l(a,c){c=0===c?0:c||10;var d=b(a).toHsl();return d.s-=c/100,d.s=B(d.s),b(d)}function m(a,c){c=0===c?0:c||10;var d=b(a).toHsl();return d.s+=c/100,d.s=B(d.s),b(d)}function n(a){return b(a).desaturate(100)}function o(a,c){c=0===c?0:c||10;var d=b(a).toHsl();return d.l+=c/100,d.l=B(d.l),b(d)}function p(a,c){c=0===c?0:c||10;var d=b(a).toRgb();return d.r=R(0,Q(255,d.r-P(255*-(c/100)))),d.g=R(0,Q(255,d.g-P(255*-(c/100)))),d.b=R(0,Q(255,d.b-P(255*-(c/100)))),b(d)}function q(a,c){c=0===c?0:c||10;var d=b(a).toHsl();return d.l-=c/100,d.l=B(d.l),b(d)}function r(a,c){var d=b(a).toHsl(),e=(d.h+c)%360;return d.h=0>e?360+e:e,b(d)}function s(a){var c=b(a).toHsl();return c.h=(c.h+180)%360,b(c)}function t(a){var c=b(a).toHsl(),d=c.h;return[b(a),b({h:(d+120)%360,s:c.s,l:c.l}),b({h:(d+240)%360,s:c.s,l:c.l})]}function u(a){var c=b(a).toHsl(),d=c.h;return[b(a),b({h:(d+90)%360,s:c.s,l:c.l}),b({h:(d+180)%360,s:c.s,l:c.l}),b({h:(d+270)%360,s:c.s,l:c.l})]}function v(a){var c=b(a).toHsl(),d=c.h;return[b(a),b({h:(d+72)%360,s:c.s,l:c.l}),b({h:(d+216)%360,s:c.s,l:c.l})]}function w(a,c,d){c=c||6,d=d||30;var e=b(a).toHsl(),f=360/d,g=[b(a)];for(e.h=(e.h-(f*c>>1)+720)%360;--c;)e.h=(e.h+f)%360,g.push(b(e));return g}function x(a,c){c=c||6;for(var d=b(a).toHsv(),e=d.h,f=d.s,g=d.v,h=[],i=1/c;c--;)h.push(b({h:e,s:f,v:g})),g=(g+i)%1;return h}function y(a){var b={};for(var c in a)a.hasOwnProperty(c)&&(b[a[c]]=c);return b}function z(a){return a=parseFloat(a),(isNaN(a)||0>a||a>1)&&(a=1),a}function A(b,c){D(b)&&(b="100%");var d=E(b);return b=Q(c,R(0,parseFloat(b))),d&&(b=parseInt(b*c,10)/100),a.abs(b-c)<1e-6?1:b%c/parseFloat(c)}function B(a){return Q(1,R(0,a))}function C(a){return parseInt(a,16)}function D(a){return"string"==typeof a&&-1!=a.indexOf(".")&&1===parseFloat(a)}function E(a){return"string"==typeof a&&-1!=a.indexOf("%")}function F(a){return 1==a.length?"0"+a:""+a}function G(a){return 1>=a&&(a=100*a+"%"),a}function H(b){return a.round(255*parseFloat(b)).toString(16)}function I(a){return C(a)/255}function J(a){return!!V.CSS_UNIT.exec(a)}function K(a){a=a.replace(M,"").replace(N,"").toLowerCase();var b=!1;if(T[a])a=T[a],b=!0;else if("transparent"==a)return{r:0,g:0,b:0,a:0,format:"name"};var c;return(c=V.rgb.exec(a))?{r:c[1],g:c[2],b:c[3]}:(c=V.rgba.exec(a))?{r:c[1],g:c[2],b:c[3],a:c[4]}:(c=V.hsl.exec(a))?{h:c[1],s:c[2],l:c[3]}:(c=V.hsla.exec(a))?{h:c[1],s:c[2],l:c[3],a:c[4]}:(c=V.hsv.exec(a))?{h:c[1],s:c[2],v:c[3]}:(c=V.hsva.exec(a))?{h:c[1],s:c[2],v:c[3],a:c[4]}:(c=V.hex8.exec(a))?{r:C(c[1]),g:C(c[2]),b:C(c[3]),a:I(c[4]),format:b?"name":"hex8"}:(c=V.hex6.exec(a))?{r:C(c[1]),g:C(c[2]),b:C(c[3]),format:b?"name":"hex"}:(c=V.hex4.exec(a))?{r:C(c[1]+""+c[1]),g:C(c[2]+""+c[2]),b:C(c[3]+""+c[3]),a:I(c[4]+""+c[4]),format:b?"name":"hex8"}:(c=V.hex3.exec(a))?{r:C(c[1]+""+c[1]),g:C(c[2]+""+c[2]),b:C(c[3]+""+c[3]),format:b?"name":"hex"}:!1}function L(a){var b,c;return a=a||{level:"AA",size:"small"},b=(a.level||"AA").toUpperCase(),c=(a.size||"small").toLowerCase(),"AA"!==b&&"AAA"!==b&&(b="AA"),"small"!==c&&"large"!==c&&(c="small"),{level:b,size:c}}var M=/^\s+/,N=/\s+$/,O=0,P=a.round,Q=a.min,R=a.max,S=a.random;b.prototype={isDark:function(){return this.getBrightness()<128},isLight:function(){return!this.isDark()},isValid:function(){return this._ok},getOriginalInput:function(){return this._originalInput},getFormat:function(){return this._format},getAlpha:function(){return this._a},getBrightness:function(){var a=this.toRgb();return(299*a.r+587*a.g+114*a.b)/1e3},getLuminance:function(){var b,c,d,e,f,g,h=this.toRgb();return b=h.r/255,c=h.g/255,d=h.b/255,e=.03928>=b?b/12.92:a.pow((b+.055)/1.055,2.4),f=.03928>=c?c/12.92:a.pow((c+.055)/1.055,2.4),g=.03928>=d?d/12.92:a.pow((d+.055)/1.055,2.4),.2126*e+.7152*f+.0722*g},setAlpha:function(a){return this._a=z(a),this._roundA=P(100*this._a)/100,this},toHsv:function(){var a=g(this._r,this._g,this._b);return{h:360*a.h,s:a.s,v:a.v,a:this._a}},toHsvString:function(){var a=g(this._r,this._g,this._b),b=P(360*a.h),c=P(100*a.s),d=P(100*a.v);return 1==this._a?"hsv("+b+", "+c+"%, "+d+"%)":"hsva("+b+", "+c+"%, "+d+"%, "+this._roundA+")"},toHsl:function(){var a=e(this._r,this._g,this._b);return{h:360*a.h,s:a.s,l:a.l,a:this._a}},toHslString:function(){var a=e(this._r,this._g,this._b),b=P(360*a.h),c=P(100*a.s),d=P(100*a.l);return 1==this._a?"hsl("+b+", "+c+"%, "+d+"%)":"hsla("+b+", "+c+"%, "+d+"%, "+this._roundA+")"},toHex:function(a){return i(this._r,this._g,this._b,a)},toHexString:function(a){return"#"+this.toHex(a)},toHex8:function(a){return j(this._r,this._g,this._b,this._a,a)},toHex8String:function(a){return"#"+this.toHex8(a)},toRgb:function(){return{r:P(this._r),g:P(this._g),b:P(this._b),a:this._a}},toRgbString:function(){return 1==this._a?"rgb("+P(this._r)+", "+P(this._g)+", "+P(this._b)+")":"rgba("+P(this._r)+", "+P(this._g)+", "+P(this._b)+", "+this._roundA+")"},toPercentageRgb:function(){return{r:P(100*A(this._r,255))+"%",g:P(100*A(this._g,255))+"%",b:P(100*A(this._b,255))+"%",a:this._a}},toPercentageRgbString:function(){return 1==this._a?"rgb("+P(100*A(this._r,255))+"%, "+P(100*A(this._g,255))+"%, "+P(100*A(this._b,255))+"%)":"rgba("+P(100*A(this._r,255))+"%, "+P(100*A(this._g,255))+"%, "+P(100*A(this._b,255))+"%, "+this._roundA+")"},toName:function(){return 0===this._a?"transparent":this._a<1?!1:U[i(this._r,this._g,this._b,!0)]||!1},toFilter:function(a){var c="#"+k(this._r,this._g,this._b,this._a),d=c,e=this._gradientType?"GradientType = 1, ":"";if(a){var f=b(a);d="#"+k(f._r,f._g,f._b,f._a)}return"progid:DXImageTransform.Microsoft.gradient("+e+"startColorstr="+c+",endColorstr="+d+")"},toString:function(a){var b=!!a;a=a||this._format;var c=!1,d=this._a<1&&this._a>=0,e=!b&&d&&("hex"===a||"hex6"===a||"hex3"===a||"hex4"===a||"hex8"===a||"name"===a);return e?"name"===a&&0===this._a?this.toName():this.toRgbString():("rgb"===a&&(c=this.toRgbString()),"prgb"===a&&(c=this.toPercentageRgbString()),("hex"===a||"hex6"===a)&&(c=this.toHexString()),"hex3"===a&&(c=this.toHexString(!0)),"hex4"===a&&(c=this.toHex8String(!0)),"hex8"===a&&(c=this.toHex8String()),"name"===a&&(c=this.toName()),"hsl"===a&&(c=this.toHslString()),"hsv"===a&&(c=this.toHsvString()),c||this.toHexString())},clone:function(){return b(this.toString())},_applyModification:function(a,b){var c=a.apply(null,[this].concat([].slice.call(b)));return this._r=c._r,this._g=c._g,this._b=c._b,this.setAlpha(c._a),this},lighten:function(){return this._applyModification(o,arguments)},brighten:function(){return this._applyModification(p,arguments)},darken:function(){return this._applyModification(q,arguments)},desaturate:function(){return this._applyModification(l,arguments)},saturate:function(){return this._applyModification(m,arguments)},greyscale:function(){return this._applyModification(n,arguments)},spin:function(){return this._applyModification(r,arguments)},_applyCombination:function(a,b){return a.apply(null,[this].concat([].slice.call(b)))},analogous:function(){return this._applyCombination(w,arguments)},complement:function(){return this._applyCombination(s,arguments)},monochromatic:function(){return this._applyCombination(x,arguments)},splitcomplement:function(){return this._applyCombination(v,arguments)},triad:function(){return this._applyCombination(t,arguments)},tetrad:function(){return this._applyCombination(u,arguments)}},b.fromRatio=function(a,c){if("object"==typeof a){var d={};for(var e in a)a.hasOwnProperty(e)&&(d[e]="a"===e?a[e]:G(a[e]));a=d}return b(a,c)},b.equals=function(a,c){return a&&c?b(a).toRgbString()==b(c).toRgbString():!1},b.random=function(){return b.fromRatio({r:S(),g:S(),b:S()})},b.mix=function(a,c,d){d=0===d?0:d||50;var e=b(a).toRgb(),f=b(c).toRgb(),g=d/100,h={r:(f.r-e.r)*g+e.r,g:(f.g-e.g)*g+e.g,b:(f.b-e.b)*g+e.b,a:(f.a-e.a)*g+e.a};return b(h)},b.readability=function(c,d){var e=b(c),f=b(d);return(a.max(e.getLuminance(),f.getLuminance())+.05)/(a.min(e.getLuminance(),f.getLuminance())+.05)},b.isReadable=function(a,c,d){var e,f,g=b.readability(a,c);switch(f=!1,e=L(d),e.level+e.size){case"AAsmall":case"AAAlarge":f=g>=4.5;break;case"AAlarge":f=g>=3;break;case"AAAsmall":f=g>=7}return f},b.mostReadable=function(a,c,d){var e,f,g,h,i=null,j=0;d=d||{},f=d.includeFallbackColors,g=d.level,h=d.size;for(var k=0;k<c.length;k++)e=b.readability(a,c[k]),e>j&&(j=e,i=b(c[k]));return b.isReadable(a,i,{level:g,size:h})||!f?i:(d.includeFallbackColors=!1,b.mostReadable(a,["#fff","#000"],d))};var T=b.names={aliceblue:"f0f8ff",antiquewhite:"faebd7",aqua:"0ff",aquamarine:"7fffd4",azure:"f0ffff",beige:"f5f5dc",bisque:"ffe4c4",black:"000",blanchedalmond:"ffebcd",blue:"00f",blueviolet:"8a2be2",brown:"a52a2a",burlywood:"deb887",burntsienna:"ea7e5d",cadetblue:"5f9ea0",chartreuse:"7fff00",chocolate:"d2691e",coral:"ff7f50",cornflowerblue:"6495ed",cornsilk:"fff8dc",crimson:"dc143c",cyan:"0ff",darkblue:"00008b",darkcyan:"008b8b",darkgoldenrod:"b8860b",darkgray:"a9a9a9",darkgreen:"006400",darkgrey:"a9a9a9",darkkhaki:"bdb76b",darkmagenta:"8b008b",darkolivegreen:"556b2f",darkorange:"ff8c00",darkorchid:"9932cc",darkred:"8b0000",darksalmon:"e9967a",darkseagreen:"8fbc8f",darkslateblue:"483d8b",darkslategray:"2f4f4f",darkslategrey:"2f4f4f",darkturquoise:"00ced1",darkviolet:"9400d3",deeppink:"ff1493",deepskyblue:"00bfff",dimgray:"696969",dimgrey:"696969",dodgerblue:"1e90ff",firebrick:"b22222",floralwhite:"fffaf0",forestgreen:"228b22",fuchsia:"f0f",gainsboro:"dcdcdc",ghostwhite:"f8f8ff",gold:"ffd700",goldenrod:"daa520",gray:"808080",green:"008000",greenyellow:"adff2f",grey:"808080",honeydew:"f0fff0",hotpink:"ff69b4",indianred:"cd5c5c",indigo:"4b0082",ivory:"fffff0",khaki:"f0e68c",lavender:"e6e6fa",lavenderblush:"fff0f5",lawngreen:"7cfc00",lemonchiffon:"fffacd",lightblue:"add8e6",lightcoral:"f08080",lightcyan:"e0ffff",lightgoldenrodyellow:"fafad2",lightgray:"d3d3d3",lightgreen:"90ee90",lightgrey:"d3d3d3",lightpink:"ffb6c1",lightsalmon:"ffa07a",lightseagreen:"20b2aa",lightskyblue:"87cefa",lightslategray:"789",lightslategrey:"789",lightsteelblue:"b0c4de",lightyellow:"ffffe0",lime:"0f0",limegreen:"32cd32",linen:"faf0e6",magenta:"f0f",maroon:"800000",mediumaquamarine:"66cdaa",mediumblue:"0000cd",mediumorchid:"ba55d3",mediumpurple:"9370db",mediumseagreen:"3cb371",mediumslateblue:"7b68ee",mediumspringgreen:"00fa9a",mediumturquoise:"48d1cc",mediumvioletred:"c71585",midnightblue:"191970",mintcream:"f5fffa",mistyrose:"ffe4e1",moccasin:"ffe4b5",navajowhite:"ffdead",navy:"000080",oldlace:"fdf5e6",olive:"808000",olivedrab:"6b8e23",orange:"ffa500",orangered:"ff4500",orchid:"da70d6",palegoldenrod:"eee8aa",palegreen:"98fb98",paleturquoise:"afeeee",palevioletred:"db7093",papayawhip:"ffefd5",peachpuff:"ffdab9",peru:"cd853f",pink:"ffc0cb",plum:"dda0dd",powderblue:"b0e0e6",purple:"800080",rebeccapurple:"663399",red:"f00",rosybrown:"bc8f8f",royalblue:"4169e1",saddlebrown:"8b4513",salmon:"fa8072",sandybrown:"f4a460",seagreen:"2e8b57",seashell:"fff5ee",sienna:"a0522d",silver:"c0c0c0",skyblue:"87ceeb",slateblue:"6a5acd",slategray:"708090",slategrey:"708090",snow:"fffafa",springgreen:"00ff7f",steelblue:"4682b4",tan:"d2b48c",teal:"008080",thistle:"d8bfd8",tomato:"ff6347",turquoise:"40e0d0",violet:"ee82ee",wheat:"f5deb3",white:"fff",whitesmoke:"f5f5f5",yellow:"ff0",yellowgreen:"9acd32"},U=b.hexNames=y(T),V=function(){var a="[-\\+]?\\d+%?",b="[-\\+]?\\d*\\.\\d+%?",c="(?:"+b+")|(?:"+a+")",d="[\\s|\\(]+("+c+")[,|\\s]+("+c+")[,|\\s]+("+c+")\\s*\\)?",e="[\\s|\\(]+("+c+")[,|\\s]+("+c+")[,|\\s]+("+c+")[,|\\s]+("+c+")\\s*\\)?";return{CSS_UNIT:new RegExp(c),rgb:new RegExp("rgb"+d),rgba:new RegExp("rgba"+e),hsl:new RegExp("hsl"+d),hsla:new RegExp("hsla"+e),hsv:new RegExp("hsv"+d),hsva:new RegExp("hsva"+e),hex3:/^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,hex6:/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/,hex4:/^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,hex8:/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/}}();"undefined"!=typeof module&&module.exports?module.exports=b:"function"==typeof define&&define.amd?define(function(){return b}):window.tinycolor=b}(Math);
+window.PainlessMenu = class PainlessMenu {
+  constructor(context) {
+    this.change_size = this.change_size.bind(this);
+    this.create_navigation_div = this.create_navigation_div.bind(this);
+    this.init = this.init.bind(this);
+    this.context = context;
+    this.init();
+  }
+
+  change_size(query_canvas_size) {
+    this.context.query_canvas.style.height = query_canvas_size + "%";
+    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
+    return setTimeout(() => {
+      return this.context.graph.cy.resize();
+    }, 550);
+  }
+
+  create_div(innerHTML = null, className = null, id = null, onclick = null) {
+    var div;
+    div = document.createElement('div');
+    div.innerHTML = innerHTML;
+    div.className = className;
+    div.id = id;
+    div.onclick = onclick;
+    return div;
+  }
+
+  create_navigation_div() {
+    var nav_div;
+    nav_div = this.create_div(null, null, 'nav_div');
+    nav_div.append(this.create_div('▲', 'resize_button', null, () => {
+      return this.change_size(90);
+    }));
+    nav_div.append(this.create_div('≡', 'resize_button', null, () => {
+      return this.change_size(60);
+    }));
+    nav_div.append(this.create_div('▼', 'resize_button', null, () => {
+      return this.change_size(0);
+    }));
+    return nav_div;
+  }
+
+  init() {
+    var menu;
+    menu = this.create_div(null, null, 'painless_menu');
+    document.getElementById('sidenav').append(menu);
+    menu.append(this.create_navigation_div());
+    menu.append(this.create_div('undo', 'menu_button', null, () => {
+      return this.context.graph.undo();
+    }));
+    menu.append(this.create_div('center view', 'menu_button', null, () => {
+      return this.context.graph.center_view();
+    }));
+    return menu.append(this.create_div('copy to clipboard', 'menu_button', null, () => {
+      return this.context.graph.copy_to_clipboard();
+    }));
+  }
+
+};
+
 window.PainlessSparql = (function() {
   class PainlessSparql {
     constructor(graph) {
@@ -9455,10 +8436,6 @@ window.PainlessSparql = (function() {
 
 }).call(this);
 
-// TinyColor v1.4.1
-// https://github.com/bgrins/TinyColor
-// 2016-07-07, Brian Grinstead, MIT License
-!function(a){function b(a,d){if(a=a?a:"",d=d||{},a instanceof b)return a;if(!(this instanceof b))return new b(a,d);var e=c(a);this._originalInput=a,this._r=e.r,this._g=e.g,this._b=e.b,this._a=e.a,this._roundA=P(100*this._a)/100,this._format=d.format||e.format,this._gradientType=d.gradientType,this._r<1&&(this._r=P(this._r)),this._g<1&&(this._g=P(this._g)),this._b<1&&(this._b=P(this._b)),this._ok=e.ok,this._tc_id=O++}function c(a){var b={r:0,g:0,b:0},c=1,e=null,g=null,i=null,j=!1,k=!1;return"string"==typeof a&&(a=K(a)),"object"==typeof a&&(J(a.r)&&J(a.g)&&J(a.b)?(b=d(a.r,a.g,a.b),j=!0,k="%"===String(a.r).substr(-1)?"prgb":"rgb"):J(a.h)&&J(a.s)&&J(a.v)?(e=G(a.s),g=G(a.v),b=h(a.h,e,g),j=!0,k="hsv"):J(a.h)&&J(a.s)&&J(a.l)&&(e=G(a.s),i=G(a.l),b=f(a.h,e,i),j=!0,k="hsl"),a.hasOwnProperty("a")&&(c=a.a)),c=z(c),{ok:j,format:a.format||k,r:Q(255,R(b.r,0)),g:Q(255,R(b.g,0)),b:Q(255,R(b.b,0)),a:c}}function d(a,b,c){return{r:255*A(a,255),g:255*A(b,255),b:255*A(c,255)}}function e(a,b,c){a=A(a,255),b=A(b,255),c=A(c,255);var d,e,f=R(a,b,c),g=Q(a,b,c),h=(f+g)/2;if(f==g)d=e=0;else{var i=f-g;switch(e=h>.5?i/(2-f-g):i/(f+g),f){case a:d=(b-c)/i+(c>b?6:0);break;case b:d=(c-a)/i+2;break;case c:d=(a-b)/i+4}d/=6}return{h:d,s:e,l:h}}function f(a,b,c){function d(a,b,c){return 0>c&&(c+=1),c>1&&(c-=1),1/6>c?a+6*(b-a)*c:.5>c?b:2/3>c?a+6*(b-a)*(2/3-c):a}var e,f,g;if(a=A(a,360),b=A(b,100),c=A(c,100),0===b)e=f=g=c;else{var h=.5>c?c*(1+b):c+b-c*b,i=2*c-h;e=d(i,h,a+1/3),f=d(i,h,a),g=d(i,h,a-1/3)}return{r:255*e,g:255*f,b:255*g}}function g(a,b,c){a=A(a,255),b=A(b,255),c=A(c,255);var d,e,f=R(a,b,c),g=Q(a,b,c),h=f,i=f-g;if(e=0===f?0:i/f,f==g)d=0;else{switch(f){case a:d=(b-c)/i+(c>b?6:0);break;case b:d=(c-a)/i+2;break;case c:d=(a-b)/i+4}d/=6}return{h:d,s:e,v:h}}function h(b,c,d){b=6*A(b,360),c=A(c,100),d=A(d,100);var e=a.floor(b),f=b-e,g=d*(1-c),h=d*(1-f*c),i=d*(1-(1-f)*c),j=e%6,k=[d,h,g,g,i,d][j],l=[i,d,d,h,g,g][j],m=[g,g,i,d,d,h][j];return{r:255*k,g:255*l,b:255*m}}function i(a,b,c,d){var e=[F(P(a).toString(16)),F(P(b).toString(16)),F(P(c).toString(16))];return d&&e[0].charAt(0)==e[0].charAt(1)&&e[1].charAt(0)==e[1].charAt(1)&&e[2].charAt(0)==e[2].charAt(1)?e[0].charAt(0)+e[1].charAt(0)+e[2].charAt(0):e.join("")}function j(a,b,c,d,e){var f=[F(P(a).toString(16)),F(P(b).toString(16)),F(P(c).toString(16)),F(H(d))];return e&&f[0].charAt(0)==f[0].charAt(1)&&f[1].charAt(0)==f[1].charAt(1)&&f[2].charAt(0)==f[2].charAt(1)&&f[3].charAt(0)==f[3].charAt(1)?f[0].charAt(0)+f[1].charAt(0)+f[2].charAt(0)+f[3].charAt(0):f.join("")}function k(a,b,c,d){var e=[F(H(d)),F(P(a).toString(16)),F(P(b).toString(16)),F(P(c).toString(16))];return e.join("")}function l(a,c){c=0===c?0:c||10;var d=b(a).toHsl();return d.s-=c/100,d.s=B(d.s),b(d)}function m(a,c){c=0===c?0:c||10;var d=b(a).toHsl();return d.s+=c/100,d.s=B(d.s),b(d)}function n(a){return b(a).desaturate(100)}function o(a,c){c=0===c?0:c||10;var d=b(a).toHsl();return d.l+=c/100,d.l=B(d.l),b(d)}function p(a,c){c=0===c?0:c||10;var d=b(a).toRgb();return d.r=R(0,Q(255,d.r-P(255*-(c/100)))),d.g=R(0,Q(255,d.g-P(255*-(c/100)))),d.b=R(0,Q(255,d.b-P(255*-(c/100)))),b(d)}function q(a,c){c=0===c?0:c||10;var d=b(a).toHsl();return d.l-=c/100,d.l=B(d.l),b(d)}function r(a,c){var d=b(a).toHsl(),e=(d.h+c)%360;return d.h=0>e?360+e:e,b(d)}function s(a){var c=b(a).toHsl();return c.h=(c.h+180)%360,b(c)}function t(a){var c=b(a).toHsl(),d=c.h;return[b(a),b({h:(d+120)%360,s:c.s,l:c.l}),b({h:(d+240)%360,s:c.s,l:c.l})]}function u(a){var c=b(a).toHsl(),d=c.h;return[b(a),b({h:(d+90)%360,s:c.s,l:c.l}),b({h:(d+180)%360,s:c.s,l:c.l}),b({h:(d+270)%360,s:c.s,l:c.l})]}function v(a){var c=b(a).toHsl(),d=c.h;return[b(a),b({h:(d+72)%360,s:c.s,l:c.l}),b({h:(d+216)%360,s:c.s,l:c.l})]}function w(a,c,d){c=c||6,d=d||30;var e=b(a).toHsl(),f=360/d,g=[b(a)];for(e.h=(e.h-(f*c>>1)+720)%360;--c;)e.h=(e.h+f)%360,g.push(b(e));return g}function x(a,c){c=c||6;for(var d=b(a).toHsv(),e=d.h,f=d.s,g=d.v,h=[],i=1/c;c--;)h.push(b({h:e,s:f,v:g})),g=(g+i)%1;return h}function y(a){var b={};for(var c in a)a.hasOwnProperty(c)&&(b[a[c]]=c);return b}function z(a){return a=parseFloat(a),(isNaN(a)||0>a||a>1)&&(a=1),a}function A(b,c){D(b)&&(b="100%");var d=E(b);return b=Q(c,R(0,parseFloat(b))),d&&(b=parseInt(b*c,10)/100),a.abs(b-c)<1e-6?1:b%c/parseFloat(c)}function B(a){return Q(1,R(0,a))}function C(a){return parseInt(a,16)}function D(a){return"string"==typeof a&&-1!=a.indexOf(".")&&1===parseFloat(a)}function E(a){return"string"==typeof a&&-1!=a.indexOf("%")}function F(a){return 1==a.length?"0"+a:""+a}function G(a){return 1>=a&&(a=100*a+"%"),a}function H(b){return a.round(255*parseFloat(b)).toString(16)}function I(a){return C(a)/255}function J(a){return!!V.CSS_UNIT.exec(a)}function K(a){a=a.replace(M,"").replace(N,"").toLowerCase();var b=!1;if(T[a])a=T[a],b=!0;else if("transparent"==a)return{r:0,g:0,b:0,a:0,format:"name"};var c;return(c=V.rgb.exec(a))?{r:c[1],g:c[2],b:c[3]}:(c=V.rgba.exec(a))?{r:c[1],g:c[2],b:c[3],a:c[4]}:(c=V.hsl.exec(a))?{h:c[1],s:c[2],l:c[3]}:(c=V.hsla.exec(a))?{h:c[1],s:c[2],l:c[3],a:c[4]}:(c=V.hsv.exec(a))?{h:c[1],s:c[2],v:c[3]}:(c=V.hsva.exec(a))?{h:c[1],s:c[2],v:c[3],a:c[4]}:(c=V.hex8.exec(a))?{r:C(c[1]),g:C(c[2]),b:C(c[3]),a:I(c[4]),format:b?"name":"hex8"}:(c=V.hex6.exec(a))?{r:C(c[1]),g:C(c[2]),b:C(c[3]),format:b?"name":"hex"}:(c=V.hex4.exec(a))?{r:C(c[1]+""+c[1]),g:C(c[2]+""+c[2]),b:C(c[3]+""+c[3]),a:I(c[4]+""+c[4]),format:b?"name":"hex8"}:(c=V.hex3.exec(a))?{r:C(c[1]+""+c[1]),g:C(c[2]+""+c[2]),b:C(c[3]+""+c[3]),format:b?"name":"hex"}:!1}function L(a){var b,c;return a=a||{level:"AA",size:"small"},b=(a.level||"AA").toUpperCase(),c=(a.size||"small").toLowerCase(),"AA"!==b&&"AAA"!==b&&(b="AA"),"small"!==c&&"large"!==c&&(c="small"),{level:b,size:c}}var M=/^\s+/,N=/\s+$/,O=0,P=a.round,Q=a.min,R=a.max,S=a.random;b.prototype={isDark:function(){return this.getBrightness()<128},isLight:function(){return!this.isDark()},isValid:function(){return this._ok},getOriginalInput:function(){return this._originalInput},getFormat:function(){return this._format},getAlpha:function(){return this._a},getBrightness:function(){var a=this.toRgb();return(299*a.r+587*a.g+114*a.b)/1e3},getLuminance:function(){var b,c,d,e,f,g,h=this.toRgb();return b=h.r/255,c=h.g/255,d=h.b/255,e=.03928>=b?b/12.92:a.pow((b+.055)/1.055,2.4),f=.03928>=c?c/12.92:a.pow((c+.055)/1.055,2.4),g=.03928>=d?d/12.92:a.pow((d+.055)/1.055,2.4),.2126*e+.7152*f+.0722*g},setAlpha:function(a){return this._a=z(a),this._roundA=P(100*this._a)/100,this},toHsv:function(){var a=g(this._r,this._g,this._b);return{h:360*a.h,s:a.s,v:a.v,a:this._a}},toHsvString:function(){var a=g(this._r,this._g,this._b),b=P(360*a.h),c=P(100*a.s),d=P(100*a.v);return 1==this._a?"hsv("+b+", "+c+"%, "+d+"%)":"hsva("+b+", "+c+"%, "+d+"%, "+this._roundA+")"},toHsl:function(){var a=e(this._r,this._g,this._b);return{h:360*a.h,s:a.s,l:a.l,a:this._a}},toHslString:function(){var a=e(this._r,this._g,this._b),b=P(360*a.h),c=P(100*a.s),d=P(100*a.l);return 1==this._a?"hsl("+b+", "+c+"%, "+d+"%)":"hsla("+b+", "+c+"%, "+d+"%, "+this._roundA+")"},toHex:function(a){return i(this._r,this._g,this._b,a)},toHexString:function(a){return"#"+this.toHex(a)},toHex8:function(a){return j(this._r,this._g,this._b,this._a,a)},toHex8String:function(a){return"#"+this.toHex8(a)},toRgb:function(){return{r:P(this._r),g:P(this._g),b:P(this._b),a:this._a}},toRgbString:function(){return 1==this._a?"rgb("+P(this._r)+", "+P(this._g)+", "+P(this._b)+")":"rgba("+P(this._r)+", "+P(this._g)+", "+P(this._b)+", "+this._roundA+")"},toPercentageRgb:function(){return{r:P(100*A(this._r,255))+"%",g:P(100*A(this._g,255))+"%",b:P(100*A(this._b,255))+"%",a:this._a}},toPercentageRgbString:function(){return 1==this._a?"rgb("+P(100*A(this._r,255))+"%, "+P(100*A(this._g,255))+"%, "+P(100*A(this._b,255))+"%)":"rgba("+P(100*A(this._r,255))+"%, "+P(100*A(this._g,255))+"%, "+P(100*A(this._b,255))+"%, "+this._roundA+")"},toName:function(){return 0===this._a?"transparent":this._a<1?!1:U[i(this._r,this._g,this._b,!0)]||!1},toFilter:function(a){var c="#"+k(this._r,this._g,this._b,this._a),d=c,e=this._gradientType?"GradientType = 1, ":"";if(a){var f=b(a);d="#"+k(f._r,f._g,f._b,f._a)}return"progid:DXImageTransform.Microsoft.gradient("+e+"startColorstr="+c+",endColorstr="+d+")"},toString:function(a){var b=!!a;a=a||this._format;var c=!1,d=this._a<1&&this._a>=0,e=!b&&d&&("hex"===a||"hex6"===a||"hex3"===a||"hex4"===a||"hex8"===a||"name"===a);return e?"name"===a&&0===this._a?this.toName():this.toRgbString():("rgb"===a&&(c=this.toRgbString()),"prgb"===a&&(c=this.toPercentageRgbString()),("hex"===a||"hex6"===a)&&(c=this.toHexString()),"hex3"===a&&(c=this.toHexString(!0)),"hex4"===a&&(c=this.toHex8String(!0)),"hex8"===a&&(c=this.toHex8String()),"name"===a&&(c=this.toName()),"hsl"===a&&(c=this.toHslString()),"hsv"===a&&(c=this.toHsvString()),c||this.toHexString())},clone:function(){return b(this.toString())},_applyModification:function(a,b){var c=a.apply(null,[this].concat([].slice.call(b)));return this._r=c._r,this._g=c._g,this._b=c._b,this.setAlpha(c._a),this},lighten:function(){return this._applyModification(o,arguments)},brighten:function(){return this._applyModification(p,arguments)},darken:function(){return this._applyModification(q,arguments)},desaturate:function(){return this._applyModification(l,arguments)},saturate:function(){return this._applyModification(m,arguments)},greyscale:function(){return this._applyModification(n,arguments)},spin:function(){return this._applyModification(r,arguments)},_applyCombination:function(a,b){return a.apply(null,[this].concat([].slice.call(b)))},analogous:function(){return this._applyCombination(w,arguments)},complement:function(){return this._applyCombination(s,arguments)},monochromatic:function(){return this._applyCombination(x,arguments)},splitcomplement:function(){return this._applyCombination(v,arguments)},triad:function(){return this._applyCombination(t,arguments)},tetrad:function(){return this._applyCombination(u,arguments)}},b.fromRatio=function(a,c){if("object"==typeof a){var d={};for(var e in a)a.hasOwnProperty(e)&&(d[e]="a"===e?a[e]:G(a[e]));a=d}return b(a,c)},b.equals=function(a,c){return a&&c?b(a).toRgbString()==b(c).toRgbString():!1},b.random=function(){return b.fromRatio({r:S(),g:S(),b:S()})},b.mix=function(a,c,d){d=0===d?0:d||50;var e=b(a).toRgb(),f=b(c).toRgb(),g=d/100,h={r:(f.r-e.r)*g+e.r,g:(f.g-e.g)*g+e.g,b:(f.b-e.b)*g+e.b,a:(f.a-e.a)*g+e.a};return b(h)},b.readability=function(c,d){var e=b(c),f=b(d);return(a.max(e.getLuminance(),f.getLuminance())+.05)/(a.min(e.getLuminance(),f.getLuminance())+.05)},b.isReadable=function(a,c,d){var e,f,g=b.readability(a,c);switch(f=!1,e=L(d),e.level+e.size){case"AAsmall":case"AAAlarge":f=g>=4.5;break;case"AAlarge":f=g>=3;break;case"AAAsmall":f=g>=7}return f},b.mostReadable=function(a,c,d){var e,f,g,h,i=null,j=0;d=d||{},f=d.includeFallbackColors,g=d.level,h=d.size;for(var k=0;k<c.length;k++)e=b.readability(a,c[k]),e>j&&(j=e,i=b(c[k]));return b.isReadable(a,i,{level:g,size:h})||!f?i:(d.includeFallbackColors=!1,b.mostReadable(a,["#fff","#000"],d))};var T=b.names={aliceblue:"f0f8ff",antiquewhite:"faebd7",aqua:"0ff",aquamarine:"7fffd4",azure:"f0ffff",beige:"f5f5dc",bisque:"ffe4c4",black:"000",blanchedalmond:"ffebcd",blue:"00f",blueviolet:"8a2be2",brown:"a52a2a",burlywood:"deb887",burntsienna:"ea7e5d",cadetblue:"5f9ea0",chartreuse:"7fff00",chocolate:"d2691e",coral:"ff7f50",cornflowerblue:"6495ed",cornsilk:"fff8dc",crimson:"dc143c",cyan:"0ff",darkblue:"00008b",darkcyan:"008b8b",darkgoldenrod:"b8860b",darkgray:"a9a9a9",darkgreen:"006400",darkgrey:"a9a9a9",darkkhaki:"bdb76b",darkmagenta:"8b008b",darkolivegreen:"556b2f",darkorange:"ff8c00",darkorchid:"9932cc",darkred:"8b0000",darksalmon:"e9967a",darkseagreen:"8fbc8f",darkslateblue:"483d8b",darkslategray:"2f4f4f",darkslategrey:"2f4f4f",darkturquoise:"00ced1",darkviolet:"9400d3",deeppink:"ff1493",deepskyblue:"00bfff",dimgray:"696969",dimgrey:"696969",dodgerblue:"1e90ff",firebrick:"b22222",floralwhite:"fffaf0",forestgreen:"228b22",fuchsia:"f0f",gainsboro:"dcdcdc",ghostwhite:"f8f8ff",gold:"ffd700",goldenrod:"daa520",gray:"808080",green:"008000",greenyellow:"adff2f",grey:"808080",honeydew:"f0fff0",hotpink:"ff69b4",indianred:"cd5c5c",indigo:"4b0082",ivory:"fffff0",khaki:"f0e68c",lavender:"e6e6fa",lavenderblush:"fff0f5",lawngreen:"7cfc00",lemonchiffon:"fffacd",lightblue:"add8e6",lightcoral:"f08080",lightcyan:"e0ffff",lightgoldenrodyellow:"fafad2",lightgray:"d3d3d3",lightgreen:"90ee90",lightgrey:"d3d3d3",lightpink:"ffb6c1",lightsalmon:"ffa07a",lightseagreen:"20b2aa",lightskyblue:"87cefa",lightslategray:"789",lightslategrey:"789",lightsteelblue:"b0c4de",lightyellow:"ffffe0",lime:"0f0",limegreen:"32cd32",linen:"faf0e6",magenta:"f0f",maroon:"800000",mediumaquamarine:"66cdaa",mediumblue:"0000cd",mediumorchid:"ba55d3",mediumpurple:"9370db",mediumseagreen:"3cb371",mediumslateblue:"7b68ee",mediumspringgreen:"00fa9a",mediumturquoise:"48d1cc",mediumvioletred:"c71585",midnightblue:"191970",mintcream:"f5fffa",mistyrose:"ffe4e1",moccasin:"ffe4b5",navajowhite:"ffdead",navy:"000080",oldlace:"fdf5e6",olive:"808000",olivedrab:"6b8e23",orange:"ffa500",orangered:"ff4500",orchid:"da70d6",palegoldenrod:"eee8aa",palegreen:"98fb98",paleturquoise:"afeeee",palevioletred:"db7093",papayawhip:"ffefd5",peachpuff:"ffdab9",peru:"cd853f",pink:"ffc0cb",plum:"dda0dd",powderblue:"b0e0e6",purple:"800080",rebeccapurple:"663399",red:"f00",rosybrown:"bc8f8f",royalblue:"4169e1",saddlebrown:"8b4513",salmon:"fa8072",sandybrown:"f4a460",seagreen:"2e8b57",seashell:"fff5ee",sienna:"a0522d",silver:"c0c0c0",skyblue:"87ceeb",slateblue:"6a5acd",slategray:"708090",slategrey:"708090",snow:"fffafa",springgreen:"00ff7f",steelblue:"4682b4",tan:"d2b48c",teal:"008080",thistle:"d8bfd8",tomato:"ff6347",turquoise:"40e0d0",violet:"ee82ee",wheat:"f5deb3",white:"fff",whitesmoke:"f5f5f5",yellow:"ff0",yellowgreen:"9acd32"},U=b.hexNames=y(T),V=function(){var a="[-\\+]?\\d+%?",b="[-\\+]?\\d*\\.\\d+%?",c="(?:"+b+")|(?:"+a+")",d="[\\s|\\(]+("+c+")[,|\\s]+("+c+")[,|\\s]+("+c+")\\s*\\)?",e="[\\s|\\(]+("+c+")[,|\\s]+("+c+")[,|\\s]+("+c+")[,|\\s]+("+c+")\\s*\\)?";return{CSS_UNIT:new RegExp(c),rgb:new RegExp("rgb"+d),rgba:new RegExp("rgba"+e),hsl:new RegExp("hsl"+d),hsla:new RegExp("hsla"+e),hsv:new RegExp("hsv"+d),hsva:new RegExp("hsva"+e),hex3:/^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,hex6:/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/,hex4:/^#?([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})$/,hex8:/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/}}();"undefined"!=typeof module&&module.exports?module.exports=b:"function"==typeof define&&define.amd?define(function(){return b}):window.tinycolor=b}(Math);
 window.QueryFilter = class QueryFilter {
   constructor(node_id) {
     this.new_condition = this.new_condition.bind(this);

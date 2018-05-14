@@ -51,6 +51,7 @@ class window.PainlessGraph
         ###
         @cy.layout({
             name:'cose-bilkent'
+            fit: false
         }).run()
 
 
