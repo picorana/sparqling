@@ -7,7 +7,7 @@ class window.PainlessMenu
 
     change_size: (query_canvas_size) =>
         @context.query_canvas.style.height = query_canvas_size + "%"
-        sparql_textbox.style.height = (100 - 15 - query_canvas_size) + "%"
+        sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%"
         setTimeout => 
             @context.graph.cy.resize()
         , 550

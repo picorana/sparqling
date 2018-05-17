@@ -3,7 +3,8 @@ class window.Void
 
     constructor: ->
         @div = document.createElement('div')
-        @div.innerHTML = "&nbsp;void"
+        @div.className = 'void_box'
+        @div.innerHTML = "&nbsp;&nbsp;&nbsp;"
 
     to_html: =>
         return @div

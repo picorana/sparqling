@@ -43,6 +43,7 @@ class window.PainlessSparql
 
         side_nav_container = document.createElement("div")
         side_nav_container.id = "sidenav_container"
+        side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
 
         document.body.appendChild(side_nav_container)
 
@@ -96,6 +97,7 @@ class window.PainlessSparql
         side_nav.id = "sidenav";
         side_nav.className = "sidenav";
         side_nav.style.display = 'inline-block'
+        side_nav.style.width = cur_sidenav_size + '%'
         side_nav_container.appendChild(side_nav);
 
         sparql_textbox = document.createElement("div");
@@ -109,31 +111,6 @@ class window.PainlessSparql
 
         @graph = new PainlessGraph(@query_canvas)
 
-        ###*
-        slider = document.createElement("div")
-        slider.className = "slidecontainer"
-        slider_range = document.createElement("input")
-        slider_range.type = "range"
-        slider_range.min = 1
-        slider_range.max = 100
-        slider_range.value = 48
-        slider_range.step = 0.5
-        slider_range.className = 'slider'
-        slider.appendChild(slider_range)
-
-        slider_val = 50
-        slider_range.oninput = (s) ->
-            slider_val = this.value
-            console.log slider_val
-        slider_range.onmousemove = slider_range.onmouseup = () =>
-            side_nav.style.width = (document.documentElement.clientWidth * (100-slider_val))/100 + "px"
-            setTimeout(()=> 
-                @graph.cy.resize()
-            , 550)
-        document.body.appendChild(slider)
-        *###
-
-
     open_nav : -> 
         document.getElementById("sidenav").style.width = "50%";
 
@@ -143,6 +120,7 @@ class window.PainlessSparql
 
 
     onkeypress_handler : (event) =>
+
         if event.key == "a" 
             #@open_nav()
         
@@ -156,6 +134,10 @@ class window.PainlessSparql
             @graph.layout_index += 1
             @graph.reshape()
             console.log @graph.layout
+
+        else if event.keyCode == 46 or event.keyCode == 8 or event.keyCode == 127
+            for link in @graph.cy.nodes(":selected").data('links')
+                link.delete()
 
 
     add_event_listener : ->

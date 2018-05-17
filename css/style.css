@@ -78,7 +78,7 @@
 
 .cxtmenu-content{
     font-size: xx-small;
-    font-family: "Courier New";
+    font-family: "Roboto";
 }
 
 /* 	
@@ -143,8 +143,10 @@
 
 .resize_button {
     width: 25px;
+    position: relative;
     vertical-align: middle;
     display: inline-block;
+    z-index: 10000;
 }
 
 /* 	
@@ -175,10 +177,10 @@
     display: inline-block;
     float: left;
     transition: 0.5s;
+    cursor: pointer;
 }
 
 .highlighting_box:hover {
-	cursor: grab;
 	-webkit-box-shadow: 2px 2px 2px 2px #888;
   	-webkit-box-shadow: 2px 2px 2px 2px #888;
   	box-shadow:         2px 2px 2px 2px #888;
@@ -188,6 +190,17 @@
     text-align: left;
     font-family: "Courier New";
     display: table;
+}
+
+.filter_button {
+	background-color: #93a1a1;
+	color: #073642;
+	font-size: x-small;
+	border-radius: 100px;
+	display: inline-block;
+	padding: 2px;
+	font-weight: bold;
+	cursor: pointer;
 }
 
 .dragslot_select {
@@ -235,12 +248,20 @@
 .filter_condition_container {
 	display: inline-block;
 	padding: 3px;
-	background-color: #666;
+	background-color: #586e75;
 	border-radius: 10px;
 }
 
 .filter_condition_container > div, .filter_condition_container > div > div {
 	display: inline-block;
+}
+
+.void_box {
+   -moz-box-shadow:    inset 0 8px 6px -6px #000000;
+   -webkit-box-shadow: inset 0 8px 6px -6px #000000;
+   box-shadow:         inset 0 8px 6px -6px #000000;
+   border-radius: 100px;
+   background-color: #073642;
 }
 
 /* 	

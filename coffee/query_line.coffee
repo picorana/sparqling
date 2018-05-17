@@ -13,7 +13,7 @@ class window.QueryLine
             q_line.append(@create_highlighting_box(@link.node_var1))
             
             f = document.createElement("div")
-            f.innerHTML = ("&nbsp;rdf:type " + @link.node_concept.data('label') + " .")
+            f.innerHTML = ("rdf:type " + @link.node_concept.data('label') + " .")
             
             q_line.append(f)
 
@@ -75,19 +75,28 @@ class window.QueryLine
         st.id = node.id() + Math.round(Math.random()*1000)
         st.dataset.prevname = node.id()
         st.dataset.node_id = node.id()
-        st.setAttribute('draggable', true)
-        st.setAttribute('contenteditable', 'true')
-        st.addEventListener('dragstart',
-            (ev) ->
-                ev.dataTransfer.setData("text", ev.target.id);
-        )
-        st.onkeyup =  () => @rename(st) 
+        st.ondblclick = () =>
+            st.setAttribute('contenteditable', 'true')
+            @sparql_text.cy.center(node)
+            setTimeout(() => 
+                st.focus()
+            , 0);
+
+            st.onkeydown = (event) =>
+                node.data('label', st.innerHTML)
+
+                if event.keyCode == 13
+                    event.preventDefault();
+                    if st.innerHTML.length <= 2
+                        st.innerHTML = node.id()
+                    st.setAttribute('contenteditable', 'false')
+                    @sparql_text.update()
         st.onmouseover = ($) ->
             node.addClass("highlight")
         st.onmouseout = ($) ->
             node.removeClass("highlight")
         st.onclick = ($) =>
-            @cy.nodes().unselect()
+            @sparql_text.cy.nodes().unselect()
             node.select()
         st.innerHTML = node.data('label')
         st.style.backgroundColor = node.data('color')

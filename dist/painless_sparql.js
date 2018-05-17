@@ -8284,7 +8284,7 @@ window.PainlessMenu = class PainlessMenu {
 
   change_size(query_canvas_size) {
     this.context.query_canvas.style.height = query_canvas_size + "%";
-    sparql_textbox.style.height = (100 - 15 - query_canvas_size) + "%";
+    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
     return setTimeout(() => {
       return this.context.graph.cy.resize();
     }, 550);
@@ -8745,6 +8745,7 @@ window.PainlessSparql = (function() {
       var button, side_nav, side_nav_container, slider, slider_button, sparql_textbox;
       side_nav_container = document.createElement("div");
       side_nav_container.id = "sidenav_container";
+      side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 30) + "px";
       document.body.appendChild(side_nav_container);
       slider = document.createElement("div");
       slider.style.backgroundColor = '#93a1a1';
@@ -8796,6 +8797,7 @@ window.PainlessSparql = (function() {
       side_nav.id = "sidenav";
       side_nav.className = "sidenav";
       side_nav.style.display = 'inline-block';
+      side_nav.style.width = cur_sidenav_size + '%';
       side_nav_container.appendChild(side_nav);
       sparql_textbox = document.createElement("div");
       sparql_textbox.id = "sparql_textbox";
@@ -8807,29 +8809,6 @@ window.PainlessSparql = (function() {
       return this.graph = new PainlessGraph(this.query_canvas);
     }
 
-    /**
-    slider = document.createElement("div")
-    slider.className = "slidecontainer"
-    slider_range = document.createElement("input")
-    slider_range.type = "range"
-    slider_range.min = 1
-    slider_range.max = 100
-    slider_range.value = 48
-    slider_range.step = 0.5
-    slider_range.className = 'slider'
-    slider.appendChild(slider_range)
-
-    slider_val = 50
-    slider_range.oninput = (s) ->
-        slider_val = this.value
-        console.log slider_val
-    slider_range.onmousemove = slider_range.onmouseup = () =>
-        side_nav.style.width = (document.documentElement.clientWidth * (100-slider_val))/100 + "px"
-        setTimeout(()=> 
-            @graph.cy.resize()
-        , 550)
-    document.body.appendChild(slider)
-    * */
     open_nav() {
       return document.getElementById("sidenav").style.width = "50%";
     }
@@ -8839,6 +8818,7 @@ window.PainlessSparql = (function() {
     }
 
     onkeypress_handler(event) {
+      var i, len, link, ref, results;
       if (event.key === "a") {
 
       
@@ -8852,6 +8832,14 @@ window.PainlessSparql = (function() {
         this.graph.layout_index += 1;
         this.graph.reshape();
         return console.log(this.graph.layout);
+      } else if (event.keyCode === 46 || event.keyCode === 8 || event.keyCode === 127) {
+        ref = this.graph.cy.nodes(":selected").data('links');
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          link = ref[i];
+          results.push(link.delete());
+        }
+        return results;
       }
     }
 
@@ -9358,6 +9346,75 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 /***/ })
 /******/ ]);
 });
+window.QueryFilter = class QueryFilter {
+  constructor(node_id) {
+    this.new_condition = this.new_condition.bind(this);
+    this.to_html = this.to_html.bind(this);
+    this.node_id = node_id;
+    this.conditions = [];
+    this.conditions.push(this.new_condition());
+  }
+
+  new_condition() {
+    var d, member1, operator, v, value;
+    d = document.createElement('div');
+    if (this.node_id !== void 0) {
+      member1 = document.createElement('div');
+      member1.innerHTML = this.node_id;
+      d.appendChild(member1);
+    } else {
+      v = new window.Void;
+      d.appendChild(v.to_html());
+    }
+    operator = document.createElement('div');
+    operator.innerHTML = ">=";
+    operator.style.marginLeft = '5px';
+    operator.style.marginRight = '5px';
+    d.appendChild(operator);
+    value = document.createElement('div');
+    value.innerHTML = "100 ^^xsd:string";
+    d.appendChild(value);
+    return d;
+  }
+
+  to_html() {
+    var condition, conditions_container, i, len, ref, remove_button, result_div, start;
+    result_div = document.createElement('div');
+    start = document.createElement('div');
+    start.innerHTML = "filter ";
+    start.style.display = "inline";
+    result_div.append(start);
+    //@conditions.push(@new_condition())
+    conditions_container = document.createElement('div');
+    conditions_container.className = "filter_condition_container";
+    ref = this.conditions;
+    for (i = 0, len = ref.length; i < len; i++) {
+      condition = ref[i];
+      conditions_container.appendChild(condition);
+    }
+    result_div.append(conditions_container);
+    remove_button = document.createElement('div');
+    remove_button.innerHTML = '❎';
+    remove_button.style.color = '#F08080';
+    remove_button.style.fontSize = 'large';
+    remove_button.style.marginLeft = '8px';
+    remove_button.style.visibility = 'hidden';
+    remove_button.style.display = 'inline-block';
+    remove_button.onclick = () => {
+      return console.log('click');
+    };
+    result_div.append(remove_button);
+    result_div.onmouseover = () => {
+      return remove_button.style.visibility = 'visible';
+    };
+    result_div.onmouseout = () => {
+      return remove_button.style.visibility = 'hidden';
+    };
+    return result_div;
+  }
+
+};
+
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.cytoscapeSpread = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 
@@ -11593,55 +11650,6 @@ module.exports = Voronoi;
 
 },{}]},{},[1])(1)
 });
-window.QueryFilter = class QueryFilter {
-  constructor(node_id) {
-    this.new_condition = this.new_condition.bind(this);
-    this.to_html = this.to_html.bind(this);
-    this.node_id = node_id;
-    this.conditions = [];
-  }
-
-  new_condition() {
-    var d, member1, operator, v, value;
-    d = document.createElement('div');
-    if (this.node_id !== "undefined") {
-      member1 = document.createElement('div');
-      member1.innerHTML = this.node_id;
-      d.appendChild(member1);
-    } else {
-      v = new window.Void;
-      d.appendChild(v);
-    }
-    operator = document.createElement('div');
-    operator.innerHTML = ">=";
-    d.appendChild(operator);
-    value = document.createElement('div');
-    value.innerHTML = "100 ^^xsd:string";
-    d.appendChild(value);
-    return d;
-  }
-
-  to_html() {
-    var condition, conditions_container, i, len, ref, result_div, start;
-    result_div = document.createElement('div');
-    start = document.createElement('div');
-    start.innerHTML = "filter ";
-    start.style.display = "inline";
-    result_div.append(start);
-    this.conditions.push(this.new_condition());
-    conditions_container = document.createElement('div');
-    conditions_container.className = "filter_condition_container";
-    ref = this.conditions;
-    for (i = 0, len = ref.length; i < len; i++) {
-      condition = ref[i];
-      conditions_container.appendChild(condition);
-    }
-    result_div.append(conditions_container);
-    return result_div;
-  }
-
-};
-
 window.QueryLine = class QueryLine {
   constructor(link, sparql_text) {
     this.to_html = this.to_html.bind(this);
@@ -11656,7 +11664,7 @@ window.QueryLine = class QueryLine {
     if (this.link.link_type === 'concept') {
       q_line.append(this.create_highlighting_box(this.link.node_var1));
       f = document.createElement("div");
-      f.innerHTML = "&nbsp;rdf:type " + this.link.node_concept.data('label') + " .";
+      f.innerHTML = "rdf:type " + this.link.node_concept.data('label') + " .";
       q_line.append(f);
     } else {
       q_line.append(this.create_highlighting_box(this.link.source));
@@ -11715,13 +11723,23 @@ window.QueryLine = class QueryLine {
     st.id = node.id() + Math.round(Math.random() * 1000);
     st.dataset.prevname = node.id();
     st.dataset.node_id = node.id();
-    st.setAttribute('draggable', true);
-    st.setAttribute('contenteditable', 'true');
-    st.addEventListener('dragstart', function(ev) {
-      return ev.dataTransfer.setData("text", ev.target.id);
-    });
-    st.onkeyup = () => {
-      return this.rename(st);
+    st.ondblclick = () => {
+      st.setAttribute('contenteditable', 'true');
+      this.sparql_text.cy.center(node);
+      setTimeout(() => {
+        return st.focus();
+      }, 0);
+      return st.onkeydown = (event) => {
+        node.data('label', st.innerHTML);
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          if (st.innerHTML.length <= 2) {
+            st.innerHTML = node.id();
+          }
+          st.setAttribute('contenteditable', 'false');
+          return this.sparql_text.update();
+        }
+      };
     };
     st.onmouseover = function($) {
       return node.addClass("highlight");
@@ -11730,7 +11748,7 @@ window.QueryLine = class QueryLine {
       return node.removeClass("highlight");
     };
     st.onclick = ($) => {
-      this.cy.nodes().unselect();
+      this.sparql_text.cy.nodes().unselect();
       return node.select();
     };
     st.innerHTML = node.data('label');
@@ -11794,13 +11812,23 @@ window.SparqlText = (function() {
       st.id = node.id() + Math.round(Math.random() * 1000);
       st.dataset.prevname = node.id();
       st.dataset.node_id = node.id();
-      st.setAttribute('draggable', true);
-      st.setAttribute('contenteditable', 'true');
-      st.addEventListener('dragstart', function(ev) {
-        return ev.dataTransfer.setData("text", ev.target.id);
-      });
-      st.onkeyup = () => {
-        return this.rename(st);
+      st.ondblclick = () => {
+        st.setAttribute('contenteditable', 'true');
+        this.cy.center(node);
+        setTimeout(() => {
+          return st.focus();
+        }, 0);
+        return st.onkeydown = (event) => {
+          node.data('label', st.innerHTML);
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            if (st.innerHTML.length <= 2) {
+              st.innerHTML = node.id();
+            }
+            st.setAttribute('contenteditable', 'false');
+            return this.update();
+          }
+        };
       };
       st.onmouseover = function($) {
         return node.addClass("highlight");
@@ -11895,7 +11923,7 @@ window.SparqlText = (function() {
     }
 
     update() {
-      var count, elem, f_string, filter, init_string, j, k, l, len, len1, len2, link, query_line, ref, ref1, s_line, select_div, select_div_f;
+      var count, elem, f_string, filter, filter_button, init_string, j, k, l, len, len1, len2, link, query_line, ref, ref1, s_line, select_div, select_div_f;
       div_sparql_text.innerHTML = "";
       init_string = document.createElement('div');
       init_string.className = "init_string";
@@ -11935,8 +11963,17 @@ window.SparqlText = (function() {
         div_sparql_text.append(filter.to_html());
       }
       f_string = document.createElement('div');
-      f_string.innerHTML = '}';
+      f_string.style.display = 'inline-block';
+      f_string.style.marginRight = '5px';
+      f_string.innerHTML = '} ';
       div_sparql_text.append(f_string);
+      filter_button = document.createElement('div');
+      filter_button.className = 'filter_button';
+      filter_button.innerHTML = '+ filter';
+      filter_button.onclick = () => {
+        return this.add_filter();
+      };
+      div_sparql_text.append(filter_button);
       return dragula([s_line]);
     }
 
@@ -11958,7 +11995,8 @@ window.Void = class Void {
   constructor() {
     this.to_html = this.to_html.bind(this);
     this.div = document.createElement('div');
-    this.div.innerHTML = "&nbsp;void";
+    this.div.className = 'void_box';
+    this.div.innerHTML = "&nbsp;&nbsp;&nbsp;";
   }
 
   to_html() {

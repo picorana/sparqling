@@ -50,13 +50,24 @@ class window.SparqlText
         st.id = node.id() + Math.round(Math.random()*1000)
         st.dataset.prevname = node.id()
         st.dataset.node_id = node.id()
-        st.setAttribute('draggable', true)
-        st.setAttribute('contenteditable', 'true')
-        st.addEventListener('dragstart',
-            (ev) ->
-                ev.dataTransfer.setData("text", ev.target.id);
-        )
-        st.onkeyup =  () => @rename(st) 
+
+        st.ondblclick = () =>
+            st.setAttribute('contenteditable', 'true')
+            @cy.center(node)
+            setTimeout(() => 
+                st.focus()
+            , 0);
+
+            st.onkeydown = (event) =>
+                node.data('label', st.innerHTML)
+
+                if event.keyCode == 13
+                    event.preventDefault();
+                    if st.innerHTML.length <= 2
+                        st.innerHTML = node.id()
+                    st.setAttribute('contenteditable', 'false')
+                    @update()
+
         st.onmouseover = ($) ->
             node.addClass("highlight")
         st.onmouseout = ($) ->
@@ -173,8 +184,15 @@ class window.SparqlText
             div_sparql_text.append(filter.to_html())
         
         f_string = document.createElement('div')
-        f_string.innerHTML = '}'
+        f_string.style.display = 'inline-block'
+        f_string.style.marginRight = '5px'
+        f_string.innerHTML = '} '
         div_sparql_text.append(f_string)
 
+        filter_button = document.createElement('div')
+        filter_button.className = 'filter_button'
+        filter_button.innerHTML = '+ filter'
+        filter_button.onclick = () => @add_filter()
+        div_sparql_text.append(filter_button)
 
         dragula([s_line])
