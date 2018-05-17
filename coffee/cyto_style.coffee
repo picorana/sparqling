@@ -16,7 +16,7 @@ class window.PainlessUtils
                     'target-endpoint' : 'outside-to-node'
                     'arrow-scale' : 1.5
                     'line-color' : '#839496'
-                    'font-family' : "Courier New"
+                    'font-family' : "Roboto"
                     'font-size' : '10'
                     'text-outline-color' : '#fdf6e3'
                     'text-outline-width' : '2px'
@@ -73,7 +73,7 @@ class window.PainlessUtils
                     'background-color' : '#93a1a1'
                     'content' : 'data(label)'
                     'text-valign' : 'center'
-                    'font-family' : "Courier New";
+                    'font-family' : "Roboto";
                     'font-size' : '12'
                     'width' : 15
                     'height' : 15
@@ -88,7 +88,7 @@ class window.PainlessUtils
                     'border-width' : '4px' 
                     'content' : 'data(label)'
                     'text-valign' : 'center'
-                    'font-family' : "Courier New";
+                    'font-family' : "Roboto";
                     'text-outline-color' : '#fdf6e3'
                     'text-outline-width' : '3px'
                     'width' : 90
@@ -104,7 +104,7 @@ class window.PainlessUtils
                     'border-width' : '4px' 
                     'content' : 'data(label)'
                     'text-valign' : 'center'
-                    'font-family' : "Courier New";
+                    'font-family' : "Roboto";
                     'text-outline-color' : '#fdf6e3'
                     'text-outline-width' : '3px'
                     'width' : 30
@@ -121,7 +121,7 @@ class window.PainlessUtils
                         return 100
                     'text-valign' : 'center'
                     'font-size' : '30'
-                    'font-family' : "Courier New";
+                    'font-family' : "Roboto";
                     'color' : '#fdf6e3'
                     'text-outline-color' : (ele) -> return ele.data('color')
                     'text-outline-width' : '5px'
@@ -138,7 +138,7 @@ class window.PainlessUtils
                         return 100
                     'text-valign' : 'center'
                     'font-size' : '20'
-                    'font-family' : "Courier New";
+                    'font-family' : "Roboto";
                     'color' : '#fdf6e3'
                     'text-outline-color' : '#fdf6e3'
                     'text-outline-width' : '0px'
@@ -155,7 +155,7 @@ class window.PainlessUtils
                         return 100
                     'text-valign' : 'center'
                     'font-size' : '20'
-                    'font-family' : "Courier New";
+                    'font-family' : "Roboto";
                     'color' : '#fdf6e3'
                     'text-outline-color' : '#fdf6e3'
                     'text-outline-width' : '0px'
@@ -172,7 +172,7 @@ class window.PainlessUtils
                     'height' : '80'
                     'border-color' : '#073642'
                     'border-width' : '2px'
-                    'font-family' : "Courier New";
+                    'font-family' : "Roboto";
                     'font-size' : '20'
                     'color' : '#fdf6e3'
                     'border-style' : 'solid'

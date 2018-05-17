@@ -2,11 +2,13 @@ class window.PainlessSparql
 
     @graph = null
     cur_sidenav_size = 50
+
+    tappedBefore = null
+    tappedTimeout = null
  
     constructor: (graph) ->
-        @graph = graph
         @cy = graph.cy
-        
+
         @init()
 
 
@@ -41,8 +43,7 @@ class window.PainlessSparql
 
         side_nav_container = document.createElement("div")
         side_nav_container.id = "sidenav_container"
-        side_nav_container.onmousedown = () =>
-            console.log 'yo'
+
         document.body.appendChild(side_nav_container)
 
         slider = document.createElement("div")
@@ -159,5 +160,23 @@ class window.PainlessSparql
 
     add_event_listener : ->
         document.onkeypress = @onkeypress_handler
+
+        @cy.on('tap', 
+            (event) => 
+                tappedNow = event.target;
+                if tappedTimeout && tappedBefore 
+                    clearTimeout(tappedTimeout);
+              
+                if tappedBefore == tappedNow 
+                    tappedNow.trigger('doubleTap', event);
+                    tappedBefore = null;
+                    originalTapEvent = null;
+                    @add_to_query()
+                else 
+                    tappedTimeout = setTimeout(()=>  
+                            tappedBefore = null
+                        , 300);
+                    tappedBefore = tappedNow;
+            )
 
     

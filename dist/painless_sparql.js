@@ -927,7 +927,7 @@ window.PainlessUtils = class PainlessUtils {
       'target-endpoint': 'outside-to-node',
       'arrow-scale': 1.5,
       'line-color': '#839496',
-      'font-family': "Courier New",
+      'font-family': "Roboto",
       'font-size': '10',
       'text-outline-color': '#fdf6e3',
       'text-outline-width': '2px',
@@ -966,7 +966,7 @@ window.PainlessUtils = class PainlessUtils {
       'background-color': '#93a1a1',
       'content': 'data(label)',
       'text-valign': 'center',
-      'font-family': "Courier New",
+      'font-family': "Roboto",
       'font-size': '12',
       'width': 15,
       'height': 15
@@ -979,7 +979,7 @@ window.PainlessUtils = class PainlessUtils {
       'border-width': '4px',
       'content': 'data(label)',
       'text-valign': 'center',
-      'font-family': "Courier New",
+      'font-family': "Roboto",
       'text-outline-color': '#fdf6e3',
       'text-outline-width': '3px',
       'width': 90,
@@ -993,7 +993,7 @@ window.PainlessUtils = class PainlessUtils {
       'border-width': '4px',
       'content': 'data(label)',
       'text-valign': 'center',
-      'font-family': "Courier New",
+      'font-family': "Roboto",
       'text-outline-color': '#fdf6e3',
       'text-outline-width': '3px',
       'width': 30,
@@ -1011,7 +1011,7 @@ window.PainlessUtils = class PainlessUtils {
       },
       'text-valign': 'center',
       'font-size': '30',
-      'font-family': "Courier New",
+      'font-family': "Roboto",
       'color': '#fdf6e3',
       'text-outline-color': function(ele) {
         return ele.data('color');
@@ -1031,7 +1031,7 @@ window.PainlessUtils = class PainlessUtils {
       },
       'text-valign': 'center',
       'font-size': '20',
-      'font-family': "Courier New",
+      'font-family': "Roboto",
       'color': '#fdf6e3',
       'text-outline-color': '#fdf6e3',
       'text-outline-width': '0px',
@@ -1049,7 +1049,7 @@ window.PainlessUtils = class PainlessUtils {
       },
       'text-valign': 'center',
       'font-size': '20',
-      'font-family': "Courier New",
+      'font-family': "Roboto",
       'color': '#fdf6e3',
       'text-outline-color': '#fdf6e3',
       'text-outline-width': '0px',
@@ -1065,7 +1065,7 @@ window.PainlessUtils = class PainlessUtils {
       'height': '80',
       'border-color': '#073642',
       'border-width': '2px',
-      'font-family': "Courier New",
+      'font-family': "Roboto",
       'font-size': '20',
       'color': '#fdf6e3',
       'border-style': 'solid'
@@ -8689,7 +8689,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 /******/ ]);
 });
 window.PainlessSparql = (function() {
-  var cur_sidenav_size;
+  var cur_sidenav_size, tappedBefore, tappedTimeout;
 
   class PainlessSparql {
     constructor(graph) {
@@ -8697,7 +8697,6 @@ window.PainlessSparql = (function() {
       this.extract_datatype = this.extract_datatype.bind(this);
       this.create_sidenav = this.create_sidenav.bind(this);
       this.onkeypress_handler = this.onkeypress_handler.bind(this);
-      this.graph = graph;
       this.cy = graph.cy;
       this.init();
     }
@@ -8746,9 +8745,6 @@ window.PainlessSparql = (function() {
       var button, side_nav, side_nav_container, slider, slider_button, sparql_textbox;
       side_nav_container = document.createElement("div");
       side_nav_container.id = "sidenav_container";
-      side_nav_container.onmousedown = () => {
-        return console.log('yo');
-      };
       document.body.appendChild(side_nav_container);
       slider = document.createElement("div");
       slider.style.backgroundColor = '#93a1a1';
@@ -8860,7 +8856,25 @@ window.PainlessSparql = (function() {
     }
 
     add_event_listener() {
-      return document.onkeypress = this.onkeypress_handler;
+      document.onkeypress = this.onkeypress_handler;
+      return this.cy.on('tap', (event) => {
+        var originalTapEvent, tappedNow;
+        tappedNow = event.target;
+        if (tappedTimeout && tappedBefore) {
+          clearTimeout(tappedTimeout);
+        }
+        if (tappedBefore === tappedNow) {
+          tappedNow.trigger('doubleTap', event);
+          tappedBefore = null;
+          originalTapEvent = null;
+          return this.add_to_query();
+        } else {
+          tappedTimeout = setTimeout(() => {
+            return tappedBefore = null;
+          }, 300);
+          return tappedBefore = tappedNow;
+        }
+      });
     }
 
   };
@@ -8868,6 +8882,10 @@ window.PainlessSparql = (function() {
   PainlessSparql.graph = null;
 
   cur_sidenav_size = 50;
+
+  tappedBefore = null;
+
+  tappedTimeout = null;
 
   return PainlessSparql;
 
@@ -9340,55 +9358,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 /***/ })
 /******/ ]);
 });
-window.QueryFilter = class QueryFilter {
-  constructor(node_id) {
-    this.new_condition = this.new_condition.bind(this);
-    this.to_html = this.to_html.bind(this);
-    this.node_id = node_id;
-    this.conditions = [];
-  }
-
-  new_condition() {
-    var d, member1, operator, v, value;
-    d = document.createElement('div');
-    if (this.node_id !== "undefined") {
-      member1 = document.createElement('div');
-      member1.innerHTML = this.node_id;
-      d.appendChild(member1);
-    } else {
-      v = new window.Void;
-      d.appendChild(v);
-    }
-    operator = document.createElement('div');
-    operator.innerHTML = ">=";
-    d.appendChild(operator);
-    value = document.createElement('div');
-    value.innerHTML = "100 ^^xsd:string";
-    d.appendChild(value);
-    return d;
-  }
-
-  to_html() {
-    var condition, conditions_container, i, len, ref, result_div, start;
-    result_div = document.createElement('div');
-    start = document.createElement('div');
-    start.innerHTML = "filter ";
-    start.style.display = "inline";
-    result_div.append(start);
-    this.conditions.push(this.new_condition());
-    conditions_container = document.createElement('div');
-    conditions_container.className = "filter_condition_container";
-    ref = this.conditions;
-    for (i = 0, len = ref.length; i < len; i++) {
-      condition = ref[i];
-      conditions_container.appendChild(condition);
-    }
-    result_div.append(conditions_container);
-    return result_div;
-  }
-
-};
-
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.cytoscapeSpread = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 
@@ -11624,6 +11593,55 @@ module.exports = Voronoi;
 
 },{}]},{},[1])(1)
 });
+window.QueryFilter = class QueryFilter {
+  constructor(node_id) {
+    this.new_condition = this.new_condition.bind(this);
+    this.to_html = this.to_html.bind(this);
+    this.node_id = node_id;
+    this.conditions = [];
+  }
+
+  new_condition() {
+    var d, member1, operator, v, value;
+    d = document.createElement('div');
+    if (this.node_id !== "undefined") {
+      member1 = document.createElement('div');
+      member1.innerHTML = this.node_id;
+      d.appendChild(member1);
+    } else {
+      v = new window.Void;
+      d.appendChild(v);
+    }
+    operator = document.createElement('div');
+    operator.innerHTML = ">=";
+    d.appendChild(operator);
+    value = document.createElement('div');
+    value.innerHTML = "100 ^^xsd:string";
+    d.appendChild(value);
+    return d;
+  }
+
+  to_html() {
+    var condition, conditions_container, i, len, ref, result_div, start;
+    result_div = document.createElement('div');
+    start = document.createElement('div');
+    start.innerHTML = "filter ";
+    start.style.display = "inline";
+    result_div.append(start);
+    this.conditions.push(this.new_condition());
+    conditions_container = document.createElement('div');
+    conditions_container.className = "filter_condition_container";
+    ref = this.conditions;
+    for (i = 0, len = ref.length; i < len; i++) {
+      condition = ref[i];
+      conditions_container.appendChild(condition);
+    }
+    result_div.append(conditions_container);
+    return result_div;
+  }
+
+};
+
 window.QueryLine = class QueryLine {
   constructor(link, sparql_text) {
     this.to_html = this.to_html.bind(this);
