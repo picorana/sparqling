@@ -26,6 +26,16 @@
 * 	NAVBAR 
 *	---
 */
+#sidenav_container {
+	position: fixed;
+	top: 0;
+	z-index: 2;
+	right: 0;
+	width: 53%;
+	height: 100%;
+	transition: 0.1s;
+}
+
 #sidenav {
 	display: inline-block;
 	height: 100%; 
@@ -114,6 +124,7 @@
 }
 
 .menu_button {
+	position: relative;
 	display: inline-block;
 	background-color: #93a1a1;
 	color: #073642;
@@ -123,6 +134,7 @@
 	border-radius: 10px;
     border: none;
     font-size: x-small;
+    z-index: 10000;
 }
 
 .menu_button:hover {
@@ -251,62 +263,16 @@
 * 	SIDENAV HANDLE
 *	---
 */
-.slidecontainer {
-	z-index: 1;
-	bottom: 2%;
-	width: 100%;
-	position: fixed;
-	pointer-events: none;
+#slider {
+	z-index: 1000;
 }
 
-.slider:focus {outline: none;}
-
-::-moz-range-track {
-  	opacity: 0;
-  	border: 0;
+.slider_button {
+	bottom: 0;
+	margin-top: 5px;
+	margin-left: 5px;
+	cursor: pointer;
 }
-
-input::-moz-focus-inner, input::-moz-focus-outer {
-	border: 0;
-}
-
-.slider {
-    -webkit-appearance: none;
-	appearance: none;
-    width: 100%;
-    border-radius: 5px;  
-    outline: none;
-	background: transparent;
-}
-
-input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-	pointer-events: auto;
-    appearance: none;
-    width: 160px;
-    height: 50px;
-    border-radius: 50%;
-	/*background: #cccccc;*/
-    background: url('../res/slider_thumb_long.svg') left no-repeat;
-	background-size: 160px 50px;
-	background-position: 0px 0px;
-    cursor: pointer;
-	transition: all ease-in-out 0.5s;
-}
-
-.slider::-moz-range-thumb {
-	pointer-events: auto;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-	background: url('../res/slider_thumb_long.svg') center no-repeat;
-	background-size: 80px 80px;
-	background-position: 0px 0px;
-    cursor: pointer;
-	border: none;
-	transition: all ease-in-out 0.5s;
-}
-
 
 /* 	
 *	--- 

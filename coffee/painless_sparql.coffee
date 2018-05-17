@@ -1,6 +1,7 @@
 class window.PainlessSparql
 
     @graph = null
+    cur_sidenav_size = 50
  
     constructor: (graph) ->
         @graph = graph
@@ -40,18 +41,61 @@ class window.PainlessSparql
 
         side_nav_container = document.createElement("div")
         side_nav_container.id = "sidenav_container"
+        side_nav_container.onmousedown = () =>
+            console.log 'yo'
         document.body.appendChild(side_nav_container)
+
+        slider = document.createElement("div")
+        slider.style.backgroundColor = '#93a1a1'
+        slider.style.height = '100%'
+        slider.id = 'slider'
+        slider.style.width = '100%'
+        slider.style.display = 'inline-block'
+        sidenav_container.appendChild(slider)
+
+        slider_button = document.createElement('div')
+        slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_left</i>'
+        slider_button.className = 'slider_button'
+        slider_button.onclick = () =>
+            cur_sidenav_size = cur_sidenav_size + 25
+        
+            if cur_sidenav_size != 100
+                side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
+                side_nav.style.width = cur_sidenav_size + '%'
+            else 
+                side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100) + "px"
+                side_nav.style.width =  (cur_sidenav_size*document.documentElement.clientWidth/100 - 30) + "px"
+            setTimeout(()=> 
+                @graph.cy.resize()
+            , 550)
+        slider.appendChild(slider_button)
+
+        slider_button = document.createElement('div')
+        slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_right</i>'
+        slider_button.className = 'slider_button'
+        slider_button.onclick = () =>
+            cur_sidenav_size = cur_sidenav_size - 25
+            side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
+            side_nav.style.width = (cur_sidenav_size) + '%'
+            setTimeout(()=> 
+                @graph.cy.resize()
+            , 550)
+        slider.appendChild(slider_button)
+
+        button = document.createElement("div")
+        button.innerHTML = '<i class="material-icons">add</i><p style="font-size:xx-small; margin-top: -5px">node</p>';
+        button.className = "slider_button"
+        button.style.bottom = 0;
+        button.style.position = 'fixed'
+        button.style.marginLeft = '5px'
+        button.onclick = () => @add_to_query()
+        slider.appendChild(button);
 
         side_nav = document.createElement("div");
         side_nav.id = "sidenav";
         side_nav.className = "sidenav";
+        side_nav.style.display = 'inline-block'
         side_nav_container.appendChild(side_nav);
-
-        button = document.createElement("button")
-        button.innerHTML = "add to \n\r query";
-        button.id = "add_to_query_button"
-        button.onclick = () => @add_to_query()
-        side_nav.appendChild(button);
 
         sparql_textbox = document.createElement("div");
         sparql_textbox.id = "sparql_textbox";
@@ -64,7 +108,7 @@ class window.PainlessSparql
 
         @graph = new PainlessGraph(@query_canvas)
 
-
+        ###*
         slider = document.createElement("div")
         slider.className = "slidecontainer"
         slider_range = document.createElement("input")
@@ -86,6 +130,7 @@ class window.PainlessSparql
                 @graph.cy.resize()
             , 550)
         document.body.appendChild(slider)
+        *###
 
 
     open_nav : -> 

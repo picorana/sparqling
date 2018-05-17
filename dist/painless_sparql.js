@@ -8320,16 +8320,16 @@ window.PainlessMenu = class PainlessMenu {
     menu = this.create_div(null, null, 'painless_menu');
     document.getElementById('sidenav').append(menu);
     menu.append(this.create_navigation_div());
-    menu.append(this.create_div('undo', 'menu_button', null, () => {
+    menu.append(this.create_div('<i class="material-icons">undo</i>', 'menu_button', null, () => {
       return this.context.graph.undo();
     }));
-    menu.append(this.create_div('center view', 'menu_button', null, () => {
+    menu.append(this.create_div('<i class="material-icons">filter_center_focus</i>', 'menu_button', null, () => {
       return this.context.graph.center_view();
     }));
-    menu.append(this.create_div('copy to clipboard', 'menu_button', null, () => {
+    menu.append(this.create_div('<i class="material-icons">file_copy</i>', 'menu_button', null, () => {
       return this.context.graph.copy_to_clipboard();
     }));
-    return menu.append(this.create_div('export', 'menu_button', null, () => {
+    return menu.append(this.create_div('<i class="material-icons">save</i>', 'menu_button', null, () => {
       return this.context.graph.download();
     }));
   }
@@ -8689,6 +8689,8 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 /******/ ]);
 });
 window.PainlessSparql = (function() {
+  var cur_sidenav_size;
+
   class PainlessSparql {
     constructor(graph) {
       this.add_to_query = this.add_to_query.bind(this);
@@ -8741,21 +8743,64 @@ window.PainlessSparql = (function() {
     }
 
     create_sidenav() {
-      var button, side_nav, side_nav_container, slider, slider_range, slider_val, sparql_textbox;
+      var button, side_nav, side_nav_container, slider, slider_button, sparql_textbox;
       side_nav_container = document.createElement("div");
       side_nav_container.id = "sidenav_container";
+      side_nav_container.onmousedown = () => {
+        return console.log('yo');
+      };
       document.body.appendChild(side_nav_container);
-      side_nav = document.createElement("div");
-      side_nav.id = "sidenav";
-      side_nav.className = "sidenav";
-      side_nav_container.appendChild(side_nav);
-      button = document.createElement("button");
-      button.innerHTML = "add to \n\r query";
-      button.id = "add_to_query_button";
+      slider = document.createElement("div");
+      slider.style.backgroundColor = '#93a1a1';
+      slider.style.height = '100%';
+      slider.id = 'slider';
+      slider.style.width = '100%';
+      slider.style.display = 'inline-block';
+      sidenav_container.appendChild(slider);
+      slider_button = document.createElement('div');
+      slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_left</i>';
+      slider_button.className = 'slider_button';
+      slider_button.onclick = () => {
+        cur_sidenav_size = cur_sidenav_size + 25;
+        if (cur_sidenav_size !== 100) {
+          side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 30) + "px";
+          side_nav.style.width = cur_sidenav_size + '%';
+        } else {
+          side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100) + "px";
+          side_nav.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 - 30) + "px";
+        }
+        return setTimeout(() => {
+          return this.graph.cy.resize();
+        }, 550);
+      };
+      slider.appendChild(slider_button);
+      slider_button = document.createElement('div');
+      slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_right</i>';
+      slider_button.className = 'slider_button';
+      slider_button.onclick = () => {
+        cur_sidenav_size = cur_sidenav_size - 25;
+        side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 30) + "px";
+        side_nav.style.width = cur_sidenav_size + '%';
+        return setTimeout(() => {
+          return this.graph.cy.resize();
+        }, 550);
+      };
+      slider.appendChild(slider_button);
+      button = document.createElement("div");
+      button.innerHTML = '<i class="material-icons">add</i><p style="font-size:xx-small; margin-top: -5px">node</p>';
+      button.className = "slider_button";
+      button.style.bottom = 0;
+      button.style.position = 'fixed';
+      button.style.marginLeft = '5px';
       button.onclick = () => {
         return this.add_to_query();
       };
-      side_nav.appendChild(button);
+      slider.appendChild(button);
+      side_nav = document.createElement("div");
+      side_nav.id = "sidenav";
+      side_nav.className = "sidenav";
+      side_nav.style.display = 'inline-block';
+      side_nav_container.appendChild(side_nav);
       sparql_textbox = document.createElement("div");
       sparql_textbox.id = "sparql_textbox";
       sparql_textbox.innerHTML = "sparql_query_here";
@@ -8763,31 +8808,32 @@ window.PainlessSparql = (function() {
       this.query_canvas = document.createElement("div");
       this.query_canvas.id = "query_canvas";
       side_nav.appendChild(this.query_canvas);
-      this.graph = new PainlessGraph(this.query_canvas);
-      slider = document.createElement("div");
-      slider.className = "slidecontainer";
-      slider_range = document.createElement("input");
-      slider_range.type = "range";
-      slider_range.min = 1;
-      slider_range.max = 100;
-      slider_range.value = 48;
-      slider_range.step = 0.5;
-      slider_range.className = 'slider';
-      slider.appendChild(slider_range);
-      slider_val = 50;
-      slider_range.oninput = function(s) {
-        slider_val = this.value;
-        return console.log(slider_val);
-      };
-      slider_range.onmousemove = slider_range.onmouseup = () => {
-        side_nav.style.width = (document.documentElement.clientWidth * (100 - slider_val)) / 100 + "px";
-        return setTimeout(() => {
-          return this.graph.cy.resize();
-        }, 550);
-      };
-      return document.body.appendChild(slider);
+      return this.graph = new PainlessGraph(this.query_canvas);
     }
 
+    /**
+    slider = document.createElement("div")
+    slider.className = "slidecontainer"
+    slider_range = document.createElement("input")
+    slider_range.type = "range"
+    slider_range.min = 1
+    slider_range.max = 100
+    slider_range.value = 48
+    slider_range.step = 0.5
+    slider_range.className = 'slider'
+    slider.appendChild(slider_range)
+
+    slider_val = 50
+    slider_range.oninput = (s) ->
+        slider_val = this.value
+        console.log slider_val
+    slider_range.onmousemove = slider_range.onmouseup = () =>
+        side_nav.style.width = (document.documentElement.clientWidth * (100-slider_val))/100 + "px"
+        setTimeout(()=> 
+            @graph.cy.resize()
+        , 550)
+    document.body.appendChild(slider)
+    * */
     open_nav() {
       return document.getElementById("sidenav").style.width = "50%";
     }
@@ -8820,6 +8866,8 @@ window.PainlessSparql = (function() {
   };
 
   PainlessSparql.graph = null;
+
+  cur_sidenav_size = 50;
 
   return PainlessSparql;
 
