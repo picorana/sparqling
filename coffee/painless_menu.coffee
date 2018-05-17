@@ -7,7 +7,7 @@ class window.PainlessMenu
 
     change_size: (query_canvas_size) =>
         @context.query_canvas.style.height = query_canvas_size + "%"
-        sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%"
+        sparql_textbox.style.height = (100 - 15 - query_canvas_size) + "%"
         setTimeout => 
             @context.graph.cy.resize()
         , 550
@@ -43,3 +43,4 @@ class window.PainlessMenu
         menu.append(@create_div('undo',                 'menu_button', null, => @context.graph.undo()))
         menu.append(@create_div('center view',          'menu_button', null, => @context.graph.center_view()))
         menu.append(@create_div('copy to clipboard',    'menu_button', null, => @context.graph.copy_to_clipboard()))
+        menu.append(@create_div('export',               'menu_button', null, => @context.graph.download()))

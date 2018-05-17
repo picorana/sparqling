@@ -21,7 +21,7 @@ class window.PainlessGraph
 
         @links = links
 
-        @layout_names   = ['cose-bilkent', 'circle', 'cose', 'grid', 'breadthfirst', 'concentric']
+        @layout_names   = ['cola', 'cose-bilkent', 'circle', 'cose', 'grid', 'breadthfirst', 'concentric']
         @layout_index   = 0
 
         @init()
@@ -58,7 +58,31 @@ class window.PainlessGraph
             name: @layout
             fit: false
             animate: true
+            nodeDimensionsIncludeLabels: true
         }).run()
+
+
+    download: => 
+        data = JSON.stringify(@cy.json())
+        filename = "sparql.json"
+        type = "text/plain"
+        file = new Blob([data], {type: type});
+        if window.navigator.msSaveOrOpenBlob
+            window.navigator.msSaveOrOpenBlob(file, filename);
+        else
+            a = document.createElement("a")
+            url = URL.createObjectURL(file)
+            a.href = url
+            a.download = filename
+            document.body.appendChild(a)
+            a.click()
+            setTimeout(
+                () => 
+                    document.body.removeChild(a)
+                    window.URL.revokeObjectURL(url) 
+            , 0); 
+        
+
 
 
     center_view: (ele = null) =>

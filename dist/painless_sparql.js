@@ -7045,6 +7045,7 @@ window.PainlessGraph = (function() {
   class PainlessGraph {
     constructor(context) {
       this.reshape = this.reshape.bind(this);
+      this.download = this.download.bind(this);
       this.center_view = this.center_view.bind(this);
       this.add_to_select = this.add_to_select.bind(this);
       this.reverse_relationship = this.reverse_relationship.bind(this);
@@ -7057,7 +7058,7 @@ window.PainlessGraph = (function() {
       this.utils = new window.PainlessUtils();
       this.context = context;
       this.links = links;
-      this.layout_names = ['cose-bilkent', 'circle', 'cose', 'grid', 'breadthfirst', 'concentric'];
+      this.layout_names = ['cola', 'cose-bilkent', 'circle', 'cose', 'grid', 'breadthfirst', 'concentric'];
       this.layout_index = 0;
       this.init();
       this.reshape();
@@ -7087,8 +7088,33 @@ window.PainlessGraph = (function() {
       return this.cy.layout({
         name: this.layout,
         fit: false,
-        animate: true
+        animate: true,
+        nodeDimensionsIncludeLabels: true
       }).run();
+    }
+
+    download() {
+      var a, data, file, filename, type, url;
+      data = JSON.stringify(this.cy.json());
+      filename = "sparql.json";
+      type = "text/plain";
+      file = new Blob([data], {
+        type: type
+      });
+      if (window.navigator.msSaveOrOpenBlob) {
+        return window.navigator.msSaveOrOpenBlob(file, filename);
+      } else {
+        a = document.createElement("a");
+        url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        return setTimeout(() => {
+          document.body.removeChild(a);
+          return window.URL.revokeObjectURL(url);
+        }, 0);
+      }
     }
 
     center_view(ele = null) {
@@ -8258,7 +8284,7 @@ window.PainlessMenu = class PainlessMenu {
 
   change_size(query_canvas_size) {
     this.context.query_canvas.style.height = query_canvas_size + "%";
-    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
+    sparql_textbox.style.height = (100 - 15 - query_canvas_size) + "%";
     return setTimeout(() => {
       return this.context.graph.cy.resize();
     }, 550);
@@ -8300,8 +8326,11 @@ window.PainlessMenu = class PainlessMenu {
     menu.append(this.create_div('center view', 'menu_button', null, () => {
       return this.context.graph.center_view();
     }));
-    return menu.append(this.create_div('copy to clipboard', 'menu_button', null, () => {
+    menu.append(this.create_div('copy to clipboard', 'menu_button', null, () => {
       return this.context.graph.copy_to_clipboard();
+    }));
+    return menu.append(this.create_div('export', 'menu_button', null, () => {
+      return this.context.graph.download();
     }));
   }
 
@@ -8659,6 +8688,143 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 /***/ })
 /******/ ]);
 });
+window.PainlessSparql = (function() {
+  class PainlessSparql {
+    constructor(graph) {
+      this.add_to_query = this.add_to_query.bind(this);
+      this.extract_datatype = this.extract_datatype.bind(this);
+      this.create_sidenav = this.create_sidenav.bind(this);
+      this.onkeypress_handler = this.onkeypress_handler.bind(this);
+      this.graph = graph;
+      this.cy = graph.cy;
+      this.init();
+    }
+
+    init() {
+      this.create_sidenav();
+      this.sparql_text = this.graph.sparql_text;
+      this.menu = new window.PainlessMenu(this);
+      return this.add_event_listener();
+    }
+
+    add_to_query() {
+      var selected_node;
+      selected_node = this.cy.nodes(":selected");
+      if (selected_node.length === 0) {
+        console.warn("please, select a node in the main graph");
+      }
+      switch (selected_node.data('type')) {
+        case "role":
+          return this.graph.add_link(selected_node.data('label'), 'role');
+        case "attribute":
+          return this.graph.add_link(selected_node.data('label'), 'attribute', this.extract_datatype(selected_node));
+        case "concept":
+          return this.graph.add_link(selected_node.data('label'), 'concept');
+      }
+    }
+
+    extract_datatype(inode) {
+      var i, j, len, len1, neighbor, node, ref, ref1;
+      ref = inode.neighborhood('node');
+      for (i = 0, len = ref.length; i < len; i++) {
+        neighbor = ref[i];
+        if (neighbor.data('type') === "range-restriction") {
+          ref1 = neighbor.neighborhood('node');
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            node = ref1[j];
+            if (node.data('type') === "value-domain") {
+              return node.data('label');
+            }
+          }
+        }
+      }
+    }
+
+    create_sidenav() {
+      var button, side_nav, side_nav_container, slider, slider_range, slider_val, sparql_textbox;
+      side_nav_container = document.createElement("div");
+      side_nav_container.id = "sidenav_container";
+      document.body.appendChild(side_nav_container);
+      side_nav = document.createElement("div");
+      side_nav.id = "sidenav";
+      side_nav.className = "sidenav";
+      side_nav_container.appendChild(side_nav);
+      button = document.createElement("button");
+      button.innerHTML = "add to \n\r query";
+      button.id = "add_to_query_button";
+      button.onclick = () => {
+        return this.add_to_query();
+      };
+      side_nav.appendChild(button);
+      sparql_textbox = document.createElement("div");
+      sparql_textbox.id = "sparql_textbox";
+      sparql_textbox.innerHTML = "sparql_query_here";
+      side_nav.appendChild(sparql_textbox);
+      this.query_canvas = document.createElement("div");
+      this.query_canvas.id = "query_canvas";
+      side_nav.appendChild(this.query_canvas);
+      this.graph = new PainlessGraph(this.query_canvas);
+      slider = document.createElement("div");
+      slider.className = "slidecontainer";
+      slider_range = document.createElement("input");
+      slider_range.type = "range";
+      slider_range.min = 1;
+      slider_range.max = 100;
+      slider_range.value = 48;
+      slider_range.step = 0.5;
+      slider_range.className = 'slider';
+      slider.appendChild(slider_range);
+      slider_val = 50;
+      slider_range.oninput = function(s) {
+        slider_val = this.value;
+        return console.log(slider_val);
+      };
+      slider_range.onmousemove = slider_range.onmouseup = () => {
+        side_nav.style.width = (document.documentElement.clientWidth * (100 - slider_val)) / 100 + "px";
+        return setTimeout(() => {
+          return this.graph.cy.resize();
+        }, 550);
+      };
+      return document.body.appendChild(slider);
+    }
+
+    open_nav() {
+      return document.getElementById("sidenav").style.width = "50%";
+    }
+
+    close_nav() {
+      return document.getElementById("sidenav").style.width = "0px";
+    }
+
+    onkeypress_handler(event) {
+      if (event.key === "a") {
+
+      
+      //@open_nav()
+      } else if (event.key === "b") {
+
+      //@close_nav()
+      } else if (event.key === "d") {
+        return console.log(this.graph.cy.nodes(":selected").data('links'));
+      } else if (event.key === "l") {
+        this.graph.layout_index += 1;
+        this.graph.reshape();
+        return console.log(this.graph.layout);
+      }
+    }
+
+    add_event_listener() {
+      return document.onkeypress = this.onkeypress_handler;
+    }
+
+  };
+
+  PainlessSparql.graph = null;
+
+  return PainlessSparql;
+
+}).call(this);
+
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("klayjs"));
@@ -9126,143 +9292,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 /***/ })
 /******/ ]);
 });
-window.PainlessSparql = (function() {
-  class PainlessSparql {
-    constructor(graph) {
-      this.add_to_query = this.add_to_query.bind(this);
-      this.extract_datatype = this.extract_datatype.bind(this);
-      this.create_sidenav = this.create_sidenav.bind(this);
-      this.onkeypress_handler = this.onkeypress_handler.bind(this);
-      this.graph = graph;
-      this.cy = graph.cy;
-      this.init();
-    }
-
-    init() {
-      this.create_sidenav();
-      this.sparql_text = this.graph.sparql_text;
-      this.menu = new window.PainlessMenu(this);
-      return this.add_event_listener();
-    }
-
-    add_to_query() {
-      var selected_node;
-      selected_node = this.cy.nodes(":selected");
-      if (selected_node.length === 0) {
-        console.warn("please, select a node in the main graph");
-      }
-      switch (selected_node.data('type')) {
-        case "role":
-          return this.graph.add_link(selected_node.data('label'), 'role');
-        case "attribute":
-          return this.graph.add_link(selected_node.data('label'), 'attribute', this.extract_datatype(selected_node));
-        case "concept":
-          return this.graph.add_link(selected_node.data('label'), 'concept');
-      }
-    }
-
-    extract_datatype(inode) {
-      var i, j, len, len1, neighbor, node, ref, ref1;
-      ref = inode.neighborhood('node');
-      for (i = 0, len = ref.length; i < len; i++) {
-        neighbor = ref[i];
-        if (neighbor.data('type') === "range-restriction") {
-          ref1 = neighbor.neighborhood('node');
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            node = ref1[j];
-            if (node.data('type') === "value-domain") {
-              return node.data('label');
-            }
-          }
-        }
-      }
-    }
-
-    create_sidenav() {
-      var button, side_nav, side_nav_container, slider, slider_range, slider_val, sparql_textbox;
-      side_nav_container = document.createElement("div");
-      side_nav_container.id = "sidenav_container";
-      document.body.appendChild(side_nav_container);
-      side_nav = document.createElement("div");
-      side_nav.id = "sidenav";
-      side_nav.className = "sidenav";
-      side_nav_container.appendChild(side_nav);
-      button = document.createElement("button");
-      button.innerHTML = "add to \n\r query";
-      button.id = "add_to_query_button";
-      button.onclick = () => {
-        return this.add_to_query();
-      };
-      side_nav.appendChild(button);
-      sparql_textbox = document.createElement("div");
-      sparql_textbox.id = "sparql_textbox";
-      sparql_textbox.innerHTML = "sparql_query_here";
-      side_nav.appendChild(sparql_textbox);
-      this.query_canvas = document.createElement("div");
-      this.query_canvas.id = "query_canvas";
-      side_nav.appendChild(this.query_canvas);
-      this.graph = new PainlessGraph(this.query_canvas);
-      slider = document.createElement("div");
-      slider.className = "slidecontainer";
-      slider_range = document.createElement("input");
-      slider_range.type = "range";
-      slider_range.min = 1;
-      slider_range.max = 100;
-      slider_range.value = 48;
-      slider_range.step = 0.5;
-      slider_range.className = 'slider';
-      slider.appendChild(slider_range);
-      slider_val = 50;
-      slider_range.oninput = function(s) {
-        slider_val = this.value;
-        return console.log(slider_val);
-      };
-      slider_range.onmousemove = slider_range.onmouseup = () => {
-        side_nav.style.width = (document.documentElement.clientWidth * (100 - slider_val)) / 100 + "px";
-        return setTimeout(() => {
-          return this.graph.cy.resize();
-        }, 550);
-      };
-      return document.body.appendChild(slider);
-    }
-
-    open_nav() {
-      return document.getElementById("sidenav").style.width = "50%";
-    }
-
-    close_nav() {
-      return document.getElementById("sidenav").style.width = "0px";
-    }
-
-    onkeypress_handler(event) {
-      if (event.key === "a") {
-
-      
-      //@open_nav()
-      } else if (event.key === "b") {
-
-      //@close_nav()
-      } else if (event.key === "d") {
-        return console.log(this.graph.cy.nodes(":selected").data('links'));
-      } else if (event.key === "l") {
-        this.graph.layout_index += 1;
-        this.graph.reshape();
-        return console.log(this.graph.layout);
-      }
-    }
-
-    add_event_listener() {
-      return document.onkeypress = this.onkeypress_handler;
-    }
-
-  };
-
-  PainlessSparql.graph = null;
-
-  return PainlessSparql;
-
-}).call(this);
-
 window.QueryFilter = class QueryFilter {
   constructor(node_id) {
     this.new_condition = this.new_condition.bind(this);
