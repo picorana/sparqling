@@ -59,6 +59,8 @@ class window.PainlessGraph
             fit: false
             animate: true
             nodeDimensionsIncludeLabels: true
+            #padding: 
+            edgeLength: 200
         }).run()
 
 

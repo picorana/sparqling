@@ -7089,7 +7089,9 @@ window.PainlessGraph = (function() {
         name: this.layout,
         fit: false,
         animate: true,
-        nodeDimensionsIncludeLabels: true
+        nodeDimensionsIncludeLabels: true,
+        //padding: 
+        edgeLength: 200
       }).run();
     }
 

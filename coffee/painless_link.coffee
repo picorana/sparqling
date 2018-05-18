@@ -160,7 +160,8 @@ class window.PainlessLink
 
         @edge_source = @create_edge(@node_link, @source, "source-edge")
         @edge_target = @create_edge(@node_link, @target, "target-edge")
-       
+
+        
 
     create_concept: =>
         if @node_var1 == null or @node_var1 == undefined
