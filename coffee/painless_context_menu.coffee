@@ -22,7 +22,7 @@ class window.PainlessContextMenu
                 {content: 'center view',                    select: (ele) => @context.center_view(ele)}
                 {content: 'add node to select statement',   select: (ele) => @context.add_to_select(ele.id())},
                 {content: 'rename node',                    select: (ele) => @rename_var(ele)}
-                {content: 'filter',                         select: (ele) => @context.sparql_text.add_filter(ele.id())}
+                {content: 'filter',                         select: (ele) => @context.sparql_text.add_filter(ele)}
             ] 
         }
 

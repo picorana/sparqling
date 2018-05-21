@@ -137,8 +137,8 @@ class window.SparqlText
         document.body.removeChild(tmp_div)
 
 
-    add_filter: (node_id) =>
-        @filters.push(new window.QueryFilter(node_id))
+    add_filter: (node) =>
+        @filters.push(new window.QueryFilter(node))
         @update()
 
 
@@ -195,4 +195,18 @@ class window.SparqlText
         filter_button.onclick = () => @add_filter()
         div_sparql_text.append(filter_button)
 
-        dragula([s_line])
+        drake = dragula(
+            [s_line, document.getElementsByClassName('q_line')[0]], {
+            copy:true,
+            accepts: (el, target, source, sibling) =>
+                if source.classList.contains('q_line') and source.classList.contains('q_line')
+                    return true
+            })
+
+        drake_filter = dragula(
+            [document.getElementsByClassName('void_box')[0], document.getElementsByClassName('q_line')[0]], {
+            })
+
+        drake.on('drop', 
+            () => console.log 'drop'
+            )

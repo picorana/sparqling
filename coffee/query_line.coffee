@@ -62,6 +62,7 @@ class window.QueryLine
             button_div.style.visibility = 'hidden'
 
         q_line.className = 'q_line'
+
         return q_line
 
 

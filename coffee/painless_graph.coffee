@@ -37,22 +37,6 @@ class window.PainlessGraph
     reshape: =>
         ###* resets node positions in the graph view ###
 
-        #for node in @cy.nodes('.node-role')
-        #    node.neighborhood().layout({name: 'circle'}).run()
-
-        ###*
-        @cy.layout({
-            name:'cola'
-            fit: false
-            refresh: 2
-            maxSimulationTime: 2000
-            #nodeDimensionsIncludeLabels: true
-            edgeLength: 100
-            #flow: { axis: 'x', minSeparation: 30 }
-            avoidOverlap: true
-            nodeSpacing: 30
-        }).run()
-        ###
         @layout = @layout_names[@layout_index % @layout_names.length]
         @cy.layout({
             name: @layout
@@ -85,6 +69,10 @@ class window.PainlessGraph
             , 0); 
         
 
+    clear_all: =>
+        for link in @links
+            link.delete()
+        @sparql_text.update()
 
 
     center_view: (ele = null) =>

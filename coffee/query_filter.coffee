@@ -1,9 +1,9 @@
 class window.QueryFilter
 
 
-    constructor: (node_id) ->
+    constructor: (node) ->
         
-        @node_id = node_id
+        @node = node
 
         @conditions = []
         @conditions.push(@new_condition())
@@ -11,10 +11,9 @@ class window.QueryFilter
 
     new_condition: () =>
         d = document.createElement('div')
-        if @node_id != undefined
-            member1 = document.createElement('div')
-            member1.innerHTML = @node_id
-            d.appendChild(member1)
+        if @node != undefined
+            hl_box = new window.HlBox(@node)
+            d.appendChild(hl_box.to_html())
         else
             v = new window.Void
             d.appendChild(v.to_html())
@@ -28,6 +27,7 @@ class window.QueryFilter
 
         value = document.createElement('div')
         value.innerHTML = "100 ^^xsd:string"
+        value.contentEditable = 'true'
 
         d.appendChild(value)
 
@@ -42,8 +42,6 @@ class window.QueryFilter
         start.innerHTML = "filter "
         start.style.display = "inline"
         result_div.append(start)
-
-        #@conditions.push(@new_condition())
 
         conditions_container = document.createElement('div')
         conditions_container.className = "filter_condition_container"

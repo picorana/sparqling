@@ -59,7 +59,11 @@ class window.PainlessSparql
         slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_left</i>'
         slider_button.className = 'slider_button'
         slider_button.onclick = () =>
+
             cur_sidenav_size = cur_sidenav_size + 25
+
+            document.getElementById('tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
+            document.getElementById('tools').style.transitionDuration = '0.1s'
         
             if cur_sidenav_size != 100
                 side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
@@ -77,6 +81,10 @@ class window.PainlessSparql
         slider_button.className = 'slider_button'
         slider_button.onclick = () =>
             cur_sidenav_size = cur_sidenav_size - 25
+
+            document.getElementById('tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
+            document.getElementById('tools').style.transitionDuration = '0.1s'
+            
             side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
             side_nav.style.width = (cur_sidenav_size) + '%'
             setTimeout(()=> 

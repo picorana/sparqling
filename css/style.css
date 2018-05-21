@@ -177,6 +177,8 @@
     display: inline-block;
     float: left;
     transition: 0.5s;
+    font-size: x-small;
+    font-weight: bold;
     cursor: pointer;
 }
 
