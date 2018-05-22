@@ -3,6 +3,7 @@ var coffee = require("gulp-coffee");
 var uglify = require("gulp-uglify-es").default;
 var gulpConcat = require("gulp-concat");
 var merge2 = require("merge2");
+var order = require("gulp-order");
 
 gulp.task("build", function() {
   var c = gulp.src("./coffee/*.coffee").pipe(coffee({ bare: true }));
@@ -12,9 +13,7 @@ gulp.task("build", function() {
     "./node_modules/simple-scrollbar/simple-scrollbar.js",
     "./node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js",
     "./node_modules/tinycolor2/dist/tinycolor-min.js",
-    "./node_modules/cytoscape-dagre/cytoscape-dagre.js",
-    "./node_modules/cytoscape-klay/cytoscape-klay.js",
-    "./node_modules/cytoscape-spread/cytoscape-spread.js"
+    "./node_modules/sparqljs/sparqljs-browser.js"
   ]);
 
   merge2([j, c])
@@ -30,9 +29,7 @@ gulp.task("compress", function() {
     "./node_modules/simple-scrollbar/simple-scrollbar.js",
     "./node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js",
     "./node_modules/tinycolor2/dist/tinycolor-min.js",
-    "./node_modules/cytoscape-dagre/cytoscape-dagre.js",
-    "./node_modules/cytoscape-klay/cytoscape-klay.js",
-    "./node_modules/cytoscape-spread/cytoscape-spread.js"
+    "./node_modules/sparqljs/sparqljs-browser.js"
   ]);
 
   merge2([j, c])

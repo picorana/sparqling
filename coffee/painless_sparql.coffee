@@ -43,9 +43,14 @@ class window.PainlessSparql
 
         side_nav_container = document.createElement("div")
         side_nav_container.id = "sidenav_container"
-        side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
+        side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 40) + "px"
 
         document.body.appendChild(side_nav_container)
+
+        document.getElementById('tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
+        document.getElementById('tools').style.transitionDuration = '0.1s'
+        document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+        @cy.resize()
 
         slider = document.createElement("div")
         slider.style.backgroundColor = '#93a1a1'
@@ -64,6 +69,8 @@ class window.PainlessSparql
 
             document.getElementById('tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
             document.getElementById('tools').style.transitionDuration = '0.1s'
+            document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+            @cy.resize()
         
             if cur_sidenav_size != 100
                 side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
@@ -84,7 +91,9 @@ class window.PainlessSparql
 
             document.getElementById('tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
             document.getElementById('tools').style.transitionDuration = '0.1s'
-            
+            document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+            @cy.resize()
+
             side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
             side_nav.style.width = (cur_sidenav_size) + '%'
             setTimeout(()=> 

@@ -7832,6 +7832,7 @@ window.PainlessGraph = (function() {
       this.reverse_relationship = this.reverse_relationship.bind(this);
       this.add_link = this.add_link.bind(this);
       this.check_collisions = this.check_collisions.bind(this);
+      this.load = this.load.bind(this);
       this.init = this.init.bind(this);
       /**
       TODO: sparql_text should be managed by painless_sparql.coffee
@@ -8052,6 +8053,29 @@ window.PainlessGraph = (function() {
           }
         }
       }
+    }
+
+    load() {
+      var i, len, link, new_node, parsed_query, ref, results, triple;
+      parsed_query = window.sparqljs.Parser().parse('PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' + 'SELECT * { ?mickey foaf:name "Mickey Mouse" . ?mickey foaf:knows ?other. }');
+      ref = parsed_query['where'][0]['triples'];
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        triple = ref[i];
+        console.log(triple);
+        //if @cy.getElementById(triple['subject'].slice(1)) != undefined
+        //    link = new PainlessLink(this, @cy, triple['predicate'], 'role', @cy.getElementById(triple['subject'].slice(1)))
+        //else 
+        new_node = this.cy.add({
+          group: 'nodes',
+          data: {
+            id: this.cy.getElementById(triple['subject'].slice(1))
+          }
+        });
+        link = new PainlessLink(this, this.cy, triple['predicate'], 'role');
+        results.push(this.links.push(link));
+      }
+      return results;
     }
 
     init() {
@@ -8288,357 +8312,2115 @@ window.PainlessLink = (function() {
 
 }).call(this);
 
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("dagre"));
-	else if(typeof define === 'function' && define.amd)
-		define(["dagre"], factory);
-	else if(typeof exports === 'object')
-		exports["cytoscapeDagre"] = factory(require("dagre"));
-	else
-		root["cytoscapeDagre"] = factory(root["dagre"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_4__) {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.sparqljs = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
-"use strict";
+},{}],2:[function(require,module,exports){
+(function (process){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
 
-var isFunction = function isFunction(o) {
-  return typeof o === 'function';
-};
-var defaults = __webpack_require__(2);
-var assign = __webpack_require__(1);
-var dagre = __webpack_require__(4);
-
-// constructor
-// options : object containing layout options
-function DagreLayout(options) {
-  this.options = assign({}, defaults, options);
+  return parts;
 }
 
-// runs the layout
-DagreLayout.prototype.run = function () {
-  var options = this.options;
-  var layout = this;
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var splitPath = function(filename) {
+  return splitPathRe.exec(filename).slice(1);
+};
 
-  var cy = options.cy; // cy is automatically populated for us in the constructor
-  var eles = options.eles;
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
 
-  var getVal = function getVal(ele, val) {
-    return isFunction(val) ? val.apply(ele, [ele]) : val;
-  };
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
 
-  var bb = options.boundingBox || { x1: 0, y1: 0, w: cy.width(), h: cy.height() };
-  if (bb.x2 === undefined) {
-    bb.x2 = bb.x1 + bb.w;
-  }
-  if (bb.w === undefined) {
-    bb.w = bb.x2 - bb.x1;
-  }
-  if (bb.y2 === undefined) {
-    bb.y2 = bb.y1 + bb.h;
-  }
-  if (bb.h === undefined) {
-    bb.h = bb.y2 - bb.y1;
-  }
-
-  var g = new dagre.graphlib.Graph({
-    multigraph: true,
-    compound: true
-  });
-
-  var gObj = {};
-  var setGObj = function setGObj(name, val) {
-    if (val != null) {
-      gObj[name] = val;
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
     }
-  };
 
-  setGObj('nodesep', options.nodeSep);
-  setGObj('edgesep', options.edgeSep);
-  setGObj('ranksep', options.rankSep);
-  setGObj('rankdir', options.rankDir);
-  setGObj('ranker', options.ranker);
-
-  g.setGraph(gObj);
-
-  g.setDefaultEdgeLabel(function () {
-    return {};
-  });
-  g.setDefaultNodeLabel(function () {
-    return {};
-  });
-
-  // add nodes to dagre
-  var nodes = eles.nodes();
-  for (var i = 0; i < nodes.length; i++) {
-    var node = nodes[i];
-    var nbb = node.layoutDimensions(options);
-
-    g.setNode(node.id(), {
-      width: nbb.w,
-      height: nbb.h,
-      name: node.id()
-    });
-
-    // console.log( g.node(node.id()) );
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
   }
 
-  // set compound parents
-  for (var _i = 0; _i < nodes.length; _i++) {
-    var _node = nodes[_i];
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
 
-    if (_node.isChild()) {
-      g.setParent(_node.id(), _node.parent().id());
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
     }
   }
 
-  // add edges to dagre
-  var edges = eles.edges().stdFilter(function (edge) {
-    return !edge.source().isParent() && !edge.target().isParent(); // dagre can't handle edges on compound nodes
-  });
-  for (var _i2 = 0; _i2 < edges.length; _i2++) {
-    var edge = edges[_i2];
-
-    g.setEdge(edge.source().id(), edge.target().id(), {
-      minlen: getVal(edge, options.minLen),
-      weight: getVal(edge, options.edgeWeight),
-      name: edge.id()
-    }, edge.id());
-
-    // console.log( g.edge(edge.source().id(), edge.target().id(), edge.id()) );
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
   }
 
-  dagre.layout(g);
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
 
-  var gNodeIds = g.nodes();
-  for (var _i3 = 0; _i3 < gNodeIds.length; _i3++) {
-    var id = gNodeIds[_i3];
-    var n = g.node(id);
+  return outputParts.join('/');
+};
 
-    cy.getElementById(id).scratch().dagre = n;
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function(path) {
+  var result = splitPath(path),
+      root = result[0],
+      dir = result[1];
+
+  if (!root && !dir) {
+    // No dirname whatsoever
+    return '.';
   }
 
-  var dagreBB = void 0;
-
-  if (options.boundingBox) {
-    dagreBB = { x1: Infinity, x2: -Infinity, y1: Infinity, y2: -Infinity };
-    nodes.forEach(function (node) {
-      var dModel = node.scratch().dagre;
-
-      dagreBB.x1 = Math.min(dagreBB.x1, dModel.x);
-      dagreBB.x2 = Math.max(dagreBB.x2, dModel.x);
-
-      dagreBB.y1 = Math.min(dagreBB.y1, dModel.y);
-      dagreBB.y2 = Math.max(dagreBB.y2, dModel.y);
-    });
-
-    dagreBB.w = dagreBB.x2 - dagreBB.x1;
-    dagreBB.h = dagreBB.y2 - dagreBB.y1;
-  } else {
-    dagreBB = bb;
+  if (dir) {
+    // It has a dirname, strip trailing slash
+    dir = dir.substr(0, dir.length - 1);
   }
 
-  var constrainPos = function constrainPos(p) {
-    if (options.boundingBox) {
-      var xPct = dagreBB.w === 0 ? 0 : (p.x - dagreBB.x1) / dagreBB.w;
-      var yPct = dagreBB.h === 0 ? 0 : (p.y - dagreBB.y1) / dagreBB.h;
+  return root + dir;
+};
 
-      return {
-        x: bb.x1 + xPct * bb.w,
-        y: bb.y1 + yPct * bb.h
-      };
+
+exports.basename = function(path, ext) {
+  var f = splitPath(path)[2];
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+
+exports.extname = function(path) {
+  return splitPath(path)[3];
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+}).call(this,require('_process'))
+},{"_process":3}],3:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
     } else {
-      return p;
+        queueIndex = -1;
     }
-  };
-
-  nodes.layoutPositions(layout, options, function (ele) {
-    ele = (typeof ele === 'undefined' ? 'undefined' : _typeof(ele)) === "object" ? ele : this;
-    var dModel = ele.scratch().dagre;
-
-    return constrainPos({
-      x: dModel.x,
-      y: dModel.y
-    });
-  });
-
-  return this; // chaining
-};
-
-module.exports = DagreLayout;
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// Simple, internal Object.assign() polyfill for options objects etc.
-
-module.exports = Object.assign != null ? Object.assign.bind(Object) : function (tgt) {
-  for (var _len = arguments.length, srcs = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    srcs[_key - 1] = arguments[_key];
-  }
-
-  srcs.forEach(function (src) {
-    Object.keys(src).forEach(function (k) {
-      return tgt[k] = src[k];
-    });
-  });
-
-  return tgt;
-};
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var defaults = {
-  // dagre algo options, uses default value on undefined
-  nodeSep: undefined, // the separation between adjacent nodes in the same rank
-  edgeSep: undefined, // the separation between adjacent edges in the same rank
-  rankSep: undefined, // the separation between adjacent nodes in the same rank
-  rankDir: undefined, // 'TB' for top to bottom flow, 'LR' for left to right,
-  ranker: undefined, // Type of algorithm to assigns a rank to each node in the input graph.
-  // Possible values: network-simplex, tight-tree or longest-path
-  minLen: function minLen(edge) {
-    return 1;
-  }, // number of ranks to keep between the source and target of the edge
-  edgeWeight: function edgeWeight(edge) {
-    return 1;
-  }, // higher weight edges are generally made shorter and straighter than lower weight edges
-
-  // general layout options
-  fit: true, // whether to fit to viewport
-  padding: 30, // fit padding
-  spacingFactor: undefined, // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
-  nodeDimensionsIncludeLabels: false, // whether labels should be included in determining the space used by a node
-  animate: false, // whether to transition the node positions
-  animateFilter: function animateFilter(node, i) {
-    return true;
-  }, // whether to animate specific nodes when animation is on; non-animated nodes immediately go to their final positions
-  animationDuration: 500, // duration of animation in ms if enabled
-  animationEasing: undefined, // easing of animation if enabled
-  boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-  transform: function transform(node, pos) {
-    return pos;
-  }, // a function that applies a transform to the final node position
-  ready: function ready() {}, // on layoutready
-  stop: function stop() {} // on layoutstop
-};
-
-module.exports = defaults;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var impl = __webpack_require__(0);
-
-// registers the extension on a cytoscape lib ref
-var register = function register(cytoscape) {
-  if (!cytoscape) {
-    return;
-  } // can't register if cytoscape unspecified
-
-  cytoscape('layout', 'dagre', impl); // register with cytoscape.js
-};
-
-if (typeof cytoscape !== 'undefined') {
-  // expose to global cytoscape (i.e. window.cytoscape)
-  register(cytoscape);
+    if (queue.length) {
+        drainQueue();
+    }
 }
 
-module.exports = register;
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
 
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
+}
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
 
-/***/ })
-/******/ ]);
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],4:[function(require,module,exports){
+var XSD_INTEGER = 'http://www.w3.org/2001/XMLSchema#integer';
+
+module.exports = function SparqlGenerator() { return { stringify: toQuery }; };
+
+// Converts the parsed query object into a SPARQL query
+function toQuery(q) {
+  var query = '';
+  for (var key in q.prefixes)
+    query += 'PREFIX ' + key + ': <' + q.prefixes[key] + '>\n';
+
+  if (q.queryType)
+    query += q.queryType.toUpperCase() + ' ';
+  if (q.reduced)
+    query += 'REDUCED ';
+  if (q.distinct)
+    query += 'DISTINCT ';
+
+  if (q.variables)
+    query += mapJoin(q.variables, function (variable) {
+      return isString(variable) ? toEntity(variable) :
+             '(' + toExpression(variable.expression) + ' AS ' + variable.variable + ')';
+    }) + ' ';
+  else if (q.template)
+    query += patterns.group(q.template, true) + '\n';
+
+  if (q.from)
+    query += mapJoin(q.from.default || [], function (g) { return 'FROM ' + toEntity(g) + '\n'; }, '') +
+             mapJoin(q.from.named || [], function (g) { return 'FROM NAMED ' + toEntity(g) + '\n'; }, '');
+  if (q.where)
+    query += 'WHERE ' + patterns.group(q.where, true)  + '\n';
+
+  if (q.updates)
+    query += mapJoin(q.updates, toUpdate, ';\n');
+  else if (q.values)
+    query += patterns.values(q);
+
+  if (q.group)
+    query += 'GROUP BY ' + mapJoin(q.group, function (it) {
+      return isString(it.expression) ? it.expression : '(' + toExpression(it.expression) + ')';
+    }) + '\n';
+  if (q.having)
+    query += 'HAVING (' + mapJoin(q.having, toExpression) + ')\n';
+  if (q.order)
+    query += 'ORDER BY ' + mapJoin(q.order, function (it) {
+      var expr = toExpression(it.expression);
+      return !it.descending ? expr : 'DESC(' + expr + ')';
+    }) + '\n';
+
+  if (q.offset)
+    query += 'OFFSET ' + q.offset + '\n';
+  if (q.limit)
+    query += 'LIMIT ' + q.limit + '\n';
+  return query.trim();
+}
+
+// Converts the parsed SPARQL pattern into a SPARQL pattern
+function toPattern(pattern) {
+  var type = pattern.type || (pattern instanceof Array) && 'array' ||
+             (pattern.subject && pattern.predicate && pattern.object ? 'triple' : '');
+  if (!(type in patterns))
+    throw new Error('Unknown entry type: ' + type);
+  return patterns[type](pattern);
+}
+var patterns = {
+  triple: function (t) {
+    return toEntity(t.subject) + ' ' + toEntity(t.predicate) + ' ' + toEntity(t.object) + '.';
+  },
+  array: function (items) {
+    return mapJoin(items, toPattern, '\n');
+  },
+  bgp: function (bgp) {
+    return mapJoin(bgp.triples, patterns.triple, '\n');
+  },
+  graph: function (graph) {
+    return 'GRAPH ' + toEntity(graph.name) + ' ' + patterns.group(graph);
+  },
+  group: function (group, inline) {
+    group = inline !== true ? patterns.array(group.patterns || group.triples)
+                            : toPattern(group.type !== 'group' ? group : group.patterns);
+    return group.indexOf('\n') === -1 ? '{ ' + group + ' }' : '{\n' + indent(group) + '\n}';
+  },
+  query: function (query) {
+    return '{\n' + indent(toQuery(query)) + '\n}';
+  },
+  filter: function (filter) {
+    return 'FILTER(' + toExpression(filter.expression) + ')';
+  },
+  bind: function (bind) {
+    return 'BIND(' + toExpression(bind.expression) + ' AS ' + bind.variable + ')';
+  },
+  optional: function (optional) {
+    return 'OPTIONAL ' + patterns.group(optional);
+  },
+  union: function (union) {
+    return mapJoin(union.patterns, function (p) { return patterns.group(p, true); }, '\nUNION\n');
+  },
+  minus: function (minus) {
+    return 'MINUS ' + patterns.group(minus);
+  },
+  values: function (valuesList) {
+    // Gather unique keys
+    var keys = Object.keys(valuesList.values.reduce(function (keyHash, values) {
+      for (var key in values) keyHash[key] = true;
+      return keyHash;
+    }, {}));
+    // Create value rows
+    return 'VALUES (' + keys.join(' ') + ') {\n' +
+      mapJoin(valuesList.values, function (values) {
+        return '  (' + mapJoin(keys, function (key) {
+          return values[key] !== undefined ? toEntity(values[key]) : 'UNDEF';
+        }) + ')';
+      }, '\n') + '\n}';
+  },
+  service: function (service) {
+    return 'SERVICE ' + (service.silent ? 'SILENT ' : '') + toEntity(service.name) + ' ' +
+           patterns.group(service);
+  },
+};
+
+// Converts the parsed expression object into a SPARQL expression
+function toExpression(expr) {
+  if (isString(expr))
+    return toEntity(expr);
+
+  switch (expr.type.toLowerCase()) {
+    case 'aggregate':
+      return expr.aggregation.toUpperCase() +
+             '(' + (expr.distinct ? 'DISTINCT ' : '') + toExpression(expr.expression) +
+             (expr.separator ? '; SEPARATOR = ' + toEntity('"' + expr.separator + '"') : '') + ')';
+    case 'functioncall':
+      return toEntity(expr.function) + '(' + mapJoin(expr.args, toExpression, ', ') + ')';
+    case 'operation':
+      var operator = expr.operator.toUpperCase(), args = expr.args || [], arg = args[0];
+      switch (expr.operator.toLowerCase()) {
+      // Infix operators
+      case '<':
+      case '>':
+      case '>=':
+      case '<=':
+      case '&&':
+      case '||':
+      case '=':
+      case '!=':
+      case '+':
+      case '-':
+      case '*':
+      case '/':
+        return mapJoin(args, function (arg) {
+          return isString(arg) ? toEntity(arg) : '(' + toExpression(arg) + ')';
+        }, ' ' + operator + ' ');
+      // Unary operators
+      case '!':
+        return '!' + toExpression(arg);
+      // IN and NOT IN
+      case 'notin':
+        operator = 'NOT IN';
+      case 'in':
+        return toExpression(arg) + ' ' + operator +
+               '(' + (isString(arg = args[1]) ? arg : mapJoin(arg, toExpression, ', ')) + ')';
+      // EXISTS and NOT EXISTS
+      case 'notexists':
+        operator = 'NOT EXISTS';
+      case 'exists':
+        return operator + ' ' + patterns.group(arg, true);
+      // Other expressions
+      default:
+        return operator + '(' + mapJoin(args, toExpression, ', ') + ')';
+      }
+    default:
+      throw new Error('Unknown expression type: ' + expr.type);
+  }
+}
+
+// Converts the parsed entity (or property path) into a SPARQL entity
+function toEntity(value) {
+  // regular entity
+  if (isString(value)) {
+    switch (value[0]) {
+    // variable, * selector, or blank node
+    case '?':
+    case '$':
+    case '*':
+    case '_':
+      return value;
+    // literal
+    case '"':
+      var match = value.match(/^"([^]*)"(?:(@.+)|\^\^(.+))?$/) || {},
+          lexical = match[1] || '', language = match[2] || '', datatype = match[3];
+      value = '"' + lexical.replace(escape, escapeReplacer) + '"' + language;
+      if (datatype) {
+        if (datatype === XSD_INTEGER && /^\d+$/.test(lexical)) return lexical;
+        value += '^^<' + datatype + '>';
+      }
+      return value;
+    // IRI
+    default:
+      return '<' + value + '>';
+    }
+  }
+  // property path
+  else {
+    var items = value.items.map(toEntity), path = value.pathType;
+    switch (path) {
+    // prefix operator
+    case '^':
+    case '!':
+      return path + items[0];
+    // postfix operator
+    case '*':
+    case '+':
+    case '?':
+      return items[0] + path;
+    // infix operator
+    default:
+      return '(' + items.join(path) + ')';
+    }
+  }
+}
+var escape = /["\\\t\n\r\b\f]/g,
+    escapeReplacer = function (c) { return escapeReplacements[c]; },
+    escapeReplacements = { '\\': '\\\\', '"': '\\"', '\t': '\\t',
+                           '\n': '\\n', '\r': '\\r', '\b': '\\b', '\f': '\\f' };
+
+// Converts the parsed update object into a SPARQL update clause
+function toUpdate(update) {
+  switch (update.type || update.updateType) {
+  case 'load':
+    return 'LOAD' + (update.source ? ' ' + toEntity(update.source) : '') +
+           (update.destination ? ' INTO GRAPH ' + toEntity(update.destination) : '');
+  case 'insert':
+    return 'INSERT DATA '  + patterns.group(update.insert, true);
+  case 'delete':
+    return 'DELETE DATA '  + patterns.group(update.delete, true);
+  case 'deletewhere':
+    return 'DELETE WHERE ' + patterns.group(update.delete, true);
+  case 'insertdelete':
+    return (update.graph ? 'WITH ' + toEntity(update.graph) + '\n' : '') +
+           (update.delete.length ? 'DELETE ' + patterns.group(update.delete, true) + '\n' : '') +
+           (update.insert.length ? 'INSERT ' + patterns.group(update.insert, true) + '\n' : '') +
+           'WHERE ' + patterns.group(update.where, true);
+  case 'add':
+  case 'copy':
+  case 'move':
+    return update.type.toUpperCase() + (update.source.default ? ' DEFAULT ' : ' ') +
+           'TO ' + toEntity(update.destination.name);
+  default:
+    throw new Error('Unknown update query type: ' + update.type);
+  }
+}
+
+// Checks whether the object is a string
+function isString(object) { return typeof object === 'string'; }
+
+// Maps the array with the given function, and joins the results using the separator
+function mapJoin(array, func, sep) { return array.map(func).join(isString(sep) ? sep : ' '); }
+
+// Indents each line of the string
+function indent(text) { return text.replace(/^/gm, '  '); }
+
+},{}],5:[function(require,module,exports){
+(function (process){
+/* parser generated by jison 0.4.15 */
+/*
+  Returns a Parser object of the following structure:
+  Parser: {
+    yy: {}
+  }
+  Parser.prototype: {
+    yy: {},
+    trace: function(),
+    symbols_: {associative list: name ==> number},
+    terminals_: {associative list: number ==> name},
+    productions_: [...],
+    performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate, $$, _$),
+    table: [...],
+    defaultActions: {...},
+    parseError: function(str, hash),
+    parse: function(input),
+    lexer: {
+        EOF: 1,
+        parseError: function(str, hash),
+        setInput: function(input),
+        input: function(),
+        unput: function(str),
+        more: function(),
+        less: function(n),
+        pastInput: function(),
+        upcomingInput: function(),
+        showPosition: function(),
+        test_match: function(regex_match_array, rule_index),
+        next: function(),
+        lex: function(),
+        begin: function(condition),
+        popState: function(),
+        _currentRules: function(),
+        topState: function(),
+        pushState: function(condition),
+        options: {
+            ranges: boolean           (optional: true ==> token location info will include a .range[] member)
+            flex: boolean             (optional: true ==> flex-like lexing behaviour where the rules are tested exhaustively to find the longest match)
+            backtrack_lexer: boolean  (optional: true ==> lexer regexes are tested in order and for each matching regex the action code is invoked; the lexer terminates the scan when a token is returned by the action code)
+        },
+        performAction: function(yy, yy_, $avoiding_name_collisions, YY_START),
+        rules: [...],
+        conditions: {associative list: name ==> set},
+    }
+  }
+  token location info (@$, _$, etc.): {
+    first_line: n,
+    last_line: n,
+    first_column: n,
+    last_column: n,
+    range: [start_number, end_number]       (where the numbers are indexes into the input string, regular zero-based)
+  }
+  the parseError function receives a 'hash' object with these members for lexer and parser errors: {
+    text:        (matched text)
+    token:       (the produced terminal token, if any)
+    line:        (yylineno)
+  }
+  while parser (grammar) errors will also provide these members, i.e. parser errors deliver a superset of attributes: {
+    loc:         (yylloc)
+    expected:    (string describing the set of expected tokens)
+    recoverable: (boolean: TRUE when the parser has a error recovery rule available for this particular error)
+  }
+*/
+var parser = (function(){
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[11,14,23,33,42,47,95,105,108,110,111,120,121,126,288,289,290,291,292],$V1=[95,105,108,110,111,120,121,126,288,289,290,291,292],$V2=[1,21],$V3=[1,25],$V4=[6,82],$V5=[37,38,50],$V6=[37,50],$V7=[1,55],$V8=[1,57],$V9=[1,53],$Va=[1,56],$Vb=[27,28,283],$Vc=[12,15,277],$Vd=[107,129,286,293],$Ve=[12,15,107,129,277],$Vf=[1,76],$Vg=[1,80],$Vh=[1,82],$Vi=[107,129,286,287,293],$Vj=[12,15,107,129,277,287],$Vk=[1,89],$Vl=[2,229],$Vm=[1,88],$Vn=[12,15,27,28,79,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277],$Vo=[6,37,38,50,60,67,70,78,80,82],$Vp=[6,12,15,27,37,38,50,60,67,70,78,80,82,277],$Vq=[6,12,15,27,28,30,31,37,38,40,50,60,67,70,78,79,80,82,89,104,107,120,121,123,128,155,156,158,161,162,163,181,192,203,208,210,211,213,214,222,237,242,259,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,283,294,297,298,300,301,302,303,304,305,306,307,308,309],$Vr=[1,104],$Vs=[1,105],$Vt=[6,12,15,27,28,38,40,79,82,107,155,156,158,161,162,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,294],$Vu=[27,31],$Vv=[2,284],$Vw=[1,118],$Vx=[1,116],$Vy=[6,192],$Vz=[2,301],$VA=[2,289],$VB=[37,123],$VC=[6,40,67,70,78,80,82],$VD=[2,231],$VE=[1,132],$VF=[1,134],$VG=[1,144],$VH=[1,150],$VI=[1,153],$VJ=[1,149],$VK=[1,151],$VL=[1,147],$VM=[1,148],$VN=[1,154],$VO=[1,155],$VP=[1,158],$VQ=[1,159],$VR=[1,160],$VS=[1,161],$VT=[1,162],$VU=[1,163],$VV=[1,164],$VW=[1,165],$VX=[1,166],$VY=[1,167],$VZ=[1,168],$V_=[1,169],$V$=[6,60,67,70,78,80,82],$V01=[27,28,37,38,50],$V11=[12,15,27,28,79,203,237,239,240,241,243,245,246,248,249,252,254,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,301,309,310,311,312,313,314],$V21=[2,374],$V31=[12,15,40,79,89,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277],$V41=[6,104,192],$V51=[40,107],$V61=[6,40,70,78,80,82],$V71=[2,313],$V81=[2,305],$V91=[12,15,27,181,277],$Va1=[2,341],$Vb1=[2,337],$Vc1=[12,15,27,28,31,38,40,79,82,107,155,156,158,161,162,163,181,192,203,208,210,211,213,214,242,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,294],$Vd1=[12,15,27,28,30,31,38,40,79,82,89,107,155,156,158,161,162,163,181,192,203,208,210,211,213,214,222,237,242,259,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,283,294,298,301,302,303,304,305,306,307,308,309],$Ve1=[12,15,27,28,30,31,38,40,79,82,89,107,155,156,158,161,162,163,181,192,203,208,210,211,213,214,222,237,242,259,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,283,294,298,301,302,303,304,305,306,307,308,309],$Vf1=[1,227],$Vg1=[1,238],$Vh1=[6,40,78,80,82],$Vi1=[1,249],$Vj1=[1,251],$Vk1=[1,252],$Vl1=[1,253],$Vm1=[1,254],$Vn1=[1,256],$Vo1=[1,257],$Vp1=[2,405],$Vq1=[1,260],$Vr1=[1,261],$Vs1=[1,262],$Vt1=[1,268],$Vu1=[1,263],$Vv1=[1,264],$Vw1=[1,265],$Vx1=[1,266],$Vy1=[1,267],$Vz1=[1,274],$VA1=[1,273],$VB1=[38,40,82,107,155,156,158,161,162],$VC1=[1,282],$VD1=[1,283],$VE1=[40,107,294],$VF1=[12,15,27,28,31,79,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277],$VG1=[12,15,27,28,31,38,40,79,82,107,155,156,158,161,162,163,192,210,211,213,214,242,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,294],$VH1=[12,15,27,28,79,239,240,241,243,245,246,248,249,252,254,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,309,310,311,312,313,314],$VI1=[2,398],$VJ1=[1,301],$VK1=[1,302],$VL1=[1,303],$VM1=[12,15,31,40,79,89,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277],$VN1=[28,40],$VO1=[2,304],$VP1=[6,40,82],$VQ1=[6,12,15,28,40,70,78,80,82,239,240,241,243,245,246,248,249,252,254,277,309,310,311,312,313,314],$VR1=[6,12,15,27,28,38,40,70,73,75,78,79,80,82,107,155,156,158,161,162,163,210,213,214,239,240,241,243,245,246,248,249,252,254,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,294,309,310,311,312,313,314],$VS1=[6,12,15,27,28,30,31,38,40,67,70,73,75,78,79,80,82,107,155,156,158,161,162,163,192,210,213,214,222,237,239,240,241,242,243,245,246,248,249,252,254,259,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,283,294,298,301,302,303,304,305,306,307,308,309,310,311,312,313,314],$VT1=[1,326],$VU1=[1,325],$VV1=[1,332],$VW1=[1,331],$VX1=[28,163],$VY1=[6,12,15,27,28,40,67,70,78,80,82,239,240,241,243,245,246,248,249,252,254,277,309,310,311,312,313,314],$VZ1=[6,12,15,27,28,30,31,38,40,60,67,70,73,75,78,79,80,82,107,155,156,158,161,162,163,192,210,213,214,222,237,239,240,241,242,243,245,246,248,249,252,254,259,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,283,294,295,298,301,302,303,304,305,306,307,308,309,310,311,312,313,314],$V_1=[12,15,28,181,203,208,277],$V$1=[2,355],$V02=[1,354],$V12=[38,40,82,107,155,156,158,161,162,294],$V22=[2,343],$V32=[12,15,27,28,31,38,40,79,82,107,155,156,158,161,162,163,181,192,210,211,213,214,242,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,294],$V42=[30,31,192,242,302,303],$V52=[30,31,192,222,237,242,259,271,272,273,274,275,276,301,302,303,304,305,306,307,308,309],$V62=[30,31,192,222,237,242,259,271,272,273,274,275,276,283,298,301,302,303,304,305,306,307,308,309],$V72=[1,387],$V82=[1,402],$V92=[1,399],$Va2=[1,400],$Vb2=[12,15,27,28,79,203,237,239,240,241,243,245,246,248,249,252,254,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,283,301,309,310,311,312,313,314],$Vc2=[12,15,27,28,38,40,79,82,107,155,156,158,161,162,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277],$Vd2=[12,15,27,277],$Ve2=[12,15,27,28,38,40,79,82,107,155,156,158,161,162,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,294],$Vf2=[2,316],$Vg2=[12,15,27,181,192,277],$Vh2=[1,453],$Vi2=[1,454],$Vj2=[12,15,31,79,89,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277],$Vk2=[6,12,15,27,28,40,73,75,78,80,82,239,240,241,243,245,246,248,249,252,254,277,309,310,311,312,313,314],$Vl2=[2,311],$Vm2=[12,15,28,181,203,277],$Vn2=[38,40,82,107,155,156,158,161,162,192,211,294],$Vo2=[12,15,27,28,40,79,107,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277],$Vp2=[12,15,27,28,31,79,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,297,298],$Vq2=[12,15,27,28,31,79,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,283,297,298,300,301],$Vr2=[1,545],$Vs2=[1,546],$Vt2=[2,299],$Vu2=[12,15,31,181,208,277];
+var parser = {trace: function trace() { },
+yy: {},
+symbols_: {"error":2,"QueryOrUpdateUnit":3,"QueryOrUpdateUnit_repetition0":4,"QueryOrUpdateUnit_group0":5,"EOF":6,"Query":7,"Query_group0":8,"Query_option0":9,"BaseDecl":10,"BASE":11,"IRIREF":12,"PrefixDecl":13,"PREFIX":14,"PNAME_NS":15,"SelectQuery":16,"SelectClause":17,"SelectQuery_repetition0":18,"WhereClause":19,"SolutionModifier":20,"SubSelect":21,"SubSelect_option0":22,"SELECT":23,"SelectClause_option0":24,"SelectClause_group0":25,"SelectClauseItem":26,"VAR":27,"(":28,"Expression":29,"AS":30,")":31,"ConstructQuery":32,"CONSTRUCT":33,"ConstructTemplate":34,"ConstructQuery_repetition0":35,"ConstructQuery_repetition1":36,"WHERE":37,"{":38,"ConstructQuery_option0":39,"}":40,"DescribeQuery":41,"DESCRIBE":42,"DescribeQuery_group0":43,"DescribeQuery_repetition0":44,"DescribeQuery_option0":45,"AskQuery":46,"ASK":47,"AskQuery_repetition0":48,"DatasetClause":49,"FROM":50,"DatasetClause_option0":51,"iri":52,"WhereClause_option0":53,"GroupGraphPattern":54,"SolutionModifier_option0":55,"SolutionModifier_option1":56,"SolutionModifier_option2":57,"SolutionModifier_option3":58,"GroupClause":59,"GROUP":60,"BY":61,"GroupClause_repetition_plus0":62,"GroupCondition":63,"BuiltInCall":64,"FunctionCall":65,"HavingClause":66,"HAVING":67,"HavingClause_repetition_plus0":68,"OrderClause":69,"ORDER":70,"OrderClause_repetition_plus0":71,"OrderCondition":72,"ASC":73,"BrackettedExpression":74,"DESC":75,"Constraint":76,"LimitOffsetClauses":77,"LIMIT":78,"INTEGER":79,"OFFSET":80,"ValuesClause":81,"VALUES":82,"InlineData":83,"InlineData_repetition0":84,"InlineData_repetition1":85,"InlineData_repetition2":86,"DataBlockValue":87,"Literal":88,"UNDEF":89,"DataBlockValueList":90,"DataBlockValueList_repetition0":91,"Update":92,"Update_repetition0":93,"Update1":94,"LOAD":95,"Update1_option0":96,"Update1_option1":97,"Update1_group0":98,"Update1_option2":99,"GraphRefAll":100,"Update1_group1":101,"Update1_option3":102,"GraphOrDefault":103,"TO":104,"CREATE":105,"Update1_option4":106,"GRAPH":107,"INSERTDATA":108,"QuadPattern":109,"DELETEDATA":110,"DELETEWHERE":111,"Update1_option5":112,"InsertClause":113,"Update1_option6":114,"Update1_repetition0":115,"Update1_option7":116,"DeleteClause":117,"Update1_option8":118,"Update1_repetition1":119,"DELETE":120,"INSERT":121,"UsingClause":122,"USING":123,"UsingClause_option0":124,"WithClause":125,"WITH":126,"IntoGraphClause":127,"INTO":128,"DEFAULT":129,"GraphOrDefault_option0":130,"GraphRefAll_group0":131,"QuadPattern_option0":132,"QuadPattern_repetition0":133,"QuadsNotTriples":134,"QuadsNotTriples_group0":135,"QuadsNotTriples_option0":136,"QuadsNotTriples_option1":137,"QuadsNotTriples_option2":138,"TriplesTemplate":139,"TriplesTemplate_repetition0":140,"TriplesSameSubject":141,"TriplesTemplate_option0":142,"GroupGraphPatternSub":143,"GroupGraphPatternSub_option0":144,"GroupGraphPatternSub_repetition0":145,"GroupGraphPatternSubTail":146,"GraphPatternNotTriples":147,"GroupGraphPatternSubTail_option0":148,"GroupGraphPatternSubTail_option1":149,"TriplesBlock":150,"TriplesBlock_repetition0":151,"TriplesSameSubjectPath":152,"TriplesBlock_option0":153,"GraphPatternNotTriples_repetition0":154,"OPTIONAL":155,"MINUS":156,"GraphPatternNotTriples_group0":157,"SERVICE":158,"GraphPatternNotTriples_option0":159,"GraphPatternNotTriples_group1":160,"FILTER":161,"BIND":162,"NIL":163,"FunctionCall_option0":164,"FunctionCall_repetition0":165,"ExpressionList":166,"ExpressionList_repetition0":167,"ConstructTemplate_option0":168,"ConstructTriples":169,"ConstructTriples_repetition0":170,"ConstructTriples_option0":171,"VarOrTerm":172,"PropertyListNotEmpty":173,"TriplesNode":174,"PropertyList":175,"PropertyList_option0":176,"PropertyListNotEmpty_repetition0":177,"VerbObjectList":178,"Verb":179,"ObjectList":180,"a":181,"ObjectList_repetition0":182,"GraphNode":183,"PropertyListPathNotEmpty":184,"TriplesNodePath":185,"TriplesSameSubjectPath_option0":186,"PropertyListPathNotEmpty_group0":187,"PropertyListPathNotEmpty_repetition0":188,"GraphNodePath":189,"PropertyListPathNotEmpty_repetition1":190,"PropertyListPathNotEmptyTail":191,";":192,"PropertyListPathNotEmptyTail_group0":193,"Path":194,"Path_repetition0":195,"PathSequence":196,"PathSequence_repetition0":197,"PathEltOrInverse":198,"PathElt":199,"PathPrimary":200,"PathElt_option0":201,"PathEltOrInverse_option0":202,"!":203,"PathNegatedPropertySet":204,"PathOneInPropertySet":205,"PathNegatedPropertySet_repetition0":206,"PathNegatedPropertySet_option0":207,"^":208,"TriplesNode_repetition_plus0":209,"[":210,"]":211,"TriplesNodePath_repetition_plus0":212,"BLANK_NODE_LABEL":213,"ANON":214,"Expression_repetition0":215,"ConditionalAndExpression":216,"ConditionalAndExpression_repetition0":217,"RelationalExpression":218,"AdditiveExpression":219,"RelationalExpression_group0":220,"RelationalExpression_option0":221,"IN":222,"MultiplicativeExpression":223,"AdditiveExpression_repetition0":224,"AdditiveExpressionTail":225,"AdditiveExpressionTail_group0":226,"NumericLiteralPositive":227,"AdditiveExpressionTail_repetition0":228,"NumericLiteralNegative":229,"AdditiveExpressionTail_repetition1":230,"UnaryExpression":231,"MultiplicativeExpression_repetition0":232,"MultiplicativeExpressionTail":233,"MultiplicativeExpressionTail_group0":234,"UnaryExpression_option0":235,"PrimaryExpression":236,"-":237,"Aggregate":238,"FUNC_ARITY0":239,"FUNC_ARITY1":240,"FUNC_ARITY2":241,",":242,"IF":243,"BuiltInCall_group0":244,"BOUND":245,"BNODE":246,"BuiltInCall_option0":247,"EXISTS":248,"COUNT":249,"Aggregate_option0":250,"Aggregate_group0":251,"FUNC_AGGREGATE":252,"Aggregate_option1":253,"GROUP_CONCAT":254,"Aggregate_option2":255,"Aggregate_option3":256,"GroupConcatSeparator":257,"SEPARATOR":258,"=":259,"String":260,"LANGTAG":261,"^^":262,"DECIMAL":263,"DOUBLE":264,"true":265,"false":266,"STRING_LITERAL1":267,"STRING_LITERAL2":268,"STRING_LITERAL_LONG1":269,"STRING_LITERAL_LONG2":270,"INTEGER_POSITIVE":271,"DECIMAL_POSITIVE":272,"DOUBLE_POSITIVE":273,"INTEGER_NEGATIVE":274,"DECIMAL_NEGATIVE":275,"DOUBLE_NEGATIVE":276,"PNAME_LN":277,"QueryOrUpdateUnit_repetition0_group0":278,"SelectClause_option0_group0":279,"DISTINCT":280,"REDUCED":281,"SelectClause_group0_repetition_plus0":282,"*":283,"DescribeQuery_group0_repetition_plus0_group0":284,"DescribeQuery_group0_repetition_plus0":285,"NAMED":286,"SILENT":287,"CLEAR":288,"DROP":289,"ADD":290,"MOVE":291,"COPY":292,"ALL":293,".":294,"UNION":295,"PropertyListNotEmpty_repetition0_repetition_plus0":296,"|":297,"/":298,"PathElt_option0_group0":299,"?":300,"+":301,"||":302,"&&":303,"!=":304,"<":305,">":306,"<=":307,">=":308,"NOT":309,"CONCAT":310,"COALESCE":311,"SUBSTR":312,"REGEX":313,"REPLACE":314,"$accept":0,"$end":1},
+terminals_: {2:"error",6:"EOF",11:"BASE",12:"IRIREF",14:"PREFIX",15:"PNAME_NS",23:"SELECT",27:"VAR",28:"(",30:"AS",31:")",33:"CONSTRUCT",37:"WHERE",38:"{",40:"}",42:"DESCRIBE",47:"ASK",50:"FROM",60:"GROUP",61:"BY",67:"HAVING",70:"ORDER",73:"ASC",75:"DESC",78:"LIMIT",79:"INTEGER",80:"OFFSET",82:"VALUES",89:"UNDEF",95:"LOAD",104:"TO",105:"CREATE",107:"GRAPH",108:"INSERTDATA",110:"DELETEDATA",111:"DELETEWHERE",120:"DELETE",121:"INSERT",123:"USING",126:"WITH",128:"INTO",129:"DEFAULT",155:"OPTIONAL",156:"MINUS",158:"SERVICE",161:"FILTER",162:"BIND",163:"NIL",181:"a",192:";",203:"!",208:"^",210:"[",211:"]",213:"BLANK_NODE_LABEL",214:"ANON",222:"IN",237:"-",239:"FUNC_ARITY0",240:"FUNC_ARITY1",241:"FUNC_ARITY2",242:",",243:"IF",245:"BOUND",246:"BNODE",248:"EXISTS",249:"COUNT",252:"FUNC_AGGREGATE",254:"GROUP_CONCAT",258:"SEPARATOR",259:"=",261:"LANGTAG",262:"^^",263:"DECIMAL",264:"DOUBLE",265:"true",266:"false",267:"STRING_LITERAL1",268:"STRING_LITERAL2",269:"STRING_LITERAL_LONG1",270:"STRING_LITERAL_LONG2",271:"INTEGER_POSITIVE",272:"DECIMAL_POSITIVE",273:"DOUBLE_POSITIVE",274:"INTEGER_NEGATIVE",275:"DECIMAL_NEGATIVE",276:"DOUBLE_NEGATIVE",277:"PNAME_LN",280:"DISTINCT",281:"REDUCED",283:"*",286:"NAMED",287:"SILENT",288:"CLEAR",289:"DROP",290:"ADD",291:"MOVE",292:"COPY",293:"ALL",294:".",295:"UNION",297:"|",298:"/",300:"?",301:"+",302:"||",303:"&&",304:"!=",305:"<",306:">",307:"<=",308:">=",309:"NOT",310:"CONCAT",311:"COALESCE",312:"SUBSTR",313:"REGEX",314:"REPLACE"},
+productions_: [0,[3,3],[7,2],[10,2],[13,3],[16,4],[21,4],[17,3],[26,1],[26,5],[32,5],[32,7],[41,5],[46,4],[49,3],[19,2],[20,4],[59,3],[63,1],[63,1],[63,3],[63,5],[63,1],[66,2],[69,3],[72,2],[72,2],[72,1],[72,1],[77,2],[77,2],[77,4],[77,4],[81,2],[83,4],[83,6],[87,1],[87,1],[87,1],[90,3],[92,2],[94,4],[94,3],[94,5],[94,4],[94,2],[94,2],[94,2],[94,6],[94,6],[117,2],[113,2],[122,3],[125,2],[127,3],[103,1],[103,2],[100,2],[100,1],[109,4],[134,7],[139,3],[54,3],[54,3],[143,2],[146,3],[150,3],[147,2],[147,2],[147,2],[147,3],[147,4],[147,2],[147,6],[147,1],[76,1],[76,1],[76,1],[65,2],[65,6],[166,1],[166,4],[34,3],[169,3],[141,2],[141,2],[175,1],[173,2],[178,2],[179,1],[179,1],[179,1],[180,2],[152,2],[152,2],[184,4],[191,1],[191,3],[194,2],[196,2],[199,2],[198,2],[200,1],[200,1],[200,2],[200,3],[204,1],[204,1],[204,4],[205,1],[205,1],[205,2],[205,2],[174,3],[174,3],[185,3],[185,3],[183,1],[183,1],[189,1],[189,1],[172,1],[172,1],[172,1],[172,1],[172,1],[172,1],[29,2],[216,2],[218,1],[218,3],[218,4],[219,2],[225,2],[225,2],[225,2],[223,2],[233,2],[231,2],[231,2],[231,2],[236,1],[236,1],[236,1],[236,1],[236,1],[236,1],[74,3],[64,1],[64,2],[64,4],[64,6],[64,8],[64,2],[64,4],[64,2],[64,4],[64,3],[238,5],[238,5],[238,6],[257,4],[88,1],[88,2],[88,3],[88,1],[88,1],[88,1],[88,1],[88,1],[88,1],[88,1],[260,1],[260,1],[260,1],[260,1],[227,1],[227,1],[227,1],[229,1],[229,1],[229,1],[52,1],[52,1],[52,1],[278,1],[278,1],[4,0],[4,2],[5,1],[5,1],[8,1],[8,1],[8,1],[8,1],[9,0],[9,1],[18,0],[18,2],[22,0],[22,1],[279,1],[279,1],[24,0],[24,1],[282,1],[282,2],[25,1],[25,1],[35,0],[35,2],[36,0],[36,2],[39,0],[39,1],[284,1],[284,1],[285,1],[285,2],[43,1],[43,1],[44,0],[44,2],[45,0],[45,1],[48,0],[48,2],[51,0],[51,1],[53,0],[53,1],[55,0],[55,1],[56,0],[56,1],[57,0],[57,1],[58,0],[58,1],[62,1],[62,2],[68,1],[68,2],[71,1],[71,2],[84,0],[84,2],[85,0],[85,2],[86,0],[86,2],[91,0],[91,2],[93,0],[93,3],[96,0],[96,1],[97,0],[97,1],[98,1],[98,1],[99,0],[99,1],[101,1],[101,1],[101,1],[102,0],[102,1],[106,0],[106,1],[112,0],[112,1],[114,0],[114,1],[115,0],[115,2],[116,0],[116,1],[118,0],[118,1],[119,0],[119,2],[124,0],[124,1],[130,0],[130,1],[131,1],[131,1],[131,1],[132,0],[132,1],[133,0],[133,2],[135,1],[135,1],[136,0],[136,1],[137,0],[137,1],[138,0],[138,1],[140,0],[140,3],[142,0],[142,1],[144,0],[144,1],[145,0],[145,2],[148,0],[148,1],[149,0],[149,1],[151,0],[151,3],[153,0],[153,1],[154,0],[154,3],[157,1],[157,1],[159,0],[159,1],[160,1],[160,1],[164,0],[164,1],[165,0],[165,3],[167,0],[167,3],[168,0],[168,1],[170,0],[170,3],[171,0],[171,1],[176,0],[176,1],[296,1],[296,2],[177,0],[177,3],[182,0],[182,3],[186,0],[186,1],[187,1],[187,1],[188,0],[188,3],[190,0],[190,2],[193,1],[193,1],[195,0],[195,3],[197,0],[197,3],[299,1],[299,1],[299,1],[201,0],[201,1],[202,0],[202,1],[206,0],[206,3],[207,0],[207,1],[209,1],[209,2],[212,1],[212,2],[215,0],[215,3],[217,0],[217,3],[220,1],[220,1],[220,1],[220,1],[220,1],[220,1],[221,0],[221,1],[224,0],[224,2],[226,1],[226,1],[228,0],[228,2],[230,0],[230,2],[232,0],[232,2],[234,1],[234,1],[235,0],[235,1],[244,1],[244,1],[244,1],[244,1],[244,1],[247,0],[247,1],[250,0],[250,1],[251,1],[251,1],[253,0],[253,1],[255,0],[255,1],[256,0],[256,1]],
+performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
+/* this == yyval */
+
+var $0 = $$.length - 1;
+switch (yystate) {
+case 1:
+
+      $$[$0-1].prefixes = Parser.prefixes;
+      Parser.prefixes = null;
+      base = basePath = baseRoot = '';
+      return $$[$0-1];
+    
+break;
+case 2:
+this.$ = extend({ type: 'query' }, $$[$0-1], $$[$0]);
+break;
+case 3:
+
+      base = resolveIRI($$[$0])
+      basePath = base.replace(/[^\/]*$/, '');
+      baseRoot = base.match(/^(?:[a-z]+:\/*)?[^\/]*/)[0];
+    
+break;
+case 4:
+
+      if (!Parser.prefixes) Parser.prefixes = {};
+      $$[$0-1] = $$[$0-1].substr(0, $$[$0-1].length - 1);
+      $$[$0] = resolveIRI($$[$0]);
+      Parser.prefixes[$$[$0-1]] = $$[$0];
+    
+break;
+case 5:
+this.$ = extend($$[$0-3], groupDatasets($$[$0-2]), $$[$0-1], $$[$0]);
+break;
+case 6:
+this.$ = extend({ type: 'query' }, $$[$0-3], $$[$0-2], $$[$0-1], $$[$0]);
+break;
+case 7:
+this.$ = extend({ queryType: 'SELECT', variables: $$[$0] === '*' ? ['*'] : $$[$0] }, $$[$0-1] && ($$[$0-2] = lowercase($$[$0-1]), $$[$0-1] = {}, $$[$0-1][$$[$0-2]] = true, $$[$0-1]));
+break;
+case 8: case 89: case 121: case 146:
+this.$ = toVar($$[$0]);
+break;
+case 9: case 21:
+this.$ = expression($$[$0-3], { variable: toVar($$[$0-1]) });
+break;
+case 10:
+this.$ = extend({ queryType: 'CONSTRUCT', template: $$[$0-3] }, groupDatasets($$[$0-2]), $$[$0-1], $$[$0]);
+break;
+case 11:
+this.$ = extend({ queryType: 'CONSTRUCT', template: $$[$0-2] = ($$[$0-2] ? $$[$0-2].triples : []) }, groupDatasets($$[$0-5]), { where: [ { type: 'bgp', triples: appendAllTo([], $$[$0-2]) } ] }, $$[$0]);
+break;
+case 12:
+this.$ = extend({ queryType: 'DESCRIBE', variables: $$[$0-3] === '*' ? ['*'] : $$[$0-3].map(toVar) }, groupDatasets($$[$0-2]), $$[$0-1], $$[$0]);
+break;
+case 13:
+this.$ = extend({ queryType: 'ASK' }, groupDatasets($$[$0-2]), $$[$0-1], $$[$0]);
+break;
+case 14: case 52:
+this.$ = { iri: $$[$0], named: !!$$[$0-1] };
+break;
+case 15:
+this.$ = { where: $$[$0].patterns };
+break;
+case 16:
+this.$ = extend($$[$0-3], $$[$0-2], $$[$0-1], $$[$0]);
+break;
+case 17:
+this.$ = { group: $$[$0] };
+break;
+case 18: case 19: case 25: case 27:
+this.$ = expression($$[$0]);
+break;
+case 20:
+this.$ = expression($$[$0-1]);
+break;
+case 22: case 28:
+this.$ = expression(toVar($$[$0]));
+break;
+case 23:
+this.$ = { having: $$[$0] };
+break;
+case 24:
+this.$ = { order: $$[$0] };
+break;
+case 26:
+this.$ = expression($$[$0], { descending: true });
+break;
+case 29:
+this.$ = { limit:  toInt($$[$0]) };
+break;
+case 30:
+this.$ = { offset: toInt($$[$0]) };
+break;
+case 31:
+this.$ = { limit: toInt($$[$0-2]), offset: toInt($$[$0]) };
+break;
+case 32:
+this.$ = { limit: toInt($$[$0]), offset: toInt($$[$0-2]) };
+break;
+case 33:
+this.$ = { type: 'values', values: $$[$0] };
+break;
+case 34:
+
+      $$[$0-3] = toVar($$[$0-3]);
+      this.$ = $$[$0-1].map(function(v) { var o = {}; o[$$[$0-3]] = v; return o; })
+    
+break;
+case 35:
+
+      var length = $$[$0-4].length;
+      $$[$0-4] = $$[$0-4].map(toVar);
+      this.$ = $$[$0-1].map(function (values) {
+        if (values.length !== length)
+          throw Error('Inconsistent VALUES length');
+        var valuesObject = {};
+        for(var i = 0; i<length; i++)
+          valuesObject[$$[$0-4][i]] = values[i];
+        return valuesObject;
+      });
+    
+break;
+case 38:
+this.$ = undefined;
+break;
+case 39: case 62: case 82: case 105: case 147:
+this.$ = $$[$0-1];
+break;
+case 40:
+this.$ = { type: 'update', updates: appendTo($$[$0-1], $$[$0]) };
+break;
+case 41:
+this.$ = extend({ type: 'load', silent: !!$$[$0-2], source: $$[$0-1] }, $$[$0] && { destination: $$[$0] });
+break;
+case 42:
+this.$ = { type: lowercase($$[$0-2]), silent: !!$$[$0-1], graph: $$[$0] };
+break;
+case 43:
+this.$ = { type: lowercase($$[$0-4]), silent: !!$$[$0-3], source: $$[$0-2], destination: $$[$0] };
+break;
+case 44:
+this.$ = { type: 'create', silent: !!$$[$0-2], graph: $$[$0-1] };
+break;
+case 45:
+this.$ = { updateType: 'insert',      insert: $$[$0] };
+break;
+case 46:
+this.$ = { updateType: 'delete',      delete: $$[$0] };
+break;
+case 47:
+this.$ = { updateType: 'deletewhere', delete: $$[$0] };
+break;
+case 48:
+this.$ = extend({ updateType: 'insertdelete' }, $$[$0-5], { insert: $$[$0-4] || [] }, { delete: $$[$0-3] || [] }, groupDatasets($$[$0-2]), { where: $$[$0].patterns });
+break;
+case 49:
+this.$ = extend({ updateType: 'insertdelete' }, $$[$0-5], { delete: $$[$0-4] || [] }, { insert: $$[$0-3] || [] }, groupDatasets($$[$0-2]), { where: $$[$0].patterns });
+break;
+case 50: case 51: case 54: case 138:
+this.$ = $$[$0];
+break;
+case 53:
+this.$ = { graph: $$[$0] };
+break;
+case 55:
+this.$ = { type: 'graph', default: true };
+break;
+case 56: case 57:
+this.$ = { type: 'graph', name: $$[$0] };
+break;
+case 58:
+ this.$ = {}; this.$[lowercase($$[$0])] = true; 
+break;
+case 59:
+this.$ = $$[$0-2] ? unionAll($$[$0-1], [$$[$0-2]]) : unionAll($$[$0-1]);
+break;
+case 60:
+
+      var graph = extend($$[$0-3] || { triples: [] }, { type: 'graph', name: toVar($$[$0-5]) });
+      this.$ = $$[$0] ? [graph, $$[$0]] : [graph];
+    
+break;
+case 61: case 66:
+this.$ = { type: 'bgp', triples: unionAll($$[$0-2], [$$[$0-1]]) };
+break;
+case 63:
+
+      // Simplify the groups by merging adjacent BGPs and moving filters to the back
+      if ($$[$0-1].length > 1) {
+        var groups = [], currentBgp, filters = [];
+        for (var i = 0, group; group=$$[$0-1][i]; i++) {
+          switch (group.type) {
+            // Add a BGP's triples to the current BGP
+            case 'bgp':
+              if (group.triples.length) {
+                if (!currentBgp)
+                  appendTo(groups, currentBgp = group);
+                else
+                  appendAllTo(currentBgp.triples, group.triples);
+              }
+              break;
+            // Save filters separately
+            case 'filter':
+              appendTo(filters, group);
+              break;
+            // All other groups break up a BGP
+            default:
+              // Only add the group if its pattern is non-empty
+              if (!group.patterns || group.patterns.length > 0) {
+                appendTo(groups, group);
+                currentBgp = null;
+              }
+          }
+        }
+        $$[$0-1] = appendAllTo(groups, filters);
+      }
+      this.$ = { type: 'group', patterns: $$[$0-1] }
+    
+break;
+case 64:
+this.$ = $$[$0-1] ? unionAll([$$[$0-1]], $$[$0]) : unionAll($$[$0]);
+break;
+case 65:
+this.$ = $$[$0] ? [$$[$0-2], $$[$0]] : $$[$0-2];
+break;
+case 67:
+this.$ = $$[$0-1].length ? { type: 'union', patterns: unionAll($$[$0-1].map(degroupSingle), [degroupSingle($$[$0])]) } : degroupSingle($$[$0]);
+break;
+case 68:
+this.$ = extend($$[$0], { type: 'optional' });
+break;
+case 69:
+this.$ = extend($$[$0], { type: 'minus' });
+break;
+case 70:
+this.$ = extend($$[$0], { type: 'graph', name: toVar($$[$0-1]) });
+break;
+case 71:
+this.$ = extend($$[$0], { type: 'service', name: toVar($$[$0-1]), silent: !!$$[$0-2] });
+break;
+case 72:
+this.$ = { type: 'filter', expression: $$[$0] };
+break;
+case 73:
+this.$ = { type: 'bind', variable: toVar($$[$0-1]), expression: $$[$0-3] };
+break;
+case 78:
+this.$ = { type: 'functionCall', function: $$[$0-1], args: [] };
+break;
+case 79:
+this.$ = { type: 'functionCall', function: $$[$0-5], args: appendTo($$[$0-2], $$[$0-1]), distinct: !!$$[$0-3] };
+break;
+case 80: case 96: case 107: case 187: case 197: case 209: case 211: case 221: case 225: case 245: case 247: case 249: case 251: case 253: case 274: case 280: case 291: case 301: case 307: case 313: case 317: case 327: case 329: case 333: case 341: case 343: case 349: case 351: case 355: case 357: case 366: case 374: case 376: case 386: case 390: case 392: case 394:
+this.$ = [];
+break;
+case 81:
+this.$ = appendTo($$[$0-2], $$[$0-1]);
+break;
+case 83:
+this.$ = unionAll($$[$0-2], [$$[$0-1]]);
+break;
+case 84: case 93:
+this.$ = $$[$0].map(function (t) { return extend(triple($$[$0-1]), t); });
+break;
+case 85:
+this.$ = appendAllTo($$[$0].map(function (t) { return extend(triple($$[$0-1].entity), t); }), $$[$0-1].triples) /* the subject is a blank node, possibly with more triples */;
+break;
+case 87:
+this.$ = unionAll($$[$0-1], [$$[$0]]);
+break;
+case 88:
+this.$ = objectListToTriples($$[$0-1], $$[$0]);
+break;
+case 91: case 103: case 110:
+this.$ = RDF_TYPE;
+break;
+case 92:
+this.$ = appendTo($$[$0-1], $$[$0]);
+break;
+case 94:
+this.$ = !$$[$0] ? $$[$0-1].triples : appendAllTo($$[$0].map(function (t) { return extend(triple($$[$0-1].entity), t); }), $$[$0-1].triples) /* the subject is a blank node, possibly with more triples */;
+break;
+case 95:
+this.$ = objectListToTriples(toVar($$[$0-3]), appendTo($$[$0-2], $$[$0-1]), $$[$0]);
+break;
+case 97:
+this.$ = objectListToTriples(toVar($$[$0-1]), $$[$0]);
+break;
+case 98:
+this.$ = $$[$0-1].length ? path('|',appendTo($$[$0-1], $$[$0])) : $$[$0];
+break;
+case 99:
+this.$ = $$[$0-1].length ? path('/', appendTo($$[$0-1], $$[$0])) : $$[$0];
+break;
+case 100:
+this.$ = $$[$0] ? path($$[$0], [$$[$0-1]]) : $$[$0-1];
+break;
+case 101:
+this.$ = $$[$0-1] ? path($$[$0-1], [$$[$0]]) : $$[$0];;
+break;
+case 104: case 111:
+this.$ = path($$[$0-1], [$$[$0]]);
+break;
+case 108:
+this.$ = path('|', appendTo($$[$0-2], $$[$0-1]));
+break;
+case 112:
+this.$ = path($$[$0-1], [RDF_TYPE]);
+break;
+case 113: case 115:
+this.$ = createList($$[$0-1]);
+break;
+case 114: case 116:
+this.$ = createAnonymousObject($$[$0-1]);
+break;
+case 117:
+this.$ = { entity: $$[$0], triples: [] } /* for consistency with TriplesNode */;
+break;
+case 119:
+this.$ = { entity: $$[$0], triples: [] } /* for consistency with TriplesNodePath */;
+break;
+case 125:
+this.$ = blank();
+break;
+case 126:
+this.$ = RDF_NIL;
+break;
+case 127:
+this.$ = $$[$0-1].length ? operation('||', appendTo($$[$0-1], $$[$0])) : $$[$0];
+break;
+case 128:
+this.$ = $$[$0-1].length ? operation('&&', appendTo($$[$0-1], $$[$0])) : $$[$0];
+break;
+case 130:
+this.$ = operation($$[$0-1], [$$[$0-2], $$[$0]]);
+break;
+case 131:
+this.$ = operation($$[$0-2] ? 'notin' : 'in', [$$[$0-3], $$[$0]]);
+break;
+case 132: case 136:
+this.$ = createOperationTree($$[$0-1], $$[$0]);
+break;
+case 133: case 137:
+this.$ = [$$[$0-1], $$[$0]];
+break;
+case 134:
+this.$ = ['+', createOperationTree($$[$0-1], $$[$0])];
+break;
+case 135:
+this.$ = ['-', createOperationTree($$[$0-1].replace('-', ''), $$[$0])];
+break;
+case 139:
+this.$ = operation($$[$0-1], [$$[$0]]);
+break;
+case 140:
+this.$ = operation('UMINUS', [$$[$0]]);
+break;
+case 149:
+this.$ = operation(lowercase($$[$0-1]));
+break;
+case 150:
+this.$ = operation(lowercase($$[$0-3]), [$$[$0-1]]);
+break;
+case 151:
+this.$ = operation(lowercase($$[$0-5]), [$$[$0-3], $$[$0-1]]);
+break;
+case 152:
+this.$ = operation(lowercase($$[$0-7]), [$$[$0-5], $$[$0-3], $$[$0-1]]);
+break;
+case 153:
+this.$ = operation(lowercase($$[$0-1]), $$[$0]);
+break;
+case 154:
+this.$ = operation('bound', [toVar($$[$0-1])]);
+break;
+case 155:
+this.$ = operation($$[$0-1], []);
+break;
+case 156:
+this.$ = operation($$[$0-3], [$$[$0-1]]);
+break;
+case 157:
+this.$ = operation($$[$0-2] ? 'notexists' :'exists', [degroupSingle($$[$0])]);
+break;
+case 158: case 159:
+this.$ = expression($$[$0-1], { type: 'aggregate', aggregation: lowercase($$[$0-4]), distinct: !!$$[$0-2] });
+break;
+case 160:
+this.$ = expression($$[$0-2], { type: 'aggregate', aggregation: lowercase($$[$0-5]), distinct: !!$$[$0-3], separator: $$[$0-1] || ' ' });
+break;
+case 161:
+this.$ = $$[$0].substr(1, $$[$0].length - 2);
+break;
+case 163:
+this.$ = $$[$0-1] + lowercase($$[$0]);
+break;
+case 164:
+this.$ = $$[$0-2] + '^^' + $$[$0];
+break;
+case 165: case 179:
+this.$ = createLiteral($$[$0], XSD_INTEGER);
+break;
+case 166: case 180:
+this.$ = createLiteral($$[$0], XSD_DECIMAL);
+break;
+case 167: case 181:
+this.$ = createLiteral(lowercase($$[$0]), XSD_DOUBLE);
+break;
+case 170:
+this.$ = XSD_TRUE;
+break;
+case 171:
+this.$ = XSD_FALSE;
+break;
+case 172: case 173:
+this.$ = unescapeString($$[$0], 1);
+break;
+case 174: case 175:
+this.$ = unescapeString($$[$0], 3);
+break;
+case 176:
+this.$ = createLiteral($$[$0].substr(1), XSD_INTEGER);
+break;
+case 177:
+this.$ = createLiteral($$[$0].substr(1), XSD_DECIMAL);
+break;
+case 178:
+this.$ = createLiteral($$[$0].substr(1).toLowerCase(), XSD_DOUBLE);
+break;
+case 182:
+this.$ = resolveIRI($$[$0]);
+break;
+case 183:
+
+      var namePos = $$[$0].indexOf(':'),
+          prefix = $$[$0].substr(0, namePos),
+          expansion = Parser.prefixes[prefix];
+      if (!expansion) throw new Error('Unknown prefix: ' + prefix);
+      this.$ = resolveIRI(expansion + $$[$0].substr(namePos + 1));
+    
+break;
+case 184:
+
+      $$[$0] = $$[$0].substr(0, $$[$0].length - 1);
+      if (!($$[$0] in Parser.prefixes)) throw new Error('Unknown prefix: ' + $$[$0]);
+      this.$ = resolveIRI(Parser.prefixes[$$[$0]]);
+    
+break;
+case 188: case 198: case 206: case 210: case 212: case 218: case 222: case 226: case 240: case 242: case 244: case 246: case 248: case 250: case 252: case 275: case 281: case 292: case 308: case 340: case 352: case 371: case 373: case 387: case 391: case 393: case 395:
+$$[$0-1].push($$[$0]);
+break;
+case 205: case 217: case 239: case 241: case 243: case 339: case 370: case 372:
+this.$ = [$$[$0]];
+break;
+case 254: case 302: case 314: case 318: case 328: case 330: case 334: case 342: case 344: case 350: case 356: case 358: case 367: case 375: case 377:
+$$[$0-2].push($$[$0-1]);
+break;
+}
+},
+table: [o($V0,[2,187],{3:1,4:2}),{1:[3]},o($V1,[2,253],{5:3,278:4,7:5,92:6,10:7,13:8,8:9,93:10,16:13,32:14,41:15,46:16,17:17,11:[1,11],14:[1,12],23:$V2,33:[1,18],42:[1,19],47:[1,20]}),{6:[1,22]},o($V0,[2,188]),{6:[2,189]},{6:[2,190]},o($V0,[2,185]),o($V0,[2,186]),{6:[2,195],9:23,81:24,82:$V3},{94:26,95:[1,27],98:28,101:29,105:[1,30],108:[1,31],110:[1,32],111:[1,33],112:34,116:35,120:[2,276],121:[2,270],125:41,126:[1,42],288:[1,36],289:[1,37],290:[1,38],291:[1,39],292:[1,40]},{12:[1,43]},{15:[1,44]},o($V4,[2,191]),o($V4,[2,192]),o($V4,[2,193]),o($V4,[2,194]),o($V5,[2,197],{18:45}),o($V6,[2,211],{34:46,36:47,38:[1,48]}),{12:$V7,15:$V8,27:$V9,43:49,52:54,277:$Va,283:[1,51],284:52,285:50},o($V5,[2,225],{48:58}),o($Vb,[2,203],{24:59,279:60,280:[1,61],281:[1,62]}),{1:[2,1]},{6:[2,2]},{6:[2,196]},{27:[1,64],28:[1,65],83:63},{6:[2,40],192:[1,66]},o($Vc,[2,255],{96:67,287:[1,68]}),o($Vd,[2,261],{99:69,287:[1,70]}),o($Ve,[2,266],{102:71,287:[1,72]}),{106:73,107:[2,268],287:[1,74]},{38:$Vf,109:75},{38:$Vf,109:77},{38:$Vf,109:78},{113:79,121:$Vg},{117:81,120:$Vh},o($Vi,[2,259]),o($Vi,[2,260]),o($Vj,[2,263]),o($Vj,[2,264]),o($Vj,[2,265]),{120:[2,277],121:[2,271]},{12:$V7,15:$V8,52:83,277:$Va},o($V0,[2,3]),{12:[1,84]},{19:85,37:$Vk,38:$Vl,49:86,50:$Vm,53:87},o($V5,[2,209],{35:90}),{37:[1,91],49:92,50:$Vm},o($Vn,[2,333],{168:93,169:94,170:95,40:[2,331]}),o($Vo,[2,221],{44:96}),o($Vo,[2,219],{52:54,284:97,12:$V7,15:$V8,27:$V9,277:$Va}),o($Vo,[2,220]),o($Vp,[2,217]),o($Vp,[2,215]),o($Vp,[2,216]),o($Vq,[2,182]),o($Vq,[2,183]),o($Vq,[2,184]),{19:98,37:$Vk,38:$Vl,49:99,50:$Vm,53:87},{25:100,26:103,27:$Vr,28:$Vs,282:101,283:[1,102]},o($Vb,[2,204]),o($Vb,[2,201]),o($Vb,[2,202]),o($Vt,[2,33]),{38:[1,106]},o($Vu,[2,247],{85:107}),o($V1,[2,254]),{12:$V7,15:$V8,52:108,277:$Va},o($Vc,[2,256]),{100:109,107:[1,110],129:[1,112],131:111,286:[1,113],293:[1,114]},o($Vd,[2,262]),o($Vc,$Vv,{103:115,130:117,107:$Vw,129:$Vx}),o($Ve,[2,267]),{107:[1,119]},{107:[2,269]},o($Vy,[2,45]),o($Vn,$Vz,{132:120,139:121,140:122,40:$VA,107:$VA}),o($Vy,[2,46]),o($Vy,[2,47]),o($VB,[2,272],{114:123,117:124,120:$Vh}),{38:$Vf,109:125},o($VB,[2,278],{118:126,113:127,121:$Vg}),{38:$Vf,109:128},o([120,121],[2,53]),o($V0,[2,4]),o($VC,$VD,{20:129,55:130,59:131,60:$VE}),o($V5,[2,198]),{38:$VF,54:133},o($Vc,[2,227],{51:135,286:[1,136]}),{38:[2,230]},{19:137,37:$Vk,38:$Vl,49:138,50:$Vm,53:87},{38:[1,139]},o($V6,[2,212]),{40:[1,140]},{40:[2,332]},{12:$V7,15:$V8,27:$VG,28:$VH,52:145,79:$VI,88:146,141:141,163:$VJ,172:142,174:143,210:$VK,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($V$,[2,223],{53:87,45:170,49:171,19:172,37:$Vk,38:$Vl,50:$Vm}),o($Vp,[2,218]),o($VC,$VD,{55:130,59:131,20:173,60:$VE}),o($V5,[2,226]),o($V5,[2,7]),o($V5,[2,207],{26:174,27:$Vr,28:$Vs}),o($V5,[2,208]),o($V01,[2,205]),o($V01,[2,8]),o($V11,$V21,{29:175,215:176}),o($V31,[2,245],{84:177}),{27:[1,179],31:[1,178]},o($Vy,[2,257],{97:180,127:181,128:[1,182]}),o($Vy,[2,42]),{12:$V7,15:$V8,52:183,277:$Va},o($Vy,[2,58]),o($Vy,[2,286]),o($Vy,[2,287]),o($Vy,[2,288]),{104:[1,184]},o($V41,[2,55]),{12:$V7,15:$V8,52:185,277:$Va},o($Vc,[2,285]),{12:$V7,15:$V8,52:186,277:$Va},o($V51,[2,291],{133:187}),o($V51,[2,290]),{12:$V7,15:$V8,27:$VG,28:$VH,52:145,79:$VI,88:146,141:188,163:$VJ,172:142,174:143,210:$VK,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($VB,[2,274],{115:189}),o($VB,[2,273]),o([37,120,123],[2,51]),o($VB,[2,280],{119:190}),o($VB,[2,279]),o([37,121,123],[2,50]),o($V4,[2,5]),o($V61,[2,233],{56:191,66:192,67:[1,193]}),o($VC,[2,232]),{61:[1,194]},o([6,40,60,67,70,78,80,82],[2,15]),o($Vn,$V71,{21:195,143:196,17:197,144:198,150:199,151:200,23:$V2,38:$V81,40:$V81,82:$V81,107:$V81,155:$V81,156:$V81,158:$V81,161:$V81,162:$V81}),{12:$V7,15:$V8,52:201,277:$Va},o($Vc,[2,228]),o($VC,$VD,{55:130,59:131,20:202,60:$VE}),o($V5,[2,210]),o($Vn,$Vz,{140:122,39:203,139:204,40:[2,213]}),o($V5,[2,82]),{40:[2,335],171:205,294:[1,206]},o($V91,$Va1,{173:207,177:208}),o($V91,$Va1,{177:208,175:209,176:210,173:211,40:$Vb1,107:$Vb1,294:$Vb1}),o($Vc1,[2,121]),o($Vc1,[2,122]),o($Vc1,[2,123]),o($Vc1,[2,124]),o($Vc1,[2,125]),o($Vc1,[2,126]),{12:$V7,15:$V8,27:$VG,28:$VH,52:145,79:$VI,88:146,163:$VJ,172:214,174:215,183:213,209:212,210:$VK,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($V91,$Va1,{177:208,173:216}),o($Vd1,[2,162],{261:[1,217],262:[1,218]}),o($Vd1,[2,165]),o($Vd1,[2,166]),o($Vd1,[2,167]),o($Vd1,[2,168]),o($Vd1,[2,169]),o($Vd1,[2,170]),o($Vd1,[2,171]),o($Ve1,[2,172]),o($Ve1,[2,173]),o($Ve1,[2,174]),o($Ve1,[2,175]),o($Vd1,[2,176]),o($Vd1,[2,177]),o($Vd1,[2,178]),o($Vd1,[2,179]),o($Vd1,[2,180]),o($Vd1,[2,181]),o($VC,$VD,{55:130,59:131,20:219,60:$VE}),o($Vo,[2,222]),o($V$,[2,224]),o($V4,[2,13]),o($V01,[2,206]),{30:[1,220]},o($V11,[2,376],{216:221,217:222}),{12:$V7,15:$V8,40:[1,223],52:225,79:$VI,87:224,88:226,89:$Vf1,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},{38:[1,228]},o($Vu,[2,248]),o($Vy,[2,41]),o($Vy,[2,258]),{107:[1,229]},o($Vy,[2,57]),o($Vc,$Vv,{130:117,103:230,107:$Vw,129:$Vx}),o($V41,[2,56]),o($Vy,[2,44]),{40:[1,231],107:[1,233],134:232},o($V51,[2,303],{142:234,294:[1,235]}),{37:[1,236],122:237,123:$Vg1},{37:[1,239],122:240,123:$Vg1},o($Vh1,[2,235],{57:241,69:242,70:[1,243]}),o($V61,[2,234]),{12:$V7,15:$V8,28:$Vi1,52:259,64:247,65:248,68:244,74:246,76:245,238:250,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,244:255,245:$Vn1,246:$Vo1,247:258,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1},{12:$V7,15:$V8,27:$Vz1,28:$VA1,52:259,62:269,63:270,64:271,65:272,238:250,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,244:255,245:$Vn1,246:$Vo1,247:258,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1},{40:[1,275]},{40:[1,276]},{19:277,37:$Vk,38:$Vl,53:87},o($VB1,[2,307],{145:278}),o($VB1,[2,306]),{12:$V7,15:$V8,27:$VG,28:$VC1,52:145,79:$VI,88:146,152:279,163:$VJ,172:280,185:281,210:$VD1,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($Vo,[2,14]),o($V4,[2,10]),{40:[1,284]},{40:[2,214]},{40:[2,83]},o($Vn,[2,334],{40:[2,336]}),o($VE1,[2,84]),{12:$V7,15:$V8,27:[1,287],52:288,178:285,179:286,181:[1,289],277:$Va},o($VE1,[2,85]),o($VE1,[2,86]),o($VE1,[2,338]),{12:$V7,15:$V8,27:$VG,28:$VH,31:[1,290],52:145,79:$VI,88:146,163:$VJ,172:214,174:215,183:291,210:$VK,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($VF1,[2,370]),o($VG1,[2,117]),o($VG1,[2,118]),{211:[1,292]},o($Vd1,[2,163]),{12:$V7,15:$V8,52:293,277:$Va},o($V4,[2,12]),{27:[1,294]},o([30,31,192,242],[2,127],{302:[1,295]}),o($VH1,$VI1,{218:296,219:297,223:298,231:299,235:300,203:$VJ1,237:$VK1,301:$VL1}),o($Vt,[2,34]),o($V31,[2,246]),o($VM1,[2,36]),o($VM1,[2,37]),o($VM1,[2,38]),o($VN1,[2,249],{86:304}),{12:$V7,15:$V8,52:305,277:$Va},o($Vy,[2,43]),o([6,37,120,121,123,192],[2,59]),o($V51,[2,292]),{12:$V7,15:$V8,27:[1,307],52:308,135:306,277:$Va},o($V51,[2,61]),o($Vn,[2,302],{40:$VO1,107:$VO1}),{38:$VF,54:309},o($VB,[2,275]),o($Vc,[2,282],{124:310,286:[1,311]}),{38:$VF,54:312},o($VB,[2,281]),o($VP1,[2,237],{58:313,77:314,78:[1,315],80:[1,316]}),o($Vh1,[2,236]),{61:[1,317]},o($V61,[2,23],{74:246,64:247,65:248,238:250,244:255,247:258,52:259,76:318,12:$V7,15:$V8,28:$Vi1,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,245:$Vn1,246:$Vo1,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1}),o($VQ1,[2,241]),o($VR1,[2,75]),o($VR1,[2,76]),o($VR1,[2,77]),o($V11,$V21,{215:176,29:319}),o($VS1,[2,148]),{163:[1,320]},{28:[1,321]},{28:[1,322]},{28:[1,323]},{28:$VT1,163:$VU1,166:324},{28:[1,327]},{28:[1,329],163:[1,328]},{248:[1,330]},{28:$VV1,163:$VW1},{28:[1,333]},{28:[1,334]},{28:[1,335]},o($VX1,[2,400]),o($VX1,[2,401]),o($VX1,[2,402]),o($VX1,[2,403]),o($VX1,[2,404]),{248:[2,406]},o($VC,[2,17],{238:250,244:255,247:258,52:259,64:271,65:272,63:336,12:$V7,15:$V8,27:$Vz1,28:$VA1,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,245:$Vn1,246:$Vo1,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1}),o($VY1,[2,239]),o($VY1,[2,18]),o($VY1,[2,19]),o($V11,$V21,{215:176,29:337}),o($VY1,[2,22]),o($VZ1,[2,62]),o($VZ1,[2,63]),o($VC,$VD,{55:130,59:131,20:338,60:$VE}),{38:[2,317],40:[2,64],81:348,82:$V3,107:[1,344],146:339,147:340,154:341,155:[1,342],156:[1,343],158:[1,345],161:[1,346],162:[1,347]},o($VB1,[2,315],{153:349,294:[1,350]}),o($V_1,$V$1,{184:351,187:352,194:353,195:355,27:$V02}),o($V12,[2,345],{187:352,194:353,195:355,186:356,184:357,12:$V$1,15:$V$1,28:$V$1,181:$V$1,203:$V$1,208:$V$1,277:$V$1,27:$V02}),{12:$V7,15:$V8,27:$VG,28:$VC1,52:145,79:$VI,88:146,163:$VJ,172:360,185:361,189:359,210:$VD1,212:358,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($V_1,$V$1,{187:352,194:353,195:355,184:362,27:$V02}),o($VC,$VD,{55:130,59:131,20:363,60:$VE}),o([40,107,211,294],[2,87],{296:364,192:[1,365]}),o($Vn,$V22,{180:366,182:367}),o($Vn,[2,89]),o($Vn,[2,90]),o($Vn,[2,91]),o($V32,[2,113]),o($VF1,[2,371]),o($V32,[2,114]),o($Vd1,[2,164]),{31:[1,368]},o($V11,[2,375]),o([30,31,192,242,302],[2,128],{303:[1,369]}),o($V42,[2,129],{220:370,221:371,222:[2,384],259:[1,372],304:[1,373],305:[1,374],306:[1,375],307:[1,376],308:[1,377],309:[1,378]}),o($V52,[2,386],{224:379}),o($V62,[2,394],{232:380}),{12:$V7,15:$V8,27:$V72,28:$Vi1,52:384,64:383,65:385,74:382,79:$VI,88:386,227:156,229:157,236:381,238:250,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,244:255,245:$Vn1,246:$Vo1,247:258,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1},{12:$V7,15:$V8,27:$V72,28:$Vi1,52:384,64:383,65:385,74:382,79:$VI,88:386,227:156,229:157,236:388,238:250,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,244:255,245:$Vn1,246:$Vo1,247:258,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1},{12:$V7,15:$V8,27:$V72,28:$Vi1,52:384,64:383,65:385,74:382,79:$VI,88:386,227:156,229:157,236:389,238:250,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,244:255,245:$Vn1,246:$Vo1,247:258,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1},o($VH1,[2,399]),{28:[1,392],40:[1,390],90:391},o($Vy,[2,54]),{38:[1,393]},{38:[2,293]},{38:[2,294]},o($Vy,[2,48]),{12:$V7,15:$V8,52:394,277:$Va},o($Vc,[2,283]),o($Vy,[2,49]),o($VP1,[2,16]),o($VP1,[2,238]),{79:[1,395]},{79:[1,396]},{12:$V7,15:$V8,27:$V82,28:$Vi1,52:259,64:247,65:248,71:397,72:398,73:$V92,74:246,75:$Va2,76:401,238:250,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,244:255,245:$Vn1,246:$Vo1,247:258,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1},o($VQ1,[2,242]),{31:[1,403]},o($VS1,[2,149]),o($V11,$V21,{215:176,29:404}),o($V11,$V21,{215:176,29:405}),o($V11,$V21,{215:176,29:406}),o($VS1,[2,153]),o($VS1,[2,80]),o($V11,[2,329],{167:407}),{27:[1,408]},o($VS1,[2,155]),o($V11,$V21,{215:176,29:409}),{38:$VF,54:410},o($VS1,[2,78]),o($V11,[2,325],{164:411,280:[1,412]}),o($Vb2,[2,407],{250:413,280:[1,414]}),o($V11,[2,411],{253:415,280:[1,416]}),o($V11,[2,413],{255:417,280:[1,418]}),o($VY1,[2,240]),{30:[1,420],31:[1,419]},{22:421,40:[2,199],81:422,82:$V3},o($VB1,[2,308]),o($Vc2,[2,309],{148:423,294:[1,424]}),{38:$VF,54:425},{38:$VF,54:426},{38:$VF,54:427},{12:$V7,15:$V8,27:[1,429],52:430,157:428,277:$Va},o($Vd2,[2,321],{159:431,287:[1,432]}),{12:$V7,15:$V8,28:$Vi1,52:259,64:247,65:248,74:246,76:433,238:250,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,244:255,245:$Vn1,246:$Vo1,247:258,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1},{28:[1,434]},o($Ve2,[2,74]),o($VB1,[2,66]),o($Vn,[2,314],{38:$Vf2,40:$Vf2,82:$Vf2,107:$Vf2,155:$Vf2,156:$Vf2,158:$Vf2,161:$Vf2,162:$Vf2}),o($V12,[2,93]),o($Vn,[2,349],{188:435}),o($Vn,[2,347]),o($Vn,[2,348]),o($V_1,[2,357],{196:436,197:437}),o($V12,[2,94]),o($V12,[2,346]),{12:$V7,15:$V8,27:$VG,28:$VC1,31:[1,438],52:145,79:$VI,88:146,163:$VJ,172:360,185:361,189:439,210:$VD1,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($VF1,[2,372]),o($VG1,[2,119]),o($VG1,[2,120]),{211:[1,440]},o($V4,[2,11]),o($V91,[2,342],{192:[1,441]}),o($Vg2,[2,339]),o([40,107,192,211,294],[2,88]),{12:$V7,15:$V8,27:$VG,28:$VH,52:145,79:$VI,88:146,163:$VJ,172:214,174:215,183:442,210:$VK,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($V01,[2,9]),o($V11,[2,377]),o($VH1,$VI1,{223:298,231:299,235:300,219:443,203:$VJ1,237:$VK1,301:$VL1}),{222:[1,444]},o($V11,[2,378]),o($V11,[2,379]),o($V11,[2,380]),o($V11,[2,381]),o($V11,[2,382]),o($V11,[2,383]),{222:[2,385]},o([30,31,192,222,242,259,302,303,304,305,306,307,308,309],[2,132],{225:445,226:446,227:447,229:448,237:[1,450],271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,301:[1,449]}),o($V52,[2,136],{233:451,234:452,283:$Vh2,298:$Vi2}),o($V62,[2,138]),o($V62,[2,141]),o($V62,[2,142]),o($V62,[2,143],{28:$VV1,163:$VW1}),o($V62,[2,144]),o($V62,[2,145]),o($V62,[2,146]),o($V62,[2,139]),o($V62,[2,140]),o($Vt,[2,35]),o($VN1,[2,250]),o($Vj2,[2,251],{91:455}),o($Vn,$Vz,{140:122,136:456,139:457,40:[2,295]}),o($VB,[2,52]),o($VP1,[2,29],{80:[1,458]}),o($VP1,[2,30],{78:[1,459]}),o($Vh1,[2,24],{74:246,64:247,65:248,238:250,244:255,247:258,52:259,76:401,72:460,12:$V7,15:$V8,27:$V82,28:$Vi1,73:$V92,75:$Va2,239:$Vj1,240:$Vk1,241:$Vl1,243:$Vm1,245:$Vn1,246:$Vo1,248:$Vp1,249:$Vq1,252:$Vr1,254:$Vs1,277:$Va,309:$Vt1,310:$Vu1,311:$Vv1,312:$Vw1,313:$Vx1,314:$Vy1}),o($Vk2,[2,243]),{28:$Vi1,74:461},{28:$Vi1,74:462},o($Vk2,[2,27]),o($Vk2,[2,28]),o([6,12,15,27,28,30,31,38,40,70,73,75,78,79,80,82,107,155,156,158,161,162,163,192,210,213,214,222,237,239,240,241,242,243,245,246,248,249,252,254,259,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,283,294,298,301,302,303,304,305,306,307,308,309,310,311,312,313,314],[2,147]),{31:[1,463]},{242:[1,464]},{242:[1,465]},o($V11,$V21,{215:176,29:466}),{31:[1,467]},{31:[1,468]},o($VS1,[2,157]),o($V11,[2,327],{165:469}),o($V11,[2,326]),o($V11,$V21,{215:176,251:470,29:472,283:[1,471]}),o($Vb2,[2,408]),o($V11,$V21,{215:176,29:473}),o($V11,[2,412]),o($V11,$V21,{215:176,29:474}),o($V11,[2,414]),o($VY1,[2,20]),{27:[1,475]},{40:[2,6]},{40:[2,200]},o($Vn,$V71,{151:200,149:476,150:477,38:$Vl2,40:$Vl2,82:$Vl2,107:$Vl2,155:$Vl2,156:$Vl2,158:$Vl2,161:$Vl2,162:$Vl2}),o($Vc2,[2,310]),o($Ve2,[2,67],{295:[1,478]}),o($Ve2,[2,68]),o($Ve2,[2,69]),{38:$VF,54:479},{38:[2,319]},{38:[2,320]},{12:$V7,15:$V8,27:[1,481],52:482,160:480,277:$Va},o($Vd2,[2,322]),o($Ve2,[2,72]),o($V11,$V21,{215:176,29:483}),{12:$V7,15:$V8,27:$VG,28:$VC1,52:145,79:$VI,88:146,163:$VJ,172:360,185:361,189:484,210:$VD1,213:$VL,214:$VM,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},o($VF1,[2,98],{297:[1,485]}),o($Vm2,[2,364],{198:486,202:487,208:[1,488]}),o($Vc1,[2,115]),o($VF1,[2,373]),o($Vc1,[2,116]),o($Vg2,[2,340]),o($Vn2,[2,92],{242:[1,489]}),o($V42,[2,130]),{28:$VT1,163:$VU1,166:490},o($V52,[2,387]),o($VH1,$VI1,{231:299,235:300,223:491,203:$VJ1,237:$VK1,301:$VL1}),o($V62,[2,390],{228:492}),o($V62,[2,392],{230:493}),o($V11,[2,388]),o($V11,[2,389]),o($V62,[2,395]),o($VH1,$VI1,{235:300,231:494,203:$VJ1,237:$VK1,301:$VL1}),o($V11,[2,396]),o($V11,[2,397]),{12:$V7,15:$V8,31:[1,495],52:225,79:$VI,87:496,88:226,89:$Vf1,227:156,229:157,260:152,263:$VN,264:$VO,265:$VP,266:$VQ,267:$VR,268:$VS,269:$VT,270:$VU,271:$VV,272:$VW,273:$VX,274:$VY,275:$VZ,276:$V_,277:$Va},{40:[1,497]},{40:[2,296]},{79:[1,498]},{79:[1,499]},o($Vk2,[2,244]),o($Vk2,[2,25]),o($Vk2,[2,26]),o($VS1,[2,150]),o($V11,$V21,{215:176,29:500}),o($V11,$V21,{215:176,29:501}),{31:[1,502],242:[1,503]},o($VS1,[2,154]),o($VS1,[2,156]),o($V11,$V21,{215:176,29:504}),{31:[1,505]},{31:[2,409]},{31:[2,410]},{31:[1,506]},{31:[2,415],192:[1,509],256:507,257:508},{31:[1,510]},o($VB1,[2,65]),o($VB1,[2,312]),{38:[2,318]},o($Ve2,[2,70]),{38:$VF,54:511},{38:[2,323]},{38:[2,324]},{30:[1,512]},o($Vn2,[2,351],{190:513,242:[1,514]}),o($V_1,[2,356]),o([12,15,27,28,31,79,163,210,213,214,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,297],[2,99],{298:[1,515]}),{12:$V7,15:$V8,28:[1,521],52:518,181:[1,519],199:516,200:517,203:[1,520],277:$Va},o($Vm2,[2,365]),o($Vn,[2,344]),o($V42,[2,131]),o($V52,[2,133]),o($V52,[2,134],{234:452,233:522,283:$Vh2,298:$Vi2}),o($V52,[2,135],{234:452,233:523,283:$Vh2,298:$Vi2}),o($V62,[2,137]),o($VN1,[2,39]),o($Vj2,[2,252]),o($Vo2,[2,297],{137:524,294:[1,525]}),o($VP1,[2,31]),o($VP1,[2,32]),{31:[1,526]},{242:[1,527]},o($VS1,[2,81]),o($V11,[2,330]),{31:[1,528],242:[1,529]},o($VS1,[2,158]),o($VS1,[2,159]),{31:[1,530]},{31:[2,416]},{258:[1,531]},o($VY1,[2,21]),o($Ve2,[2,71]),{27:[1,532]},o([38,40,82,107,155,156,158,161,162,211,294],[2,95],{191:533,192:[1,534]}),o($Vn,[2,350]),o($V_1,[2,358]),o($Vp2,[2,101]),o($Vp2,[2,362],{201:535,299:536,283:[1,538],300:[1,537],301:[1,539]}),o($Vq2,[2,102]),o($Vq2,[2,103]),{12:$V7,15:$V8,28:[1,543],52:544,163:[1,542],181:$Vr2,204:540,205:541,208:$Vs2,277:$Va},o($V_1,$V$1,{195:355,194:547}),o($V62,[2,391]),o($V62,[2,393]),o($Vn,$Vz,{140:122,138:548,139:549,40:$Vt2,107:$Vt2}),o($Vo2,[2,298]),o($VS1,[2,151]),o($V11,$V21,{215:176,29:550}),o($VS1,[2,79]),o($V11,[2,328]),o($VS1,[2,160]),{259:[1,551]},{31:[1,552]},o($Vn2,[2,352]),o($Vn2,[2,96],{195:355,193:553,194:554,12:$V$1,15:$V$1,28:$V$1,181:$V$1,203:$V$1,208:$V$1,277:$V$1,27:[1,555]}),o($Vp2,[2,100]),o($Vp2,[2,363]),o($Vp2,[2,359]),o($Vp2,[2,360]),o($Vp2,[2,361]),o($Vq2,[2,104]),o($Vq2,[2,106]),o($Vq2,[2,107]),o($Vu2,[2,366],{206:556}),o($Vq2,[2,109]),o($Vq2,[2,110]),{12:$V7,15:$V8,52:557,181:[1,558],277:$Va},{31:[1,559]},o($V51,[2,60]),o($V51,[2,300]),{31:[1,560]},{260:561,267:$VR,268:$VS,269:$VT,270:$VU},o($Ve2,[2,73]),o($Vn,$V22,{182:367,180:562}),o($Vn,[2,353]),o($Vn,[2,354]),{12:$V7,15:$V8,31:[2,368],52:544,181:$Vr2,205:564,207:563,208:$Vs2,277:$Va},o($Vq2,[2,111]),o($Vq2,[2,112]),o($Vq2,[2,105]),o($VS1,[2,152]),{31:[2,161]},o($Vn2,[2,97]),{31:[1,565]},{31:[2,369],297:[1,566]},o($Vq2,[2,108]),o($Vu2,[2,367])],
+defaultActions: {5:[2,189],6:[2,190],22:[2,1],23:[2,2],24:[2,196],74:[2,269],89:[2,230],94:[2,332],204:[2,214],205:[2,83],268:[2,406],307:[2,293],308:[2,294],378:[2,385],421:[2,6],422:[2,200],429:[2,319],430:[2,320],457:[2,296],471:[2,409],472:[2,410],478:[2,318],481:[2,323],482:[2,324],508:[2,416],561:[2,161]},
+parseError: function parseError(str, hash) {
+    if (hash.recoverable) {
+        this.trace(str);
+    } else {
+        throw new Error(str);
+    }
+},
+parse: function parse(input) {
+    var self = this, stack = [0], tstack = [], vstack = [null], lstack = [], table = this.table, yytext = '', yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
+    var args = lstack.slice.call(arguments, 1);
+    var lexer = Object.create(this.lexer);
+    var sharedState = { yy: {} };
+    for (var k in this.yy) {
+        if (Object.prototype.hasOwnProperty.call(this.yy, k)) {
+            sharedState.yy[k] = this.yy[k];
+        }
+    }
+    lexer.setInput(input, sharedState.yy);
+    sharedState.yy.lexer = lexer;
+    sharedState.yy.parser = this;
+    if (typeof lexer.yylloc == 'undefined') {
+        lexer.yylloc = {};
+    }
+    var yyloc = lexer.yylloc;
+    lstack.push(yyloc);
+    var ranges = lexer.options && lexer.options.ranges;
+    if (typeof sharedState.yy.parseError === 'function') {
+        this.parseError = sharedState.yy.parseError;
+    } else {
+        this.parseError = Object.getPrototypeOf(this).parseError;
+    }
+    function popStack(n) {
+        stack.length = stack.length - 2 * n;
+        vstack.length = vstack.length - n;
+        lstack.length = lstack.length - n;
+    }
+    _token_stack:
+        function lex() {
+            var token;
+            token = lexer.lex() || EOF;
+            if (typeof token !== 'number') {
+                token = self.symbols_[token] || token;
+            }
+            return token;
+        }
+    var symbol, preErrorSymbol, state, action, a, r, yyval = {}, p, len, newState, expected;
+    while (true) {
+        state = stack[stack.length - 1];
+        if (this.defaultActions[state]) {
+            action = this.defaultActions[state];
+        } else {
+            if (symbol === null || typeof symbol == 'undefined') {
+                symbol = lex();
+            }
+            action = table[state] && table[state][symbol];
+        }
+                    if (typeof action === 'undefined' || !action.length || !action[0]) {
+                var errStr = '';
+                expected = [];
+                for (p in table[state]) {
+                    if (this.terminals_[p] && p > TERROR) {
+                        expected.push('\'' + this.terminals_[p] + '\'');
+                    }
+                }
+                if (lexer.showPosition) {
+                    errStr = 'Parse error on line ' + (yylineno + 1) + ':\n' + lexer.showPosition() + '\nExpecting ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'';
+                } else {
+                    errStr = 'Parse error on line ' + (yylineno + 1) + ': Unexpected ' + (symbol == EOF ? 'end of input' : '\'' + (this.terminals_[symbol] || symbol) + '\'');
+                }
+                this.parseError(errStr, {
+                    text: lexer.match,
+                    token: this.terminals_[symbol] || symbol,
+                    line: lexer.yylineno,
+                    loc: yyloc,
+                    expected: expected
+                });
+            }
+        if (action[0] instanceof Array && action.length > 1) {
+            throw new Error('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol);
+        }
+        switch (action[0]) {
+        case 1:
+            stack.push(symbol);
+            vstack.push(lexer.yytext);
+            lstack.push(lexer.yylloc);
+            stack.push(action[1]);
+            symbol = null;
+            if (!preErrorSymbol) {
+                yyleng = lexer.yyleng;
+                yytext = lexer.yytext;
+                yylineno = lexer.yylineno;
+                yyloc = lexer.yylloc;
+                if (recovering > 0) {
+                    recovering--;
+                }
+            } else {
+                symbol = preErrorSymbol;
+                preErrorSymbol = null;
+            }
+            break;
+        case 2:
+            len = this.productions_[action[1]][1];
+            yyval.$ = vstack[vstack.length - len];
+            yyval._$ = {
+                first_line: lstack[lstack.length - (len || 1)].first_line,
+                last_line: lstack[lstack.length - 1].last_line,
+                first_column: lstack[lstack.length - (len || 1)].first_column,
+                last_column: lstack[lstack.length - 1].last_column
+            };
+            if (ranges) {
+                yyval._$.range = [
+                    lstack[lstack.length - (len || 1)].range[0],
+                    lstack[lstack.length - 1].range[1]
+                ];
+            }
+            r = this.performAction.apply(yyval, [
+                yytext,
+                yyleng,
+                yylineno,
+                sharedState.yy,
+                action[1],
+                vstack,
+                lstack
+            ].concat(args));
+            if (typeof r !== 'undefined') {
+                return r;
+            }
+            if (len) {
+                stack = stack.slice(0, -1 * len * 2);
+                vstack = vstack.slice(0, -1 * len);
+                lstack = lstack.slice(0, -1 * len);
+            }
+            stack.push(this.productions_[action[1]][0]);
+            vstack.push(yyval.$);
+            lstack.push(yyval._$);
+            newState = table[stack[stack.length - 2]][stack[stack.length - 1]];
+            stack.push(newState);
+            break;
+        case 3:
+            return true;
+        }
+    }
+    return true;
+}};
+
+  /*
+    SPARQL parser in the Jison parser generator format.
+  */
+
+  // Common namespaces and entities
+  var RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+      RDF_TYPE  = RDF + 'type',
+      RDF_FIRST = RDF + 'first',
+      RDF_REST  = RDF + 'rest',
+      RDF_NIL   = RDF + 'nil',
+      XSD = 'http://www.w3.org/2001/XMLSchema#',
+      XSD_INTEGER  = XSD + 'integer',
+      XSD_DECIMAL  = XSD + 'decimal',
+      XSD_DOUBLE   = XSD + 'double',
+      XSD_BOOLEAN  = XSD + 'boolean',
+      XSD_TRUE =  '"true"^^'  + XSD_BOOLEAN,
+      XSD_FALSE = '"false"^^' + XSD_BOOLEAN;
+
+  var base = '', basePath = '', baseRoot = '';
+
+  // Returns a lowercase version of the given string
+  function lowercase(string) {
+    return string.toLowerCase();
+  }
+
+  // Appends the item to the array and returns the array
+  function appendTo(array, item) {
+    return array.push(item), array;
+  }
+
+  // Appends the items to the array and returns the array
+  function appendAllTo(array, items) {
+    return array.push.apply(array, items), array;
+  }
+
+  // Extends a base object with properties of other objects
+  function extend(base) {
+    if (!base) base = {};
+    for (var i = 1, l = arguments.length, arg; i < l && (arg = arguments[i] || {}); i++)
+      for (var name in arg)
+        base[name] = arg[name];
+    return base;
+  }
+
+  // Creates an array that contains all items of the given arrays
+  function unionAll() {
+    var union = [];
+    for (var i = 0, l = arguments.length; i < l; i++)
+      union = union.concat.apply(union, arguments[i]);
+    return union;
+  }
+
+  // Resolves an IRI against a base path
+  function resolveIRI(iri) {
+    // Strip off possible angular brackets
+    if (iri[0] === '<')
+      iri = iri.substring(1, iri.length - 1);
+    switch (iri[0]) {
+    // An empty relative IRI indicates the base IRI
+    case undefined:
+      return base;
+    // Resolve relative fragment IRIs against the base IRI
+    case '#':
+      return base + iri;
+    // Resolve relative query string IRIs by replacing the query string
+    case '?':
+      return base.replace(/(?:\?.*)?$/, iri);
+    // Resolve root relative IRIs at the root of the base IRI
+    case '/':
+      return baseRoot + iri;
+    // Resolve all other IRIs at the base IRI's path
+    default:
+      return /^[a-z]+:/.test(iri) ? iri : basePath + iri;
+    }
+  }
+
+  // If the item is a variable, ensures it starts with a question mark
+  function toVar(variable) {
+    if (variable) {
+      var first = variable[0];
+      if (first === '?') return variable;
+      if (first === '$') return '?' + variable.substr(1);
+    }
+    return variable;
+  }
+
+  // Creates an operation with the given name and arguments
+  function operation(operatorName, args) {
+    return { type: 'operation', operator: operatorName, args: args || [] };
+  }
+
+  // Creates an expression with the given type and attributes
+  function expression(expr, attr) {
+    var expression = { expression: expr };
+    if (attr)
+      for (var a in attr)
+        expression[a] = attr[a];
+    return expression;
+  }
+
+  // Creates a path with the given type and items
+  function path(type, items) {
+    return { type: 'path', pathType: type, items: items };
+  }
+
+  // Transforms a list of operations types and arguments into a tree of operations
+  function createOperationTree(initialExpression, operationList) {
+    for (var i = 0, l = operationList.length, item; i < l && (item = operationList[i]); i++)
+      initialExpression = operation(item[0], [initialExpression, item[1]]);
+    return initialExpression;
+  }
+
+  // Group datasets by default and named
+  function groupDatasets(fromClauses) {
+    var defaults = [], named = [], l = fromClauses.length, fromClause;
+    for (var i = 0; i < l && (fromClause = fromClauses[i]); i++)
+      (fromClause.named ? named : defaults).push(fromClause.iri);
+    return l ? { from: { default: defaults, named: named } } : null;
+  }
+
+  // Converts the number to a string
+  function toInt(string) {
+    return parseInt(string, 10);
+  }
+
+  // Transforms a possibly single group into its patterns
+  function degroupSingle(group) {
+    return group.type === 'group' && group.patterns.length === 1 ? group.patterns[0] : group;
+  }
+
+  // Creates a literal with the given value and type
+  function createLiteral(value, type) {
+    return '"' + value + '"^^' + type;
+  }
+
+  // Creates a triple with the given subject, predicate, and object
+  function triple(subject, predicate, object) {
+    var triple = {};
+    if (subject   != null) triple.subject   = subject;
+    if (predicate != null) triple.predicate = predicate;
+    if (object    != null) triple.object    = object;
+    return triple;
+  }
+
+  // Creates a new blank node identifier
+  function blank() {
+    return '_:b' + blankId++;
+  };
+  var blankId = 0;
+  Parser._resetBlanks = function () { blankId = 0; }
+
+  // Regular expression and replacement strings to escape strings
+  var escapeSequence = /\\u([a-fA-F0-9]{4})|\\U([a-fA-F0-9]{8})|\\(.)/g,
+      escapeReplacements = { '\\': '\\', "'": "'", '"': '"',
+                             't': '\t', 'b': '\b', 'n': '\n', 'r': '\r', 'f': '\f' },
+      fromCharCode = String.fromCharCode;
+
+  // Translates escape codes in the string into their textual equivalent
+  function unescapeString(string, trimLength) {
+    string = string.substring(trimLength, string.length - trimLength);
+    try {
+      string = string.replace(escapeSequence, function (sequence, unicode4, unicode8, escapedChar) {
+        var charCode;
+        if (unicode4) {
+          charCode = parseInt(unicode4, 16);
+          if (isNaN(charCode)) throw new Error(); // can never happen (regex), but helps performance
+          return fromCharCode(charCode);
+        }
+        else if (unicode8) {
+          charCode = parseInt(unicode8, 16);
+          if (isNaN(charCode)) throw new Error(); // can never happen (regex), but helps performance
+          if (charCode < 0xFFFF) return fromCharCode(charCode);
+          return fromCharCode(0xD800 + ((charCode -= 0x10000) >> 10), 0xDC00 + (charCode & 0x3FF));
+        }
+        else {
+          var replacement = escapeReplacements[escapedChar];
+          if (!replacement) throw new Error();
+          return replacement;
+        }
+      });
+    }
+    catch (error) { return ''; }
+    return '"' + string + '"';
+  }
+
+  // Creates a list, collecting its (possibly blank) items and triples associated with those items
+  function createList(objects) {
+    var list = blank(), head = list, listItems = [], listTriples, triples = [];
+    objects.forEach(function (o) { listItems.push(o.entity); appendAllTo(triples, o.triples); });
+
+    // Build an RDF list out of the items
+    for (var i = 0, j = 0, l = listItems.length, listTriples = Array(l * 2); i < l;)
+      listTriples[j++] = triple(head, RDF_FIRST, listItems[i]),
+      listTriples[j++] = triple(head, RDF_REST,  head = ++i < l ? blank() : RDF_NIL);
+
+    // Return the list's identifier, its triples, and the triples associated with its items
+    return { entity: list, triples: appendAllTo(listTriples, triples) };
+  }
+
+  // Creates a blank node identifier, collecting triples with that blank node as subject
+  function createAnonymousObject(propertyList) {
+    var entity = blank();
+    return {
+      entity: entity,
+      triples: propertyList.map(function (t) { return extend(triple(entity), t); })
+    };
+  }
+
+  // Collects all (possibly blank) objects, and triples that have them as subject
+  function objectListToTriples(predicate, objectList, otherTriples) {
+    var objects = [], triples = [];
+    objectList.forEach(function (l) {
+      objects.push(triple(null, predicate, l.entity));
+      appendAllTo(triples, l.triples);
+    });
+    return unionAll(objects, otherTriples || [], triples);
+  }
+/* generated by jison-lex 0.3.4 */
+var lexer = (function(){
+var lexer = ({
+
+EOF:1,
+
+parseError:function parseError(str, hash) {
+        if (this.yy.parser) {
+            this.yy.parser.parseError(str, hash);
+        } else {
+            throw new Error(str);
+        }
+    },
+
+// resets the lexer, sets new input
+setInput:function (input, yy) {
+        this.yy = yy || this.yy || {};
+        this._input = input;
+        this._more = this._backtrack = this.done = false;
+        this.yylineno = this.yyleng = 0;
+        this.yytext = this.matched = this.match = '';
+        this.conditionStack = ['INITIAL'];
+        this.yylloc = {
+            first_line: 1,
+            first_column: 0,
+            last_line: 1,
+            last_column: 0
+        };
+        if (this.options.ranges) {
+            this.yylloc.range = [0,0];
+        }
+        this.offset = 0;
+        return this;
+    },
+
+// consumes and returns one char from the input
+input:function () {
+        var ch = this._input[0];
+        this.yytext += ch;
+        this.yyleng++;
+        this.offset++;
+        this.match += ch;
+        this.matched += ch;
+        var lines = ch.match(/(?:\r\n?|\n).*/g);
+        if (lines) {
+            this.yylineno++;
+            this.yylloc.last_line++;
+        } else {
+            this.yylloc.last_column++;
+        }
+        if (this.options.ranges) {
+            this.yylloc.range[1]++;
+        }
+
+        this._input = this._input.slice(1);
+        return ch;
+    },
+
+// unshifts one char (or a string) into the input
+unput:function (ch) {
+        var len = ch.length;
+        var lines = ch.split(/(?:\r\n?|\n)/g);
+
+        this._input = ch + this._input;
+        this.yytext = this.yytext.substr(0, this.yytext.length - len);
+        //this.yyleng -= len;
+        this.offset -= len;
+        var oldLines = this.match.split(/(?:\r\n?|\n)/g);
+        this.match = this.match.substr(0, this.match.length - 1);
+        this.matched = this.matched.substr(0, this.matched.length - 1);
+
+        if (lines.length - 1) {
+            this.yylineno -= lines.length - 1;
+        }
+        var r = this.yylloc.range;
+
+        this.yylloc = {
+            first_line: this.yylloc.first_line,
+            last_line: this.yylineno + 1,
+            first_column: this.yylloc.first_column,
+            last_column: lines ?
+                (lines.length === oldLines.length ? this.yylloc.first_column : 0)
+                 + oldLines[oldLines.length - lines.length].length - lines[0].length :
+              this.yylloc.first_column - len
+        };
+
+        if (this.options.ranges) {
+            this.yylloc.range = [r[0], r[0] + this.yyleng - len];
+        }
+        this.yyleng = this.yytext.length;
+        return this;
+    },
+
+// When called from action, caches matched text and appends it on next action
+more:function () {
+        this._more = true;
+        return this;
+    },
+
+// When called from action, signals the lexer that this rule fails to match the input, so the next matching rule (regex) should be tested instead.
+reject:function () {
+        if (this.options.backtrack_lexer) {
+            this._backtrack = true;
+        } else {
+            return this.parseError('Lexical error on line ' + (this.yylineno + 1) + '. You can only invoke reject() in the lexer when the lexer is of the backtracking persuasion (options.backtrack_lexer = true).\n' + this.showPosition(), {
+                text: "",
+                token: null,
+                line: this.yylineno
+            });
+
+        }
+        return this;
+    },
+
+// retain first n characters of the match
+less:function (n) {
+        this.unput(this.match.slice(n));
+    },
+
+// displays already matched input, i.e. for error messages
+pastInput:function () {
+        var past = this.matched.substr(0, this.matched.length - this.match.length);
+        return (past.length > 20 ? '...':'') + past.substr(-20).replace(/\n/g, "");
+    },
+
+// displays upcoming input, i.e. for error messages
+upcomingInput:function () {
+        var next = this.match;
+        if (next.length < 20) {
+            next += this._input.substr(0, 20-next.length);
+        }
+        return (next.substr(0,20) + (next.length > 20 ? '...' : '')).replace(/\n/g, "");
+    },
+
+// displays the character position where the lexing error occurred, i.e. for error messages
+showPosition:function () {
+        var pre = this.pastInput();
+        var c = new Array(pre.length + 1).join("-");
+        return pre + this.upcomingInput() + "\n" + c + "^";
+    },
+
+// test the lexed token: return FALSE when not a match, otherwise return token
+test_match:function (match, indexed_rule) {
+        var token,
+            lines,
+            backup;
+
+        if (this.options.backtrack_lexer) {
+            // save context
+            backup = {
+                yylineno: this.yylineno,
+                yylloc: {
+                    first_line: this.yylloc.first_line,
+                    last_line: this.last_line,
+                    first_column: this.yylloc.first_column,
+                    last_column: this.yylloc.last_column
+                },
+                yytext: this.yytext,
+                match: this.match,
+                matches: this.matches,
+                matched: this.matched,
+                yyleng: this.yyleng,
+                offset: this.offset,
+                _more: this._more,
+                _input: this._input,
+                yy: this.yy,
+                conditionStack: this.conditionStack.slice(0),
+                done: this.done
+            };
+            if (this.options.ranges) {
+                backup.yylloc.range = this.yylloc.range.slice(0);
+            }
+        }
+
+        lines = match[0].match(/(?:\r\n?|\n).*/g);
+        if (lines) {
+            this.yylineno += lines.length;
+        }
+        this.yylloc = {
+            first_line: this.yylloc.last_line,
+            last_line: this.yylineno + 1,
+            first_column: this.yylloc.last_column,
+            last_column: lines ?
+                         lines[lines.length - 1].length - lines[lines.length - 1].match(/\r?\n?/)[0].length :
+                         this.yylloc.last_column + match[0].length
+        };
+        this.yytext += match[0];
+        this.match += match[0];
+        this.matches = match;
+        this.yyleng = this.yytext.length;
+        if (this.options.ranges) {
+            this.yylloc.range = [this.offset, this.offset += this.yyleng];
+        }
+        this._more = false;
+        this._backtrack = false;
+        this._input = this._input.slice(match[0].length);
+        this.matched += match[0];
+        token = this.performAction.call(this, this.yy, this, indexed_rule, this.conditionStack[this.conditionStack.length - 1]);
+        if (this.done && this._input) {
+            this.done = false;
+        }
+        if (token) {
+            return token;
+        } else if (this._backtrack) {
+            // recover context
+            for (var k in backup) {
+                this[k] = backup[k];
+            }
+            return false; // rule action called reject() implying the next rule should be tested instead.
+        }
+        return false;
+    },
+
+// return next match in input
+next:function () {
+        if (this.done) {
+            return this.EOF;
+        }
+        if (!this._input) {
+            this.done = true;
+        }
+
+        var token,
+            match,
+            tempMatch,
+            index;
+        if (!this._more) {
+            this.yytext = '';
+            this.match = '';
+        }
+        var rules = this._currentRules();
+        for (var i = 0; i < rules.length; i++) {
+            tempMatch = this._input.match(this.rules[rules[i]]);
+            if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
+                match = tempMatch;
+                index = i;
+                if (this.options.backtrack_lexer) {
+                    token = this.test_match(tempMatch, rules[i]);
+                    if (token !== false) {
+                        return token;
+                    } else if (this._backtrack) {
+                        match = false;
+                        continue; // rule action called reject() implying a rule MISmatch.
+                    } else {
+                        // else: this is a lexer rule which consumes input without producing a token (e.g. whitespace)
+                        return false;
+                    }
+                } else if (!this.options.flex) {
+                    break;
+                }
+            }
+        }
+        if (match) {
+            token = this.test_match(match, rules[index]);
+            if (token !== false) {
+                return token;
+            }
+            // else: this is a lexer rule which consumes input without producing a token (e.g. whitespace)
+            return false;
+        }
+        if (this._input === "") {
+            return this.EOF;
+        } else {
+            return this.parseError('Lexical error on line ' + (this.yylineno + 1) + '. Unrecognized text.\n' + this.showPosition(), {
+                text: "",
+                token: null,
+                line: this.yylineno
+            });
+        }
+    },
+
+// return next match that has a token
+lex:function lex() {
+        var r = this.next();
+        if (r) {
+            return r;
+        } else {
+            return this.lex();
+        }
+    },
+
+// activates a new lexer condition state (pushes the new lexer condition state onto the condition stack)
+begin:function begin(condition) {
+        this.conditionStack.push(condition);
+    },
+
+// pop the previously active lexer condition state off the condition stack
+popState:function popState() {
+        var n = this.conditionStack.length - 1;
+        if (n > 0) {
+            return this.conditionStack.pop();
+        } else {
+            return this.conditionStack[0];
+        }
+    },
+
+// produce the lexer rule set which is active for the currently active lexer condition state
+_currentRules:function _currentRules() {
+        if (this.conditionStack.length && this.conditionStack[this.conditionStack.length - 1]) {
+            return this.conditions[this.conditionStack[this.conditionStack.length - 1]].rules;
+        } else {
+            return this.conditions["INITIAL"].rules;
+        }
+    },
+
+// return the currently active lexer condition state; when an index argument is provided it produces the N-th previous condition state, if available
+topState:function topState(n) {
+        n = this.conditionStack.length - 1 - Math.abs(n || 0);
+        if (n >= 0) {
+            return this.conditionStack[n];
+        } else {
+            return "INITIAL";
+        }
+    },
+
+// alias for begin(condition)
+pushState:function pushState(condition) {
+        this.begin(condition);
+    },
+
+// return the number of states currently on the stack
+stateStackSize:function stateStackSize() {
+        return this.conditionStack.length;
+    },
+options: {"flex":true,"case-insensitive":true},
+performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
+var YYSTATE=YY_START;
+switch($avoiding_name_collisions) {
+case 0:/* ignore */
+break;
+case 1:return 11
+break;
+case 2:return 14
+break;
+case 3:return 23
+break;
+case 4:return 280
+break;
+case 5:return 281
+break;
+case 6:return 28
+break;
+case 7:return 30
+break;
+case 8:return 31
+break;
+case 9:return 283
+break;
+case 10:return 33
+break;
+case 11:return 37
+break;
+case 12:return 38
+break;
+case 13:return 40
+break;
+case 14:return 42
+break;
+case 15:return 47
+break;
+case 16:return 50
+break;
+case 17:return 286
+break;
+case 18:return 60
+break;
+case 19:return 61
+break;
+case 20:return 67
+break;
+case 21:return 70
+break;
+case 22:return 73
+break;
+case 23:return 75
+break;
+case 24:return 78
+break;
+case 25:return 80
+break;
+case 26:return 82
+break;
+case 27:return 192
+break;
+case 28:return 95
+break;
+case 29:return 287
+break;
+case 30:return 128
+break;
+case 31:return 288
+break;
+case 32:return 289
+break;
+case 33:return 105
+break;
+case 34:return 290
+break;
+case 35:return 104
+break;
+case 36:return 291
+break;
+case 37:return 292
+break;
+case 38:return 108
+break;
+case 39:return 110
+break;
+case 40:return 111
+break;
+case 41:return 126
+break;
+case 42:return 120
+break;
+case 43:return 121
+break;
+case 44:return 123
+break;
+case 45:return 129
+break;
+case 46:return 107
+break;
+case 47:return 293
+break;
+case 48:return 294
+break;
+case 49:return 155
+break;
+case 50:return 158
+break;
+case 51:return 162
+break;
+case 52:return 89
+break;
+case 53:return 156
+break;
+case 54:return 295
+break;
+case 55:return 161
+break;
+case 56:return 242
+break;
+case 57:return 181
+break;
+case 58:return 297
+break;
+case 59:return 298
+break;
+case 60:return 208
+break;
+case 61:return 300
+break;
+case 62:return 301
+break;
+case 63:return 203
+break;
+case 64:return 210
+break;
+case 65:return 211
+break;
+case 66:return 302
+break;
+case 67:return 303
+break;
+case 68:return 259
+break;
+case 69:return 304
+break;
+case 70:return 305
+break;
+case 71:return 306
+break;
+case 72:return 307
+break;
+case 73:return 308
+break;
+case 74:return 222
+break;
+case 75:return 309
+break;
+case 76:return 237
+break;
+case 77:return 245
+break;
+case 78:return 246
+break;
+case 79:return 239
+break;
+case 80:return 240
+break;
+case 81:return 241
+break;
+case 82:return 310
+break;
+case 83:return 311
+break;
+case 84:return 243
+break;
+case 85:return 313
+break;
+case 86:return 312
+break;
+case 87:return 314
+break;
+case 88:return 248
+break;
+case 89:return 249
+break;
+case 90:return 252
+break;
+case 91:return 254
+break;
+case 92:return 258
+break;
+case 93:return 262
+break;
+case 94:return 265
+break;
+case 95:return 266
+break;
+case 96:return 12
+break;
+case 97:return 15
+break;
+case 98:return 277
+break;
+case 99:return 213
+break;
+case 100:return 27
+break;
+case 101:return 261
+break;
+case 102:return 79
+break;
+case 103:return 263
+break;
+case 104:return 264
+break;
+case 105:return 271
+break;
+case 106:return 272
+break;
+case 107:return 273
+break;
+case 108:return 274
+break;
+case 109:return 275
+break;
+case 110:return 276
+break;
+case 111:return 'EXPONENT'
+break;
+case 112:return 267
+break;
+case 113:return 268
+break;
+case 114:return 269
+break;
+case 115:return 270
+break;
+case 116:return 163
+break;
+case 117:return 214
+break;
+case 118:return 6
+break;
+case 119:return 'INVALID'
+break;
+case 120:console.log(yy_.yytext);
+break;
+}
+},
+rules: [/^(?:\s+|#[^\n\r]*)/i,/^(?:BASE)/i,/^(?:PREFIX)/i,/^(?:SELECT)/i,/^(?:DISTINCT)/i,/^(?:REDUCED)/i,/^(?:\()/i,/^(?:AS)/i,/^(?:\))/i,/^(?:\*)/i,/^(?:CONSTRUCT)/i,/^(?:WHERE)/i,/^(?:\{)/i,/^(?:\})/i,/^(?:DESCRIBE)/i,/^(?:ASK)/i,/^(?:FROM)/i,/^(?:NAMED)/i,/^(?:GROUP)/i,/^(?:BY)/i,/^(?:HAVING)/i,/^(?:ORDER)/i,/^(?:ASC)/i,/^(?:DESC)/i,/^(?:LIMIT)/i,/^(?:OFFSET)/i,/^(?:VALUES)/i,/^(?:;)/i,/^(?:LOAD)/i,/^(?:SILENT)/i,/^(?:INTO)/i,/^(?:CLEAR)/i,/^(?:DROP)/i,/^(?:CREATE)/i,/^(?:ADD)/i,/^(?:TO)/i,/^(?:MOVE)/i,/^(?:COPY)/i,/^(?:INSERT\s+DATA)/i,/^(?:DELETE\s+DATA)/i,/^(?:DELETE\s+WHERE)/i,/^(?:WITH)/i,/^(?:DELETE)/i,/^(?:INSERT)/i,/^(?:USING)/i,/^(?:DEFAULT)/i,/^(?:GRAPH)/i,/^(?:ALL)/i,/^(?:\.)/i,/^(?:OPTIONAL)/i,/^(?:SERVICE)/i,/^(?:BIND)/i,/^(?:UNDEF)/i,/^(?:MINUS)/i,/^(?:UNION)/i,/^(?:FILTER)/i,/^(?:,)/i,/^(?:a)/i,/^(?:\|)/i,/^(?:\/)/i,/^(?:\^)/i,/^(?:\?)/i,/^(?:\+)/i,/^(?:!)/i,/^(?:\[)/i,/^(?:\])/i,/^(?:\|\|)/i,/^(?:&&)/i,/^(?:=)/i,/^(?:!=)/i,/^(?:<)/i,/^(?:>)/i,/^(?:<=)/i,/^(?:>=)/i,/^(?:IN)/i,/^(?:NOT)/i,/^(?:-)/i,/^(?:BOUND)/i,/^(?:BNODE)/i,/^(?:(RAND|NOW|UUID|STUUID))/i,/^(?:(LANG|DATATYPE|IRI|URI|ABS|CEIL|FLOOR|ROUND|STRLEN|STR|UCASE|LCASE|ENCODE_FOR_URI|YEAR|MONTH|DAY|HOURS|MINUTES|SECONDS|TIMEZONE|TZ|MD5|SHA1|SHA256|SHA384|SHA512|isIRI|isURI|isBLANK|isLITERAL|isNUMERIC))/i,/^(?:(LANGMATCHES|CONTAINS|STRSTARTS|STRENDS|STRBEFORE|STRAFTER|STRLANG|STRDT|sameTerm))/i,/^(?:CONCAT)/i,/^(?:COALESCE)/i,/^(?:IF)/i,/^(?:REGEX)/i,/^(?:SUBSTR)/i,/^(?:REPLACE)/i,/^(?:EXISTS)/i,/^(?:COUNT)/i,/^(?:SUM|MIN|MAX|AVG|SAMPLE)/i,/^(?:GROUP_CONCAT)/i,/^(?:SEPARATOR)/i,/^(?:\^\^)/i,/^(?:true)/i,/^(?:false)/i,/^(?:(<([^<>\"\{\}\|\^`\\\u0000-\u0020])*>))/i,/^(?:((([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])(((((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|-|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040])|\.)*(((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|-|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040]))?)?:))/i,/^(?:(((([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])(((((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|-|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040])|\.)*(((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|-|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040]))?)?:)((((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|:|[0-9]|((%([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f]))|(\\(_|~|\.|-|!|\$|&|'|\(|\)|\*|\+|,|;|=|\/|\?|#|@|%))))(((((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|-|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040])|\.|:|((%([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f]))|(\\(_|~|\.|-|!|\$|&|'|\(|\)|\*|\+|,|;|=|\/|\?|#|@|%))))*((((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|-|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040])|:|((%([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f]))|(\\(_|~|\.|-|!|\$|&|'|\(|\)|\*|\+|,|;|=|\/|\?|#|@|%)))))?)))/i,/^(?:(_:(((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|[0-9])(((((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|-|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040])|\.)*(((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|-|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040]))?))/i,/^(?:([\?\$]((((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|[0-9])(((?:([A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|[\uD800-\uDB7F][\uDC00-\uDFFF])|_))|[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040])*)))/i,/^(?:(@[a-zA-Z]+(-[a-zA-Z0-9]+)*))/i,/^(?:([0-9]+))/i,/^(?:([0-9]*\.[0-9]+))/i,/^(?:([0-9]+\.[0-9]*([eE][+-]?[0-9]+)|\.([0-9])+([eE][+-]?[0-9]+)|([0-9])+([eE][+-]?[0-9]+)))/i,/^(?:(\+([0-9]+)))/i,/^(?:(\+([0-9]*\.[0-9]+)))/i,/^(?:(\+([0-9]+\.[0-9]*([eE][+-]?[0-9]+)|\.([0-9])+([eE][+-]?[0-9]+)|([0-9])+([eE][+-]?[0-9]+))))/i,/^(?:(-([0-9]+)))/i,/^(?:(-([0-9]*\.[0-9]+)))/i,/^(?:(-([0-9]+\.[0-9]*([eE][+-]?[0-9]+)|\.([0-9])+([eE][+-]?[0-9]+)|([0-9])+([eE][+-]?[0-9]+))))/i,/^(?:([eE][+-]?[0-9]+))/i,/^(?:('(([^\u0027\u005C\u000A\u000D])|(\\[tbnrf\\\"']|\\u([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])|\\U([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])))*'))/i,/^(?:("(([^\u0022\u005C\u000A\u000D])|(\\[tbnrf\\\"']|\\u([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])|\\U([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])))*"))/i,/^(?:('''(('|'')?([^'\\]|(\\[tbnrf\\\"']|\\u([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])|\\U([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f]))))*'''))/i,/^(?:("""(("|"")?([^\"\\]|(\\[tbnrf\\\"']|\\u([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])|\\U([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f]))))*"""))/i,/^(?:(\((\u0020|\u0009|\u000D|\u000A)*\)))/i,/^(?:(\[(\u0020|\u0009|\u000D|\u000A)*\]))/i,/^(?:$)/i,/^(?:.)/i,/^(?:.)/i],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120],"inclusive":true}}
+});
+return lexer;
+})();
+parser.lexer = lexer;
+function Parser () {
+  this.yy = {};
+}
+Parser.prototype = parser;parser.Parser = Parser;
+return new Parser;
+})();
+
+
+if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
+exports.parser = parser;
+exports.Parser = parser.Parser;
+exports.parse = function () { return parser.parse.apply(parser, arguments); };
+exports.main = function commonjsMain(args) {
+    if (!args[1]) {
+        console.log('Usage: '+args[0]+' FILE');
+        process.exit(1);
+    }
+    var source = require('fs').readFileSync(require('path').normalize(args[1]), "utf8");
+    return exports.parser.parse(source);
+};
+if (typeof module !== 'undefined' && require.main === module) {
+  exports.main(process.argv.slice(1));
+}
+}
+}).call(this,require('_process'))
+},{"_process":3,"fs":1,"path":2}],6:[function(require,module,exports){
+var Parser = require('./lib/SparqlParser').Parser;
+var Generator = require('./lib/SparqlGenerator');
+
+module.exports = {
+  // Creates a SPARQL parser with the given pre-defined prefixes
+  Parser: function (prefixes) {
+    // Create a copy of the prefixes
+    var prefixesCopy = {};
+    for (var prefix in prefixes || {})
+      prefixesCopy[prefix] = prefixes[prefix];
+
+    // Create a new parser with the given prefixes
+    // (Workaround for https://github.com/zaach/jison/issues/241)
+    var parser = new Parser();
+    parser.parse = function () {
+      Parser.prefixes = Object.create(prefixesCopy);
+      return Parser.prototype.parse.apply(parser, arguments);
+    };
+    parser._resetBlanks = Parser._resetBlanks;
+    return parser;
+  },
+  Generator: Generator,
+};
+
+},{"./lib/SparqlGenerator":4,"./lib/SparqlParser":5}]},{},[6])(6)
 });
 window.PainlessMenu = class PainlessMenu {
   constructor(context) {
@@ -8699,6 +10481,9 @@ window.PainlessMenu = class PainlessMenu {
     menu.append(this.create_div('<i class="material-icons">save</i>', 'menu_button', null, () => {
       return this.context.graph.download();
     }));
+    menu.append(this.create_div('<i class="material-icons">open_in_browser</i>', 'menu_button', null, () => {
+      return this.context.graph.load();
+    }));
     return menu.append(this.create_div('<i class="material-icons">clear_all</i>', 'menu_button', null, () => {
       return this.context.graph.clear_all();
     }));
@@ -8706,473 +10491,6 @@ window.PainlessMenu = class PainlessMenu {
 
 };
 
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("klayjs"));
-	else if(typeof define === 'function' && define.amd)
-		define(["klayjs"], factory);
-	else if(typeof exports === 'object')
-		exports["cytoscapeKlay"] = factory(require("klayjs"));
-	else
-		root["cytoscapeKlay"] = factory(root["$klay"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_4__) {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var klay = __webpack_require__(4);
-var assign = __webpack_require__(1);
-var defaults = __webpack_require__(2);
-
-var klayNSLookup = {
-  'addUnnecessaryBendpoints': 'de.cau.cs.kieler.klay.layered.unnecessaryBendpoints',
-  'alignment': 'de.cau.cs.kieler.alignment',
-  'aspectRatio': 'de.cau.cs.kieler.aspectRatio',
-  'borderSpacing': 'borderSpacing',
-  'compactComponents': 'de.cau.cs.kieler.klay.layered.components.compact',
-  'compactionStrategy': 'de.cau.cs.kieler.klay.layered.nodeplace.compactionStrategy',
-  'contentAlignment': 'de.cau.cs.kieler.klay.layered.contentAlignment',
-  'crossingMinimization': 'de.cau.cs.kieler.klay.layered.crossMin',
-  'cycleBreaking': 'de.cau.cs.kieler.klay.layered.cycleBreaking',
-  'debugMode': 'de.cau.cs.kieler.debugMode',
-  'direction': 'de.cau.cs.kieler.direction',
-  'edgeLabelSideSelection': 'de.cau.cs.kieler.klay.layered.edgeLabelSideSelection',
-  // <broken> 'de.cau.cs.kieler.klay.layered.edgeNodeSpacingFactor': options.edgeNodeSpacingFactor,
-  'edgeRouting': 'de.cau.cs.kieler.edgeRouting',
-  'edgeSpacingFactor': 'de.cau.cs.kieler.klay.layered.edgeSpacingFactor',
-  'feedbackEdges': 'de.cau.cs.kieler.klay.layered.feedBackEdges',
-  'fixedAlignment': 'de.cau.cs.kieler.klay.layered.fixedAlignment',
-  'greedySwitchCrossingMinimization': 'de.cau.cs.kieler.klay.layered.greedySwitch',
-  'hierarchyHandling': 'de.cau.cs.kieler.hierarchyHandling',
-  'inLayerSpacingFactor': 'de.cau.cs.kieler.klay.layered.inLayerSpacingFactor',
-  'interactiveReferencePoint': 'de.cau.cs.kieler.klay.layered.interactiveReferencePoint',
-  'layerConstraint': 'de.cau.cs.kieler.klay.layered.layerConstraint',
-  'layoutHierarchy': 'de.cau.cs.kieler.layoutHierarchy',
-  'linearSegmentsDeflectionDampening': 'de.cau.cs.kieler.klay.layered.linearSegmentsDeflectionDampening',
-  'mergeEdges': 'de.cau.cs.kieler.klay.layered.mergeEdges',
-  'mergeHierarchyCrossingEdges': 'de.cau.cs.kieler.klay.layered.mergeHierarchyEdges',
-  'noLayout': 'de.cau.cs.kieler.noLayout',
-  'nodeLabelPlacement': 'de.cau.cs.kieler.nodeLabelPlacement',
-  'nodeLayering': 'de.cau.cs.kieler.klay.layered.nodeLayering',
-  'nodePlacement': 'de.cau.cs.kieler.klay.layered.nodePlace',
-  'portAlignment': 'de.cau.cs.kieler.portAlignment',
-  'portAlignmentEastern': 'de.cau.cs.kieler.portAlignment.east',
-  'portAlignmentNorth': 'de.cau.cs.kieler.portAlignment.north',
-  'portAlignmentSouth': 'de.cau.cs.kieler.portAlignment.south',
-  'portAlignmentWest': 'de.cau.cs.kieler.portAlignment.west',
-  'portConstraints': 'de.cau.cs.kieler.portConstraints',
-  'portLabelPlacement': 'de.cau.cs.kieler.portLabelPlacement',
-  'portOffset': 'de.cau.cs.kieler.offset',
-  'portSide': 'de.cau.cs.kieler.portSide',
-  'portSpacing': 'de.cau.cs.kieler.portSpacing',
-  'postCompaction': 'de.cau.cs.kieler.klay.layered.postCompaction',
-  'priority': 'de.cau.cs.kieler.priority',
-  'randomizationSeed': 'de.cau.cs.kieler.randomSeed',
-  'routeSelfLoopInside': 'de.cau.cs.kieler.selfLoopInside',
-  'separateConnectedComponents': 'de.cau.cs.kieler.separateConnComp',
-  'sizeConstraint': 'de.cau.cs.kieler.sizeConstraint',
-  'sizeOptions': 'de.cau.cs.kieler.sizeOptions',
-  'spacing': 'de.cau.cs.kieler.spacing',
-  'splineSelfLoopPlacement': 'de.cau.cs.kieler.klay.layered.splines.selfLoopPlacement',
-  'thoroughness': 'de.cau.cs.kieler.klay.layered.thoroughness',
-  'wideNodesOnMultipleLayers': 'de.cau.cs.kieler.klay.layered.wideNodesOnMultipleLayers'
-};
-
-var mapToKlayNS = function mapToKlayNS(klayOpts) {
-  var keys = Object.keys(klayOpts);
-  var ret = {};
-
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    var nsKey = klayNSLookup[key];
-    var val = klayOpts[key];
-
-    ret[nsKey] = val;
-  }
-
-  return ret;
-};
-
-var klayOverrides = {
-  interactiveReferencePoint: 'CENTER' // Determines which point of a node is considered by interactive layout phases.
-};
-
-var getPos = function getPos(ele) {
-  var parent = ele.parent();
-  var k = ele.scratch('klay');
-  var p = {
-    x: k.x,
-    y: k.y
-  };
-
-  if (parent.nonempty()) {
-    var kp = parent.scratch('klay');
-
-    p.x += kp.x;
-    p.y += kp.y;
-  }
-
-  return p;
-};
-
-var makeNode = function makeNode(node, options) {
-  var dims = node.layoutDimensions(options);
-  var padding = node.numericStyle('padding');
-
-  var k = {
-    _cyEle: node,
-    id: node.id(),
-    padding: {
-      top: padding,
-      left: padding,
-      bottom: padding,
-      right: padding
-    }
-  };
-
-  if (!node.isParent()) {
-    k.width = dims.w;
-    k.height = dims.h;
-  }
-
-  node.scratch('klay', k);
-
-  return k;
-};
-
-var makeEdge = function makeEdge(edge, options) {
-  var k = {
-    _cyEle: edge,
-    id: edge.id(),
-    source: edge.data('source'),
-    target: edge.data('target')
-  };
-
-  var priority = options.priority(edge);
-
-  if (priority != null) {
-    k.priority = priority;
-  }
-
-  edge.scratch('klay', k);
-
-  return k;
-};
-
-var makeGraph = function makeGraph(nodes, edges, options) {
-  var klayNodes = [];
-  var klayEdges = [];
-  var klayEleLookup = {};
-  var graph = {
-    id: 'root',
-    children: [],
-    edges: []
-  };
-
-  // map all nodes
-  for (var i = 0; i < nodes.length; i++) {
-    var n = nodes[i];
-    var k = makeNode(n, options);
-
-    klayNodes.push(k);
-
-    klayEleLookup[n.id()] = k;
-  }
-
-  // map all edges
-  for (var _i = 0; _i < edges.length; _i++) {
-    var e = edges[_i];
-    var _k = makeEdge(e, options);
-
-    klayEdges.push(_k);
-
-    klayEleLookup[e.id()] = _k;
-  }
-
-  // make hierarchy
-  for (var _i2 = 0; _i2 < klayNodes.length; _i2++) {
-    var _k2 = klayNodes[_i2];
-    var _n = _k2._cyEle;
-
-    if (!_n.isChild()) {
-      graph.children.push(_k2);
-    } else {
-      var parent = _n.parent();
-      var parentK = klayEleLookup[parent.id()];
-
-      var children = parentK.children = parentK.children || [];
-
-      children.push(_k2);
-    }
-  }
-
-  for (var _i3 = 0; _i3 < klayEdges.length; _i3++) {
-    var _k3 = klayEdges[_i3];
-    var _e = _k3._cyEle;
-    var parentSrc = _e.source().parent();
-    var parentTgt = _e.target().parent();
-
-    // put all edges in the top level for now
-    // TODO does this cause issues in certain edgecases?
-    if (false) {
-      var kp = klayEleLookup[parentSrc.id()];
-
-      kp.edges = kp.edges || [];
-
-      kp.edges.push(_k3);
-    } else {
-      graph.edges.push(_k3);
-    }
-  }
-
-  return graph;
-};
-
-function Layout(options) {
-  var klayOptions = options.klay;
-
-  this.options = assign({}, defaults, options);
-
-  this.options.klay = assign({}, defaults.klay, klayOptions, klayOverrides);
-}
-
-Layout.prototype.run = function () {
-  var layout = this;
-  var options = this.options;
-
-  var eles = options.eles;
-  var nodes = eles.nodes();
-  var edges = eles.edges();
-
-  var graph = makeGraph(nodes, edges, options);
-
-  klay.layout({
-    graph: graph,
-    options: mapToKlayNS(options.klay),
-    success: function success() {},
-    error: function error(_error) {
-      throw _error;
-    }
-  });
-
-  nodes.filter(function (n) {
-    return !n.isParent();
-  }).layoutPositions(layout, options, getPos);
-
-  return this;
-};
-
-Layout.prototype.stop = function () {
-  return this; // chaining
-};
-
-Layout.prototype.destroy = function () {
-  return this; // chaining
-};
-
-module.exports = Layout;
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// Simple, internal Object.assign() polyfill for options objects etc.
-
-module.exports = Object.assign != null ? Object.assign.bind(Object) : function (tgt) {
-  for (var _len = arguments.length, srcs = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    srcs[_key - 1] = arguments[_key];
-  }
-
-  srcs.forEach(function (src) {
-    Object.keys(src).forEach(function (k) {
-      return tgt[k] = src[k];
-    });
-  });
-
-  return tgt;
-};
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var defaults = {
-  nodeDimensionsIncludeLabels: false, // Boolean which changes whether label dimensions are included when calculating node dimensions
-  fit: true, // Whether to fit
-  padding: 20, // Padding on fit
-  animate: false, // Whether to transition the node positions
-  animateFilter: function animateFilter(node, i) {
-    return true;
-  }, // Whether to animate specific nodes when animation is on; non-animated nodes immediately go to their final positions
-  animationDuration: 500, // Duration of animation in ms if enabled
-  animationEasing: undefined, // Easing of animation if enabled
-  transform: function transform(node, pos) {
-    return pos;
-  }, // A function that applies a transform to the final node position
-  ready: undefined, // Callback on layoutready
-  stop: undefined, // Callback on layoutstop
-  klay: {
-    // Following descriptions taken from http://layout.rtsys.informatik.uni-kiel.de:9444/Providedlayout.html?algorithm=de.cau.cs.kieler.klay.layered
-    addUnnecessaryBendpoints: false, // Adds bend points even if an edge does not change direction.
-    aspectRatio: 1.6, // The aimed aspect ratio of the drawing, that is the quotient of width by height
-    borderSpacing: 20, // Minimal amount of space to be left to the border
-    compactComponents: false, // Tries to further compact components (disconnected sub-graphs).
-    crossingMinimization: 'LAYER_SWEEP', // Strategy for crossing minimization.
-    /* LAYER_SWEEP The layer sweep algorithm iterates multiple times over the layers, trying to find node orderings that minimize the number of crossings. The algorithm uses randomization to increase the odds of finding a good result. To improve its results, consider increasing the Thoroughness option, which influences the number of iterations done. The Randomization seed also influences results.
-    INTERACTIVE Orders the nodes of each layer by comparing their positions before the layout algorithm was started. The idea is that the relative order of nodes as it was before layout was applied is not changed. This of course requires valid positions for all nodes to have been set on the input graph before calling the layout algorithm. The interactive layer sweep algorithm uses the Interactive Reference Point option to determine which reference point of nodes are used to compare positions. */
-    cycleBreaking: 'GREEDY', // Strategy for cycle breaking. Cycle breaking looks for cycles in the graph and determines which edges to reverse to break the cycles. Reversed edges will end up pointing to the opposite direction of regular edges (that is, reversed edges will point left if edges usually point right).
-    /* GREEDY This algorithm reverses edges greedily. The algorithm tries to avoid edges that have the Priority property set.
-    INTERACTIVE The interactive algorithm tries to reverse edges that already pointed leftwards in the input graph. This requires node and port coordinates to have been set to sensible values.*/
-    direction: 'UNDEFINED', // Overall direction of edges: horizontal (right / left) or vertical (down / up)
-    /* UNDEFINED, RIGHT, LEFT, DOWN, UP */
-    edgeRouting: 'ORTHOGONAL', // Defines how edges are routed (POLYLINE, ORTHOGONAL, SPLINES)
-    edgeSpacingFactor: 0.5, // Factor by which the object spacing is multiplied to arrive at the minimal spacing between edges.
-    feedbackEdges: false, // Whether feedback edges should be highlighted by routing around the nodes.
-    fixedAlignment: 'NONE', // Tells the BK node placer to use a certain alignment instead of taking the optimal result.  This option should usually be left alone.
-    /* NONE Chooses the smallest layout from the four possible candidates.
-    LEFTUP Chooses the left-up candidate from the four possible candidates.
-    RIGHTUP Chooses the right-up candidate from the four possible candidates.
-    LEFTDOWN Chooses the left-down candidate from the four possible candidates.
-    RIGHTDOWN Chooses the right-down candidate from the four possible candidates.
-    BALANCED Creates a balanced layout from the four possible candidates. */
-    inLayerSpacingFactor: 1.0, // Factor by which the usual spacing is multiplied to determine the in-layer spacing between objects.
-    layoutHierarchy: false, // Whether the selected layouter should consider the full hierarchy
-    linearSegmentsDeflectionDampening: 0.3, // Dampens the movement of nodes to keep the diagram from getting too large.
-    mergeEdges: false, // Edges that have no ports are merged so they touch the connected nodes at the same points.
-    mergeHierarchyCrossingEdges: true, // If hierarchical layout is active, hierarchy-crossing edges use as few hierarchical ports as possible.
-    nodeLayering: 'NETWORK_SIMPLEX', // Strategy for node layering.
-    /* NETWORK_SIMPLEX This algorithm tries to minimize the length of edges. This is the most computationally intensive algorithm. The number of iterations after which it aborts if it hasn't found a result yet can be set with the Maximal Iterations option.
-    LONGEST_PATH A very simple algorithm that distributes nodes along their longest path to a sink node.
-    INTERACTIVE Distributes the nodes into layers by comparing their positions before the layout algorithm was started. The idea is that the relative horizontal order of nodes as it was before layout was applied is not changed. This of course requires valid positions for all nodes to have been set on the input graph before calling the layout algorithm. The interactive node layering algorithm uses the Interactive Reference Point option to determine which reference point of nodes are used to compare positions. */
-    nodePlacement: 'BRANDES_KOEPF', // Strategy for Node Placement
-    /* BRANDES_KOEPF Minimizes the number of edge bends at the expense of diagram size: diagrams drawn with this algorithm are usually higher than diagrams drawn with other algorithms.
-    LINEAR_SEGMENTS Computes a balanced placement.
-    INTERACTIVE Tries to keep the preset y coordinates of nodes from the original layout. For dummy nodes, a guess is made to infer their coordinates. Requires the other interactive phase implementations to have run as well.
-    SIMPLE Minimizes the area at the expense of... well, pretty much everything else. */
-    randomizationSeed: 1, // Seed used for pseudo-random number generators to control the layout algorithm; 0 means a new seed is generated
-    routeSelfLoopInside: false, // Whether a self-loop is routed around or inside its node.
-    separateConnectedComponents: true, // Whether each connected component should be processed separately
-    spacing: 20, // Overall setting for the minimal amount of space to be left between objects
-    thoroughness: 7 // How much effort should be spent to produce a nice layout..
-  },
-  priority: function priority(edge) {
-    return null;
-  } // Edges with a non-nil value are skipped when geedy edge cycle breaking is enabled
-};
-
-module.exports = defaults;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var impl = __webpack_require__(0);
-
-// registers the extension on a cytoscape lib ref
-var register = function register(cytoscape) {
-  if (!cytoscape) {
-    return;
-  } // can't register if cytoscape unspecified
-
-  cytoscape('layout', 'klay', impl); // register with cytoscape.js
-};
-
-if (typeof cytoscape !== 'undefined') {
-  // expose to global cytoscape (i.e. window.cytoscape)
-  register(cytoscape);
-}
-
-module.exports = register;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
-
-/***/ })
-/******/ ]);
-});
 window.PainlessSparql = (function() {
   var cur_sidenav_size, tappedBefore, tappedTimeout;
 
@@ -9230,8 +10548,12 @@ window.PainlessSparql = (function() {
       var button, side_nav, side_nav_container, slider, slider_button, sparql_textbox;
       side_nav_container = document.createElement("div");
       side_nav_container.id = "sidenav_container";
-      side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 30) + "px";
+      side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 40) + "px";
       document.body.appendChild(side_nav_container);
+      document.getElementById('tools').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
+      document.getElementById('tools').style.transitionDuration = '0.1s';
+      document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * document.documentElement.clientWidth / 100 + 50) + "px";
+      this.cy.resize();
       slider = document.createElement("div");
       slider.style.backgroundColor = '#93a1a1';
       slider.style.height = '100%';
@@ -9246,6 +10568,8 @@ window.PainlessSparql = (function() {
         cur_sidenav_size = cur_sidenav_size + 25;
         document.getElementById('tools').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
         document.getElementById('tools').style.transitionDuration = '0.1s';
+        document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * document.documentElement.clientWidth / 100 + 50) + "px";
+        this.cy.resize();
         if (cur_sidenav_size !== 100) {
           side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 30) + "px";
           side_nav.style.width = cur_sidenav_size + '%';
@@ -9265,6 +10589,8 @@ window.PainlessSparql = (function() {
         cur_sidenav_size = cur_sidenav_size - 25;
         document.getElementById('tools').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
         document.getElementById('tools').style.transitionDuration = '0.1s';
+        document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * document.documentElement.clientWidth / 100 + 50) + "px";
+        this.cy.resize();
         side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 30) + "px";
         side_nav.style.width = cur_sidenav_size + '%';
         return setTimeout(() => {
@@ -9368,2241 +10694,6 @@ window.PainlessSparql = (function() {
 
 }).call(this);
 
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.cytoscapeSpread = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';
-
-// registers the extension on a cytoscape lib ref
-var getLayout = _dereq_('./layout');
-
-var register = function( cytoscape, weaver ){
-  var layout = getLayout( cytoscape, weaver || _dereq_('weaverjs') );
-
-  cytoscape('layout', 'spread', layout);
-};
-
-if( typeof cytoscape !== 'undefined' && ( typeof weaver !== 'undefined' || typeof cytoscape.Thread !== 'undefined' ) ){ // expose to global cytoscape (i.e. window.cytoscape)
-  register( cytoscape, weaver || cytoscape );
-}
-
-module.exports = register;
-
-},{"./layout":2,"weaverjs":undefined}],2:[function(_dereq_,module,exports){
-var Thread;
-
-var Voronoi = _dereq_('./rhill-voronoi-core');
-
-var defaults = {
-  animate: true, // Whether to show the layout as it's running
-  ready: undefined, // Callback on layoutready
-  stop: undefined, // Callback on layoutstop
-  fit: true, // Reset viewport to fit default simulationBounds
-  minDist: 20, // Minimum distance between nodes
-  padding: 20, // Padding
-  expandingFactor: -1.0, // If the network does not satisfy the minDist
-  // criterium then it expands the network of this amount
-  // If it is set to -1.0 the amount of expansion is automatically
-  // calculated based on the minDist, the aspect ratio and the
-  // number of nodes
-  prelayout: { name: 'cose' }, // Layout options for the first phase
-  maxExpandIterations: 4, // Maximum number of expanding iterations
-  boundingBox: undefined, // Constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-  randomize: false // Uses random initial node positions on true
-};
-
-function SpreadLayout( options ) {
-  var opts = this.options = {};
-  for( var i in defaults ){ opts[i] = defaults[i]; }
-  for( var i in options ){ opts[i] = options[i]; }
-}
-
-SpreadLayout.prototype.run = function() {
-
-  var layout = this;
-  var options = this.options;
-  var cy = options.cy;
-
-  var bb = options.boundingBox || { x1: 0, y1: 0, w: cy.width(), h: cy.height() };
-  if( bb.x2 === undefined ){ bb.x2 = bb.x1 + bb.w; }
-  if( bb.w === undefined ){ bb.w = bb.x2 - bb.x1; }
-  if( bb.y2 === undefined ){ bb.y2 = bb.y1 + bb.h; }
-  if( bb.h === undefined ){ bb.h = bb.y2 - bb.y1; }
-
-  var nodes = cy.nodes();
-  var edges = cy.edges();
-  var cWidth = cy.width();
-  var cHeight = cy.height();
-  var simulationBounds = bb;
-  var padding = options.padding;
-  var simBBFactor = Math.max( 1, Math.log(nodes.length) * 0.8 );
-
-  if( nodes.length < 100 ){
-    simBBFactor /= 2;
-  }
-
-  layout.trigger( {
-    type: 'layoutstart',
-    layout: layout
-  } );
-
-  var simBB = {
-    x1: 0,
-    y1: 0,
-    x2: cWidth * simBBFactor,
-    y2: cHeight * simBBFactor
-  };
-
-  if( simulationBounds ) {
-    simBB.x1 = simulationBounds.x1;
-    simBB.y1 = simulationBounds.y1;
-    simBB.x2 = simulationBounds.x2;
-    simBB.y2 = simulationBounds.y2;
-  }
-
-  simBB.x1 += padding;
-  simBB.y1 += padding;
-  simBB.x2 -= padding;
-  simBB.y2 -= padding;
-
-  var width = simBB.x2 - simBB.x1;
-  var height = simBB.y2 - simBB.y1;
-
-  // Get start time
-  var startTime = Date.now();
-
-  // layout doesn't work with just 1 node
-  if( nodes.size() <= 1 ) {
-    nodes.positions( {
-      x: Math.round( ( simBB.x1 + simBB.x2 ) / 2 ),
-      y: Math.round( ( simBB.y1 + simBB.y2 ) / 2 )
-    } );
-
-    if( options.fit ) {
-      cy.fit( options.padding );
-    }
-
-    // Get end time
-    var endTime = Date.now();
-    console.info( "Layout on " + nodes.size() + " nodes took " + ( endTime - startTime ) + " ms" );
-
-    layout.one( "layoutready", options.ready );
-    layout.trigger( "layoutready" );
-
-    layout.one( "layoutstop", options.stop );
-    layout.trigger( "layoutstop" );
-
-    return;
-  }
-
-  // First I need to create the data structure to pass to the worker
-  var pData = {
-    'width': width,
-    'height': height,
-    'minDist': options.minDist,
-    'expFact': options.expandingFactor,
-    'expIt': 0,
-    'maxExpIt': options.maxExpandIterations,
-    'vertices': [],
-    'edges': [],
-    'startTime': startTime
-  };
-
-  for(var i = nodes.length - 1; i >= 0 ; i--) {
-    var nodeId = nodes[i].id();
-    var pos = nodes[i].position();
-
-    if( options.randomize ){
-      pos = {
-        x: Math.round( simBB.x1 + (simBB.x2 - simBB.x1) * Math.random() ),
-        y: Math.round( simBB.y1 + (simBB.y2 - simBB.y1) * Math.random() )
-      };
-    }
-
-    pData[ 'vertices' ].push( {
-      id: nodeId,
-      x: pos.x,
-      y: pos.y
-    } );
-  };
-
-  for(var i = edges.length - 1; i >= 0; i--) {
-    var srcNodeId = edges[i].source().id();
-    var tgtNodeId = edges[i].target().id();
-    pData[ 'edges' ].push( {
-      src: srcNodeId,
-      tgt: tgtNodeId
-    } );
-  };
-
-  //Decleration
-  var t1 = layout.thread;
-
-  // reuse old thread if possible
-  if( !t1 || t1.stopped() ){
-    t1 = layout.thread = Thread();
-
-    // And to add the required scripts
-    t1.require( Voronoi, 'Voronoi' );
-  }
-
-  function setPositions( pData ){ //console.log('set posns')
-    // First we retrieve the important data
-    // var expandIteration = pData[ 'expIt' ];
-    var dataVertices = pData[ 'vertices' ];
-    var vertices = [];
-    for( var i = 0; i < dataVertices.length; ++i ) {
-      var dv = dataVertices[ i ];
-      vertices[ dv.id ] = {
-        x: dv.x,
-        y: dv.y
-      };
-    }
-    /*
-     * FINALLY:
-     *
-     * We position the nodes based on the calculation
-     */
-    nodes.positions(
-      function( node, i ) {
-        // Perform 2.x and 1.x backwards compatibility check
-        if( typeof node === "number" ){
-          node = i;
-        }
-        var id = node.id()
-        var vertex = vertices[ id ];
-
-        return {
-          x: Math.round( simBB.x1 + vertex.x ),
-          y: Math.round( simBB.y1 + vertex.y )
-        };
-      } );
-
-    if( options.fit ) {
-      cy.fit( options.padding );
-    }
-  }
-
-  var didLayoutReady = false;
-  t1.on('message', function(e){
-    var pData = e.message; //console.log('message', e)
-
-    if( !options.animate ){
-      return;
-    }
-
-    setPositions( pData );
-
-    if( !didLayoutReady ){
-      layout.trigger( "layoutready" );
-
-      didLayoutReady = true;
-    }
-  });
-
-  layout.one( "layoutready", options.ready );
-
-  if( options.prelayout ){
-    var prelayout = cy.makeLayout( options.prelayout );
-    var promise = prelayout.promiseOn('layoutstop');
-
-    promise.then( runVoronoi );
-
-    prelayout.run();
-  } else {
-    runVoronoi();
-  }
-
-  function runVoronoi(){
-    t1.pass( pData ).run( function( pData ) {
-
-      function cellCentroid( cell ) {
-        var hes = cell.halfedges;
-        var area = 0,
-          x = 0,
-          y = 0;
-        var p1, p2, f;
-
-        for( var i = 0; i < hes.length; ++i ) {
-          p1 = hes[ i ].getEndpoint();
-          p2 = hes[ i ].getStartpoint();
-
-          area += p1.x * p2.y;
-          area -= p1.y * p2.x;
-
-          f = p1.x * p2.y - p2.x * p1.y;
-          x += ( p1.x + p2.x ) * f;
-          y += ( p1.y + p2.y ) * f;
-        }
-
-        area /= 2;
-        f = area * 6;
-        return {
-          x: x / f,
-          y: y / f
-        };
-      }
-
-      function sitesDistance( ls, rs ) {
-        var dx = ls.x - rs.x;
-        var dy = ls.y - rs.y;
-        return Math.sqrt( dx * dx + dy * dy );
-      }
-
-      Voronoi = _ref_('Voronoi');
-
-      // I need to retrieve the important data
-      var lWidth = pData[ 'width' ];
-      var lHeight = pData[ 'height' ];
-      var lMinDist = pData[ 'minDist' ];
-      var lExpFact = pData[ 'expFact' ];
-      var lMaxExpIt = pData[ 'maxExpIt' ];
-
-      // Prepare the data to output
-      var savePositions = function(){
-        pData[ 'width' ] = lWidth;
-        pData[ 'height' ] = lHeight;
-        pData[ 'expIt' ] = expandIteration;
-        pData[ 'expFact' ] = lExpFact;
-
-        pData[ 'vertices' ] = [];
-        for( var i = 0; i < fv.length; ++i ) {
-          pData[ 'vertices' ].push( {
-            id: fv[ i ].label,
-            x: fv[ i ].x,
-            y: fv[ i ].y
-          } );
-        }
-      };
-
-      var messagePositions = function(){
-        broadcast( pData );
-      };
-
-      var dataVertices = pData[ 'vertices' ];
-      var dataEdges = pData[ 'edges' ];
-
-      var x1 = Infinity;
-      var x2 = -Infinity;
-      var y1 = Infinity;
-      var y2 = -Infinity;
-
-      dataVertices.forEach(function(v){
-        x1 = Math.min( v.x, x1 );
-        x2 = Math.max( v.x, x2 );
-        y1 = Math.min( v.y, y1 );
-        y2 = Math.max( v.y, y2 );
-      });
-
-      var scale = function(x, minX, maxX, scaledMinX, scaledMaxX){
-        var p = (x - minX) / (maxX - minX);
-
-        if( isNaN(p) ){
-          p = Math.random();
-        }
-
-        return scaledMinX + (scaledMaxX - scaledMinX) * p;
-      };
-
-      // NB Voronoi expects all nodes to be on { x in [0, lWidth], y in [0, lHeight] }
-      var fv = dataVertices.map(function(v){
-        return {
-          label: v.id,
-          x: scale( v.x, x1, x2, 0, lWidth ),
-          y: scale( v.y, y1, y2, 0, lHeight )
-        };
-      });
-
-      savePositions();
-      messagePositions();
-
-      if( lMaxExpIt <= 0 ){
-        return pData;
-      }
-
-      /*
-       * SECOND STEP: Tiding up of the graph.
-       *
-       * We use the method described by Gansner and North, based on Voronoi
-       * diagrams.
-       *
-       * Ref: doi:10.1007/3-540-37623-2_28
-       */
-
-      // We calculate the Voronoi diagram dor the position of the nodes
-      var voronoi = new Voronoi();
-      var bbox = {
-        xl: 0,
-        xr: lWidth,
-        yt: 0,
-        yb: lHeight
-      };
-      var vSites = [];
-      for( var i = 0; i < fv.length; ++i ) {
-        vSites[ fv[ i ].label ] = fv[ i ];
-      }
-
-      function checkMinDist( ee ) {
-        var infractions = 0;
-        // Then we check if the minimum distance is satisfied
-        for( var eei = 0; eei < ee.length; ++eei ) {
-          var e = ee[ eei ];
-          if( ( e.lSite != null ) && ( e.rSite != null ) && sitesDistance( e.lSite, e.rSite ) < lMinDist ) {
-            ++infractions;
-          }
-        }
-        return infractions;
-      }
-
-      var diagram = voronoi.compute( fv, bbox );
-
-      // Then we reposition the nodes at the centroid of their Voronoi cells
-      var cells = diagram.cells;
-      for( var i = 0; i < cells.length; ++i ) {
-        var cell = cells[ i ];
-        var site = cell.site;
-        var centroid = cellCentroid( cell );
-        var currv = vSites[ site.label ];
-        currv.x = centroid.x;
-        currv.y = centroid.y;
-      }
-
-      if( lExpFact < 0.0 ) {
-        // Calculates the expanding factor
-        lExpFact = Math.max( 0.05, Math.min( 0.10, lMinDist / Math.sqrt( ( lWidth * lHeight ) / fv.length ) * 0.5 ) );
-        //console.info("Expanding factor is " + (options.expandingFactor * 100.0) + "%");
-      }
-
-      var prevInfractions = checkMinDist( diagram.edges );
-      //console.info("Initial infractions " + prevInfractions);
-
-      var bStop = ( prevInfractions <= 0 ) || lMaxExpIt <= 0;
-
-      var voronoiIteration = 0;
-      var expandIteration = 0;
-
-      // var initWidth = lWidth;
-
-      while( !bStop ) {
-        ++voronoiIteration;
-        for( var it = 0; it <= 4; ++it ) {
-          voronoi.recycle( diagram );
-          diagram = voronoi.compute( fv, bbox );
-
-          // Then we reposition the nodes at the centroid of their Voronoi cells
-          // cells = diagram.cells;
-          for( var i = 0; i < cells.length; ++i ) {
-            var cell = cells[ i ];
-            var site = cell.site;
-            var centroid = cellCentroid( cell );
-            var currv = vSites[ site.label ];
-            currv.x = centroid.x;
-            currv.y = centroid.y;
-          }
-        }
-
-        var currInfractions = checkMinDist( diagram.edges );
-        //console.info("Current infractions " + currInfractions);
-
-        if( currInfractions <= 0 ) {
-          bStop = true;
-        } else {
-          if( currInfractions >= prevInfractions || voronoiIteration >= 4 ) {
-            if( expandIteration >= lMaxExpIt ) {
-              bStop = true;
-            } else {
-              lWidth += lWidth * lExpFact;
-              lHeight += lHeight * lExpFact;
-              bbox = {
-                xl: 0,
-                xr: lWidth,
-                yt: 0,
-                yb: lHeight
-              };
-              ++expandIteration;
-              voronoiIteration = 0;
-              //console.info("Expanded to ("+width+","+height+")");
-            }
-          }
-        }
-        prevInfractions = currInfractions;
-
-        savePositions();
-        messagePositions();
-      }
-
-      savePositions();
-      return pData;
-
-    } ).then( function( pData ) {
-      // var expandIteration = pData[ 'expIt' ];
-      var dataVertices = pData[ 'vertices' ];
-
-      setPositions( pData );
-
-      // Get end time
-      var startTime = pData[ 'startTime' ];
-      var endTime = new Date();
-      console.info( "Layout on " + dataVertices.length + " nodes took " + ( endTime - startTime ) + " ms" );
-
-      layout.one( "layoutstop", options.stop );
-
-      if( !options.animate ){
-        layout.trigger( "layoutready" );
-      }
-
-      layout.trigger( "layoutstop" );
-
-      t1.stop();
-    } );
-  }
-
-
-  return this;
-}; // run
-
-SpreadLayout.prototype.stop = function(){
-  if( this.thread ){
-    this.thread.stop();
-  }
-
-  this.trigger('layoutstop');
-};
-
-SpreadLayout.prototype.destroy = function(){
-  if( this.thread ){
-    this.thread.stop();
-  }
-};
-
-module.exports = function get( cytoscape, weaver ){
-  Thread = weaver.Thread;
-
-  return SpreadLayout;
-};
-
-},{"./rhill-voronoi-core":3}],3:[function(_dereq_,module,exports){
-/*!
-Copyright (C) 2010-2013 Raymond Hill: https://github.com/gorhill/Javascript-Voronoi
-MIT License: See https://github.com/gorhill/Javascript-Voronoi/LICENSE.md
-*/
-/*
-Author: Raymond Hill (rhill@raymondhill.net)
-Contributor: Jesse Morgan (morgajel@gmail.com)
-File: rhill-voronoi-core.js
-Version: 0.98
-Date: January 21, 2013
-Description: This is my personal Javascript implementation of
-Steven Fortune's algorithm to compute Voronoi diagrams.
-
-License: See https://github.com/gorhill/Javascript-Voronoi/LICENSE.md
-Credits: See https://github.com/gorhill/Javascript-Voronoi/CREDITS.md
-History: See https://github.com/gorhill/Javascript-Voronoi/CHANGELOG.md
-
-## Usage:
-
-  var sites = [{x:300,y:300}, {x:100,y:100}, {x:200,y:500}, {x:250,y:450}, {x:600,y:150}];
-  // xl, xr means x left, x right
-  // yt, yb means y top, y bottom
-  var bbox = {xl:0, xr:800, yt:0, yb:600};
-  var voronoi = new Voronoi();
-  // pass an object which exhibits xl, xr, yt, yb properties. The bounding
-  // box will be used to connect unbound edges, and to close open cells
-  result = voronoi.compute(sites, bbox);
-  // render, further analyze, etc.
-
-Return value:
-  An object with the following properties:
-
-  result.vertices = an array of unordered, unique Voronoi.Vertex objects making
-    up the Voronoi diagram.
-  result.edges = an array of unordered, unique Voronoi.Edge objects making up
-    the Voronoi diagram.
-  result.cells = an array of Voronoi.Cell object making up the Voronoi diagram.
-    A Cell object might have an empty array of halfedges, meaning no Voronoi
-    cell could be computed for a particular cell.
-  result.execTime = the time it took to compute the Voronoi diagram, in
-    milliseconds.
-
-Voronoi.Vertex object:
-  x: The x position of the vertex.
-  y: The y position of the vertex.
-
-Voronoi.Edge object:
-  lSite: the Voronoi site object at the left of this Voronoi.Edge object.
-  rSite: the Voronoi site object at the right of this Voronoi.Edge object (can
-    be null).
-  va: an object with an 'x' and a 'y' property defining the start point
-    (relative to the Voronoi site on the left) of this Voronoi.Edge object.
-  vb: an object with an 'x' and a 'y' property defining the end point
-    (relative to Voronoi site on the left) of this Voronoi.Edge object.
-
-  For edges which are used to close open cells (using the supplied bounding
-  box), the rSite property will be null.
-
-Voronoi.Cell object:
-  site: the Voronoi site object associated with the Voronoi cell.
-  halfedges: an array of Voronoi.Halfedge objects, ordered counterclockwise,
-    defining the polygon for this Voronoi cell.
-
-Voronoi.Halfedge object:
-  site: the Voronoi site object owning this Voronoi.Halfedge object.
-  edge: a reference to the unique Voronoi.Edge object underlying this
-    Voronoi.Halfedge object.
-  getStartpoint(): a method returning an object with an 'x' and a 'y' property
-    for the start point of this halfedge. Keep in mind halfedges are always
-    countercockwise.
-  getEndpoint(): a method returning an object with an 'x' and a 'y' property
-    for the end point of this halfedge. Keep in mind halfedges are always
-    countercockwise.
-
-TODO: Identify opportunities for performance improvement.
-
-TODO: Let the user close the Voronoi cells, do not do it automatically. Not only let
-      him close the cells, but also allow him to close more than once using a different
-      bounding box for the same Voronoi diagram.
-*/
-
-/*global Math */
-
-// ---------------------------------------------------------------------------
-
-function Voronoi() {
-    this.vertices = null;
-    this.edges = null;
-    this.cells = null;
-    this.toRecycle = null;
-    this.beachsectionJunkyard = [];
-    this.circleEventJunkyard = [];
-    this.vertexJunkyard = [];
-    this.edgeJunkyard = [];
-    this.cellJunkyard = [];
-    }
-
-// ---------------------------------------------------------------------------
-
-Voronoi.prototype.reset = function() {
-    if (!this.beachline) {
-        this.beachline = new this.RBTree();
-        }
-    // Move leftover beachsections to the beachsection junkyard.
-    if (this.beachline.root) {
-        var beachsection = this.beachline.getFirst(this.beachline.root);
-        while (beachsection) {
-            this.beachsectionJunkyard.push(beachsection); // mark for reuse
-            beachsection = beachsection.rbNext;
-            }
-        }
-    this.beachline.root = null;
-    if (!this.circleEvents) {
-        this.circleEvents = new this.RBTree();
-        }
-    this.circleEvents.root = this.firstCircleEvent = null;
-    this.vertices = [];
-    this.edges = [];
-    this.cells = [];
-    };
-
-Voronoi.prototype.sqrt = function(n){ return Math.sqrt(n); };
-Voronoi.prototype.abs = function(n){ return Math.abs(n); };
-Voronoi.prototype.ε = Voronoi.ε = 1e-9;
-Voronoi.prototype.invε = Voronoi.invε = 1.0 / Voronoi.ε;
-Voronoi.prototype.equalWithEpsilon = function(a,b){return this.abs(a-b)<1e-9;};
-Voronoi.prototype.greaterThanWithEpsilon = function(a,b){return a-b>1e-9;};
-Voronoi.prototype.greaterThanOrEqualWithEpsilon = function(a,b){return b-a<1e-9;};
-Voronoi.prototype.lessThanWithEpsilon = function(a,b){return b-a>1e-9;};
-Voronoi.prototype.lessThanOrEqualWithEpsilon = function(a,b){return a-b<1e-9;};
-
-// ---------------------------------------------------------------------------
-// Red-Black tree code (based on C version of "rbtree" by Franck Bui-Huu
-// https://github.com/fbuihuu/libtree/blob/master/rb.c
-
-Voronoi.prototype.RBTree = function() {
-    this.root = null;
-    };
-
-Voronoi.prototype.RBTree.prototype.rbInsertSuccessor = function(node, successor) {
-    var parent;
-    if (node) {
-        // >>> rhill 2011-05-27: Performance: cache previous/next nodes
-        successor.rbPrevious = node;
-        successor.rbNext = node.rbNext;
-        if (node.rbNext) {
-            node.rbNext.rbPrevious = successor;
-            }
-        node.rbNext = successor;
-        // <<<
-        if (node.rbRight) {
-            // in-place expansion of node.rbRight.getFirst();
-            node = node.rbRight;
-            while (node.rbLeft) {node = node.rbLeft;}
-            node.rbLeft = successor;
-            }
-        else {
-            node.rbRight = successor;
-            }
-        parent = node;
-        }
-    // rhill 2011-06-07: if node is null, successor must be inserted
-    // to the left-most part of the tree
-    else if (this.root) {
-        node = this.getFirst(this.root);
-        // >>> Performance: cache previous/next nodes
-        successor.rbPrevious = null;
-        successor.rbNext = node;
-        node.rbPrevious = successor;
-        // <<<
-        node.rbLeft = successor;
-        parent = node;
-        }
-    else {
-        // >>> Performance: cache previous/next nodes
-        successor.rbPrevious = successor.rbNext = null;
-        // <<<
-        this.root = successor;
-        parent = null;
-        }
-    successor.rbLeft = successor.rbRight = null;
-    successor.rbParent = parent;
-    successor.rbRed = true;
-    // Fixup the modified tree by recoloring nodes and performing
-    // rotations (2 at most) hence the red-black tree properties are
-    // preserved.
-    var grandpa, uncle;
-    node = successor;
-    while (parent && parent.rbRed) {
-        grandpa = parent.rbParent;
-        if (parent === grandpa.rbLeft) {
-            uncle = grandpa.rbRight;
-            if (uncle && uncle.rbRed) {
-                parent.rbRed = uncle.rbRed = false;
-                grandpa.rbRed = true;
-                node = grandpa;
-                }
-            else {
-                if (node === parent.rbRight) {
-                    this.rbRotateLeft(parent);
-                    node = parent;
-                    parent = node.rbParent;
-                    }
-                parent.rbRed = false;
-                grandpa.rbRed = true;
-                this.rbRotateRight(grandpa);
-                }
-            }
-        else {
-            uncle = grandpa.rbLeft;
-            if (uncle && uncle.rbRed) {
-                parent.rbRed = uncle.rbRed = false;
-                grandpa.rbRed = true;
-                node = grandpa;
-                }
-            else {
-                if (node === parent.rbLeft) {
-                    this.rbRotateRight(parent);
-                    node = parent;
-                    parent = node.rbParent;
-                    }
-                parent.rbRed = false;
-                grandpa.rbRed = true;
-                this.rbRotateLeft(grandpa);
-                }
-            }
-        parent = node.rbParent;
-        }
-    this.root.rbRed = false;
-    };
-
-Voronoi.prototype.RBTree.prototype.rbRemoveNode = function(node) {
-    // >>> rhill 2011-05-27: Performance: cache previous/next nodes
-    if (node.rbNext) {
-        node.rbNext.rbPrevious = node.rbPrevious;
-        }
-    if (node.rbPrevious) {
-        node.rbPrevious.rbNext = node.rbNext;
-        }
-    node.rbNext = node.rbPrevious = null;
-    // <<<
-    var parent = node.rbParent,
-        left = node.rbLeft,
-        right = node.rbRight,
-        next;
-    if (!left) {
-        next = right;
-        }
-    else if (!right) {
-        next = left;
-        }
-    else {
-        next = this.getFirst(right);
-        }
-    if (parent) {
-        if (parent.rbLeft === node) {
-            parent.rbLeft = next;
-            }
-        else {
-            parent.rbRight = next;
-            }
-        }
-    else {
-        this.root = next;
-        }
-    // enforce red-black rules
-    var isRed;
-    if (left && right) {
-        isRed = next.rbRed;
-        next.rbRed = node.rbRed;
-        next.rbLeft = left;
-        left.rbParent = next;
-        if (next !== right) {
-            parent = next.rbParent;
-            next.rbParent = node.rbParent;
-            node = next.rbRight;
-            parent.rbLeft = node;
-            next.rbRight = right;
-            right.rbParent = next;
-            }
-        else {
-            next.rbParent = parent;
-            parent = next;
-            node = next.rbRight;
-            }
-        }
-    else {
-        isRed = node.rbRed;
-        node = next;
-        }
-    // 'node' is now the sole successor's child and 'parent' its
-    // new parent (since the successor can have been moved)
-    if (node) {
-        node.rbParent = parent;
-        }
-    // the 'easy' cases
-    if (isRed) {return;}
-    if (node && node.rbRed) {
-        node.rbRed = false;
-        return;
-        }
-    // the other cases
-    var sibling;
-    do {
-        if (node === this.root) {
-            break;
-            }
-        if (node === parent.rbLeft) {
-            sibling = parent.rbRight;
-            if (sibling.rbRed) {
-                sibling.rbRed = false;
-                parent.rbRed = true;
-                this.rbRotateLeft(parent);
-                sibling = parent.rbRight;
-                }
-            if ((sibling.rbLeft && sibling.rbLeft.rbRed) || (sibling.rbRight && sibling.rbRight.rbRed)) {
-                if (!sibling.rbRight || !sibling.rbRight.rbRed) {
-                    sibling.rbLeft.rbRed = false;
-                    sibling.rbRed = true;
-                    this.rbRotateRight(sibling);
-                    sibling = parent.rbRight;
-                    }
-                sibling.rbRed = parent.rbRed;
-                parent.rbRed = sibling.rbRight.rbRed = false;
-                this.rbRotateLeft(parent);
-                node = this.root;
-                break;
-                }
-            }
-        else {
-            sibling = parent.rbLeft;
-            if (sibling.rbRed) {
-                sibling.rbRed = false;
-                parent.rbRed = true;
-                this.rbRotateRight(parent);
-                sibling = parent.rbLeft;
-                }
-            if ((sibling.rbLeft && sibling.rbLeft.rbRed) || (sibling.rbRight && sibling.rbRight.rbRed)) {
-                if (!sibling.rbLeft || !sibling.rbLeft.rbRed) {
-                    sibling.rbRight.rbRed = false;
-                    sibling.rbRed = true;
-                    this.rbRotateLeft(sibling);
-                    sibling = parent.rbLeft;
-                    }
-                sibling.rbRed = parent.rbRed;
-                parent.rbRed = sibling.rbLeft.rbRed = false;
-                this.rbRotateRight(parent);
-                node = this.root;
-                break;
-                }
-            }
-        sibling.rbRed = true;
-        node = parent;
-        parent = parent.rbParent;
-    } while (!node.rbRed);
-    if (node) {node.rbRed = false;}
-    };
-
-Voronoi.prototype.RBTree.prototype.rbRotateLeft = function(node) {
-    var p = node,
-        q = node.rbRight, // can't be null
-        parent = p.rbParent;
-    if (parent) {
-        if (parent.rbLeft === p) {
-            parent.rbLeft = q;
-            }
-        else {
-            parent.rbRight = q;
-            }
-        }
-    else {
-        this.root = q;
-        }
-    q.rbParent = parent;
-    p.rbParent = q;
-    p.rbRight = q.rbLeft;
-    if (p.rbRight) {
-        p.rbRight.rbParent = p;
-        }
-    q.rbLeft = p;
-    };
-
-Voronoi.prototype.RBTree.prototype.rbRotateRight = function(node) {
-    var p = node,
-        q = node.rbLeft, // can't be null
-        parent = p.rbParent;
-    if (parent) {
-        if (parent.rbLeft === p) {
-            parent.rbLeft = q;
-            }
-        else {
-            parent.rbRight = q;
-            }
-        }
-    else {
-        this.root = q;
-        }
-    q.rbParent = parent;
-    p.rbParent = q;
-    p.rbLeft = q.rbRight;
-    if (p.rbLeft) {
-        p.rbLeft.rbParent = p;
-        }
-    q.rbRight = p;
-    };
-
-Voronoi.prototype.RBTree.prototype.getFirst = function(node) {
-    while (node.rbLeft) {
-        node = node.rbLeft;
-        }
-    return node;
-    };
-
-Voronoi.prototype.RBTree.prototype.getLast = function(node) {
-    while (node.rbRight) {
-        node = node.rbRight;
-        }
-    return node;
-    };
-
-// ---------------------------------------------------------------------------
-// Diagram methods
-
-Voronoi.prototype.Diagram = function(site) {
-    this.site = site;
-    };
-
-// ---------------------------------------------------------------------------
-// Cell methods
-
-Voronoi.prototype.Cell = function(site) {
-    this.site = site;
-    this.halfedges = [];
-    this.closeMe = false;
-    };
-
-Voronoi.prototype.Cell.prototype.init = function(site) {
-    this.site = site;
-    this.halfedges = [];
-    this.closeMe = false;
-    return this;
-    };
-
-Voronoi.prototype.createCell = function(site) {
-    var cell = this.cellJunkyard.pop();
-    if ( cell ) {
-        return cell.init(site);
-        }
-    return new this.Cell(site);
-    };
-
-Voronoi.prototype.Cell.prototype.prepareHalfedges = function() {
-    var halfedges = this.halfedges,
-        iHalfedge = halfedges.length,
-        edge;
-    // get rid of unused halfedges
-    // rhill 2011-05-27: Keep it simple, no point here in trying
-    // to be fancy: dangling edges are a typically a minority.
-    while (iHalfedge--) {
-        edge = halfedges[iHalfedge].edge;
-        if (!edge.vb || !edge.va) {
-            halfedges.splice(iHalfedge,1);
-            }
-        }
-
-    // rhill 2011-05-26: I tried to use a binary search at insertion
-    // time to keep the array sorted on-the-fly (in Cell.addHalfedge()).
-    // There was no real benefits in doing so, performance on
-    // Firefox 3.6 was improved marginally, while performance on
-    // Opera 11 was penalized marginally.
-    halfedges.sort(function(a,b){return b.angle-a.angle;});
-    return halfedges.length;
-    };
-
-// Return a list of the neighbor Ids
-Voronoi.prototype.Cell.prototype.getNeighborIds = function() {
-    var neighbors = [],
-        iHalfedge = this.halfedges.length,
-        edge;
-    while (iHalfedge--){
-        edge = this.halfedges[iHalfedge].edge;
-        if (edge.lSite !== null && edge.lSite.voronoiId != this.site.voronoiId) {
-            neighbors.push(edge.lSite.voronoiId);
-            }
-        else if (edge.rSite !== null && edge.rSite.voronoiId != this.site.voronoiId){
-            neighbors.push(edge.rSite.voronoiId);
-            }
-        }
-    return neighbors;
-    };
-
-// Compute bounding box
-//
-Voronoi.prototype.Cell.prototype.getBbox = function() {
-    var halfedges = this.halfedges,
-        iHalfedge = halfedges.length,
-        xmin = Infinity,
-        ymin = Infinity,
-        xmax = -Infinity,
-        ymax = -Infinity,
-        v, vx, vy;
-    while (iHalfedge--) {
-        v = halfedges[iHalfedge].getStartpoint();
-        vx = v.x;
-        vy = v.y;
-        if (vx < xmin) {xmin = vx;}
-        if (vy < ymin) {ymin = vy;}
-        if (vx > xmax) {xmax = vx;}
-        if (vy > ymax) {ymax = vy;}
-        // we dont need to take into account end point,
-        // since each end point matches a start point
-        }
-    return {
-        x: xmin,
-        y: ymin,
-        width: xmax-xmin,
-        height: ymax-ymin
-        };
-    };
-
-// Return whether a point is inside, on, or outside the cell:
-//   -1: point is outside the perimeter of the cell
-//    0: point is on the perimeter of the cell
-//    1: point is inside the perimeter of the cell
-//
-Voronoi.prototype.Cell.prototype.pointIntersection = function(x, y) {
-    // Check if point in polygon. Since all polygons of a Voronoi
-    // diagram are convex, then:
-    // http://paulbourke.net/geometry/polygonmesh/
-    // Solution 3 (2D):
-    //   "If the polygon is convex then one can consider the polygon
-    //   "as a 'path' from the first vertex. A point is on the interior
-    //   "of this polygons if it is always on the same side of all the
-    //   "line segments making up the path. ...
-    //   "(y - y0) (x1 - x0) - (x - x0) (y1 - y0)
-    //   "if it is less than 0 then P is to the right of the line segment,
-    //   "if greater than 0 it is to the left, if equal to 0 then it lies
-    //   "on the line segment"
-    var halfedges = this.halfedges,
-        iHalfedge = halfedges.length,
-        halfedge,
-        p0, p1, r;
-    while (iHalfedge--) {
-        halfedge = halfedges[iHalfedge];
-        p0 = halfedge.getStartpoint();
-        p1 = halfedge.getEndpoint();
-        r = (y-p0.y)*(p1.x-p0.x)-(x-p0.x)*(p1.y-p0.y);
-        if (!r) {
-            return 0;
-            }
-        if (r > 0) {
-            return -1;
-            }
-        }
-    return 1;
-    };
-
-// ---------------------------------------------------------------------------
-// Edge methods
-//
-
-Voronoi.prototype.Vertex = function(x, y) {
-    this.x = x;
-    this.y = y;
-    };
-
-Voronoi.prototype.Edge = function(lSite, rSite) {
-    this.lSite = lSite;
-    this.rSite = rSite;
-    this.va = this.vb = null;
-    };
-
-Voronoi.prototype.Halfedge = function(edge, lSite, rSite) {
-    this.site = lSite;
-    this.edge = edge;
-    // 'angle' is a value to be used for properly sorting the
-    // halfsegments counterclockwise. By convention, we will
-    // use the angle of the line defined by the 'site to the left'
-    // to the 'site to the right'.
-    // However, border edges have no 'site to the right': thus we
-    // use the angle of line perpendicular to the halfsegment (the
-    // edge should have both end points defined in such case.)
-    if (rSite) {
-        this.angle = Math.atan2(rSite.y-lSite.y, rSite.x-lSite.x);
-        }
-    else {
-        var va = edge.va,
-            vb = edge.vb;
-        // rhill 2011-05-31: used to call getStartpoint()/getEndpoint(),
-        // but for performance purpose, these are expanded in place here.
-        this.angle = edge.lSite === lSite ?
-            Math.atan2(vb.x-va.x, va.y-vb.y) :
-            Math.atan2(va.x-vb.x, vb.y-va.y);
-        }
-    };
-
-Voronoi.prototype.createHalfedge = function(edge, lSite, rSite) {
-    return new this.Halfedge(edge, lSite, rSite);
-    };
-
-Voronoi.prototype.Halfedge.prototype.getStartpoint = function() {
-    return this.edge.lSite === this.site ? this.edge.va : this.edge.vb;
-    };
-
-Voronoi.prototype.Halfedge.prototype.getEndpoint = function() {
-    return this.edge.lSite === this.site ? this.edge.vb : this.edge.va;
-    };
-
-
-
-// this create and add a vertex to the internal collection
-
-Voronoi.prototype.createVertex = function(x, y) {
-    var v = this.vertexJunkyard.pop();
-    if ( !v ) {
-        v = new this.Vertex(x, y);
-        }
-    else {
-        v.x = x;
-        v.y = y;
-        }
-    this.vertices.push(v);
-    return v;
-    };
-
-// this create and add an edge to internal collection, and also create
-// two halfedges which are added to each site's counterclockwise array
-// of halfedges.
-
-Voronoi.prototype.createEdge = function(lSite, rSite, va, vb) {
-    var edge = this.edgeJunkyard.pop();
-    if ( !edge ) {
-        edge = new this.Edge(lSite, rSite);
-        }
-    else {
-        edge.lSite = lSite;
-        edge.rSite = rSite;
-        edge.va = edge.vb = null;
-        }
-
-    this.edges.push(edge);
-    if (va) {
-        this.setEdgeStartpoint(edge, lSite, rSite, va);
-        }
-    if (vb) {
-        this.setEdgeEndpoint(edge, lSite, rSite, vb);
-        }
-    this.cells[lSite.voronoiId].halfedges.push(this.createHalfedge(edge, lSite, rSite));
-    this.cells[rSite.voronoiId].halfedges.push(this.createHalfedge(edge, rSite, lSite));
-    return edge;
-    };
-
-Voronoi.prototype.createBorderEdge = function(lSite, va, vb) {
-    var edge = this.edgeJunkyard.pop();
-    if ( !edge ) {
-        edge = new this.Edge(lSite, null);
-        }
-    else {
-        edge.lSite = lSite;
-        edge.rSite = null;
-        }
-    edge.va = va;
-    edge.vb = vb;
-    this.edges.push(edge);
-    return edge;
-    };
-
-Voronoi.prototype.setEdgeStartpoint = function(edge, lSite, rSite, vertex) {
-    if (!edge.va && !edge.vb) {
-        edge.va = vertex;
-        edge.lSite = lSite;
-        edge.rSite = rSite;
-        }
-    else if (edge.lSite === rSite) {
-        edge.vb = vertex;
-        }
-    else {
-        edge.va = vertex;
-        }
-    };
-
-Voronoi.prototype.setEdgeEndpoint = function(edge, lSite, rSite, vertex) {
-    this.setEdgeStartpoint(edge, rSite, lSite, vertex);
-    };
-
-// ---------------------------------------------------------------------------
-// Beachline methods
-
-// rhill 2011-06-07: For some reasons, performance suffers significantly
-// when instanciating a literal object instead of an empty ctor
-Voronoi.prototype.Beachsection = function() {
-    };
-
-// rhill 2011-06-02: A lot of Beachsection instanciations
-// occur during the computation of the Voronoi diagram,
-// somewhere between the number of sites and twice the
-// number of sites, while the number of Beachsections on the
-// beachline at any given time is comparatively low. For this
-// reason, we reuse already created Beachsections, in order
-// to avoid new memory allocation. This resulted in a measurable
-// performance gain.
-
-Voronoi.prototype.createBeachsection = function(site) {
-    var beachsection = this.beachsectionJunkyard.pop();
-    if (!beachsection) {
-        beachsection = new this.Beachsection();
-        }
-    beachsection.site = site;
-    return beachsection;
-    };
-
-// calculate the left break point of a particular beach section,
-// given a particular sweep line
-Voronoi.prototype.leftBreakPoint = function(arc, directrix) {
-    // http://en.wikipedia.org/wiki/Parabola
-    // http://en.wikipedia.org/wiki/Quadratic_equation
-    // h1 = x1,
-    // k1 = (y1+directrix)/2,
-    // h2 = x2,
-    // k2 = (y2+directrix)/2,
-    // p1 = k1-directrix,
-    // a1 = 1/(4*p1),
-    // b1 = -h1/(2*p1),
-    // c1 = h1*h1/(4*p1)+k1,
-    // p2 = k2-directrix,
-    // a2 = 1/(4*p2),
-    // b2 = -h2/(2*p2),
-    // c2 = h2*h2/(4*p2)+k2,
-    // x = (-(b2-b1) + Math.sqrt((b2-b1)*(b2-b1) - 4*(a2-a1)*(c2-c1))) / (2*(a2-a1))
-    // When x1 become the x-origin:
-    // h1 = 0,
-    // k1 = (y1+directrix)/2,
-    // h2 = x2-x1,
-    // k2 = (y2+directrix)/2,
-    // p1 = k1-directrix,
-    // a1 = 1/(4*p1),
-    // b1 = 0,
-    // c1 = k1,
-    // p2 = k2-directrix,
-    // a2 = 1/(4*p2),
-    // b2 = -h2/(2*p2),
-    // c2 = h2*h2/(4*p2)+k2,
-    // x = (-b2 + Math.sqrt(b2*b2 - 4*(a2-a1)*(c2-k1))) / (2*(a2-a1)) + x1
-
-    // change code below at your own risk: care has been taken to
-    // reduce errors due to computers' finite arithmetic precision.
-    // Maybe can still be improved, will see if any more of this
-    // kind of errors pop up again.
-    var site = arc.site,
-        rfocx = site.x,
-        rfocy = site.y,
-        pby2 = rfocy-directrix;
-    // parabola in degenerate case where focus is on directrix
-    if (!pby2) {
-        return rfocx;
-        }
-    var lArc = arc.rbPrevious;
-    if (!lArc) {
-        return -Infinity;
-        }
-    site = lArc.site;
-    var lfocx = site.x,
-        lfocy = site.y,
-        plby2 = lfocy-directrix;
-    // parabola in degenerate case where focus is on directrix
-    if (!plby2) {
-        return lfocx;
-        }
-    var hl = lfocx-rfocx,
-        aby2 = 1/pby2-1/plby2,
-        b = hl/plby2;
-    if (aby2) {
-        return (-b+this.sqrt(b*b-2*aby2*(hl*hl/(-2*plby2)-lfocy+plby2/2+rfocy-pby2/2)))/aby2+rfocx;
-        }
-    // both parabolas have same distance to directrix, thus break point is midway
-    return (rfocx+lfocx)/2;
-    };
-
-// calculate the right break point of a particular beach section,
-// given a particular directrix
-Voronoi.prototype.rightBreakPoint = function(arc, directrix) {
-    var rArc = arc.rbNext;
-    if (rArc) {
-        return this.leftBreakPoint(rArc, directrix);
-        }
-    var site = arc.site;
-    return site.y === directrix ? site.x : Infinity;
-    };
-
-Voronoi.prototype.detachBeachsection = function(beachsection) {
-    this.detachCircleEvent(beachsection); // detach potentially attached circle event
-    this.beachline.rbRemoveNode(beachsection); // remove from RB-tree
-    this.beachsectionJunkyard.push(beachsection); // mark for reuse
-    };
-
-Voronoi.prototype.removeBeachsection = function(beachsection) {
-    var circle = beachsection.circleEvent,
-        x = circle.x,
-        y = circle.ycenter,
-        vertex = this.createVertex(x, y),
-        previous = beachsection.rbPrevious,
-        next = beachsection.rbNext,
-        disappearingTransitions = [beachsection],
-        abs_fn = Math.abs;
-
-    // remove collapsed beachsection from beachline
-    this.detachBeachsection(beachsection);
-
-    // there could be more than one empty arc at the deletion point, this
-    // happens when more than two edges are linked by the same vertex,
-    // so we will collect all those edges by looking up both sides of
-    // the deletion point.
-    // by the way, there is *always* a predecessor/successor to any collapsed
-    // beach section, it's just impossible to have a collapsing first/last
-    // beach sections on the beachline, since they obviously are unconstrained
-    // on their left/right side.
-
-    // look left
-    var lArc = previous;
-    while (lArc.circleEvent && abs_fn(x-lArc.circleEvent.x)<1e-9 && abs_fn(y-lArc.circleEvent.ycenter)<1e-9) {
-        previous = lArc.rbPrevious;
-        disappearingTransitions.unshift(lArc);
-        this.detachBeachsection(lArc); // mark for reuse
-        lArc = previous;
-        }
-    // even though it is not disappearing, I will also add the beach section
-    // immediately to the left of the left-most collapsed beach section, for
-    // convenience, since we need to refer to it later as this beach section
-    // is the 'left' site of an edge for which a start point is set.
-    disappearingTransitions.unshift(lArc);
-    this.detachCircleEvent(lArc);
-
-    // look right
-    var rArc = next;
-    while (rArc.circleEvent && abs_fn(x-rArc.circleEvent.x)<1e-9 && abs_fn(y-rArc.circleEvent.ycenter)<1e-9) {
-        next = rArc.rbNext;
-        disappearingTransitions.push(rArc);
-        this.detachBeachsection(rArc); // mark for reuse
-        rArc = next;
-        }
-    // we also have to add the beach section immediately to the right of the
-    // right-most collapsed beach section, since there is also a disappearing
-    // transition representing an edge's start point on its left.
-    disappearingTransitions.push(rArc);
-    this.detachCircleEvent(rArc);
-
-    // walk through all the disappearing transitions between beach sections and
-    // set the start point of their (implied) edge.
-    var nArcs = disappearingTransitions.length,
-        iArc;
-    for (iArc=1; iArc<nArcs; iArc++) {
-        rArc = disappearingTransitions[iArc];
-        lArc = disappearingTransitions[iArc-1];
-        this.setEdgeStartpoint(rArc.edge, lArc.site, rArc.site, vertex);
-        }
-
-    // create a new edge as we have now a new transition between
-    // two beach sections which were previously not adjacent.
-    // since this edge appears as a new vertex is defined, the vertex
-    // actually define an end point of the edge (relative to the site
-    // on the left)
-    lArc = disappearingTransitions[0];
-    rArc = disappearingTransitions[nArcs-1];
-    rArc.edge = this.createEdge(lArc.site, rArc.site, undefined, vertex);
-
-    // create circle events if any for beach sections left in the beachline
-    // adjacent to collapsed sections
-    this.attachCircleEvent(lArc);
-    this.attachCircleEvent(rArc);
-    };
-
-Voronoi.prototype.addBeachsection = function(site) {
-    var x = site.x,
-        directrix = site.y;
-
-    // find the left and right beach sections which will surround the newly
-    // created beach section.
-    // rhill 2011-06-01: This loop is one of the most often executed,
-    // hence we expand in-place the comparison-against-epsilon calls.
-    var lArc, rArc,
-        dxl, dxr,
-        node = this.beachline.root;
-
-    while (node) {
-        dxl = this.leftBreakPoint(node,directrix)-x;
-        // x lessThanWithEpsilon xl => falls somewhere before the left edge of the beachsection
-        if (dxl > 1e-9) {
-            // this case should never happen
-            // if (!node.rbLeft) {
-            //    rArc = node.rbLeft;
-            //    break;
-            //    }
-            node = node.rbLeft;
-            }
-        else {
-            dxr = x-this.rightBreakPoint(node,directrix);
-            // x greaterThanWithEpsilon xr => falls somewhere after the right edge of the beachsection
-            if (dxr > 1e-9) {
-                if (!node.rbRight) {
-                    lArc = node;
-                    break;
-                    }
-                node = node.rbRight;
-                }
-            else {
-                // x equalWithEpsilon xl => falls exactly on the left edge of the beachsection
-                if (dxl > -1e-9) {
-                    lArc = node.rbPrevious;
-                    rArc = node;
-                    }
-                // x equalWithEpsilon xr => falls exactly on the right edge of the beachsection
-                else if (dxr > -1e-9) {
-                    lArc = node;
-                    rArc = node.rbNext;
-                    }
-                // falls exactly somewhere in the middle of the beachsection
-                else {
-                    lArc = rArc = node;
-                    }
-                break;
-                }
-            }
-        }
-    // at this point, keep in mind that lArc and/or rArc could be
-    // undefined or null.
-
-    // create a new beach section object for the site and add it to RB-tree
-    var newArc = this.createBeachsection(site);
-    this.beachline.rbInsertSuccessor(lArc, newArc);
-
-    // cases:
-    //
-
-    // [null,null]
-    // least likely case: new beach section is the first beach section on the
-    // beachline.
-    // This case means:
-    //   no new transition appears
-    //   no collapsing beach section
-    //   new beachsection become root of the RB-tree
-    if (!lArc && !rArc) {
-        return;
-        }
-
-    // [lArc,rArc] where lArc == rArc
-    // most likely case: new beach section split an existing beach
-    // section.
-    // This case means:
-    //   one new transition appears
-    //   the left and right beach section might be collapsing as a result
-    //   two new nodes added to the RB-tree
-    if (lArc === rArc) {
-        // invalidate circle event of split beach section
-        this.detachCircleEvent(lArc);
-
-        // split the beach section into two separate beach sections
-        rArc = this.createBeachsection(lArc.site);
-        this.beachline.rbInsertSuccessor(newArc, rArc);
-
-        // since we have a new transition between two beach sections,
-        // a new edge is born
-        newArc.edge = rArc.edge = this.createEdge(lArc.site, newArc.site);
-
-        // check whether the left and right beach sections are collapsing
-        // and if so create circle events, to be notified when the point of
-        // collapse is reached.
-        this.attachCircleEvent(lArc);
-        this.attachCircleEvent(rArc);
-        return;
-        }
-
-    // [lArc,null]
-    // even less likely case: new beach section is the *last* beach section
-    // on the beachline -- this can happen *only* if *all* the previous beach
-    // sections currently on the beachline share the same y value as
-    // the new beach section.
-    // This case means:
-    //   one new transition appears
-    //   no collapsing beach section as a result
-    //   new beach section become right-most node of the RB-tree
-    if (lArc && !rArc) {
-        newArc.edge = this.createEdge(lArc.site,newArc.site);
-        return;
-        }
-
-    // [null,rArc]
-    // impossible case: because sites are strictly processed from top to bottom,
-    // and left to right, which guarantees that there will always be a beach section
-    // on the left -- except of course when there are no beach section at all on
-    // the beach line, which case was handled above.
-    // rhill 2011-06-02: No point testing in non-debug version
-    //if (!lArc && rArc) {
-    //    throw "Voronoi.addBeachsection(): What is this I don't even";
-    //    }
-
-    // [lArc,rArc] where lArc != rArc
-    // somewhat less likely case: new beach section falls *exactly* in between two
-    // existing beach sections
-    // This case means:
-    //   one transition disappears
-    //   two new transitions appear
-    //   the left and right beach section might be collapsing as a result
-    //   only one new node added to the RB-tree
-    if (lArc !== rArc) {
-        // invalidate circle events of left and right sites
-        this.detachCircleEvent(lArc);
-        this.detachCircleEvent(rArc);
-
-        // an existing transition disappears, meaning a vertex is defined at
-        // the disappearance point.
-        // since the disappearance is caused by the new beachsection, the
-        // vertex is at the center of the circumscribed circle of the left,
-        // new and right beachsections.
-        // http://mathforum.org/library/drmath/view/55002.html
-        // Except that I bring the origin at A to simplify
-        // calculation
-        var lSite = lArc.site,
-            ax = lSite.x,
-            ay = lSite.y,
-            bx=site.x-ax,
-            by=site.y-ay,
-            rSite = rArc.site,
-            cx=rSite.x-ax,
-            cy=rSite.y-ay,
-            d=2*(bx*cy-by*cx),
-            hb=bx*bx+by*by,
-            hc=cx*cx+cy*cy,
-            vertex = this.createVertex((cy*hb-by*hc)/d+ax, (bx*hc-cx*hb)/d+ay);
-
-        // one transition disappear
-        this.setEdgeStartpoint(rArc.edge, lSite, rSite, vertex);
-
-        // two new transitions appear at the new vertex location
-        newArc.edge = this.createEdge(lSite, site, undefined, vertex);
-        rArc.edge = this.createEdge(site, rSite, undefined, vertex);
-
-        // check whether the left and right beach sections are collapsing
-        // and if so create circle events, to handle the point of collapse.
-        this.attachCircleEvent(lArc);
-        this.attachCircleEvent(rArc);
-        return;
-        }
-    };
-
-// ---------------------------------------------------------------------------
-// Circle event methods
-
-// rhill 2011-06-07: For some reasons, performance suffers significantly
-// when instanciating a literal object instead of an empty ctor
-Voronoi.prototype.CircleEvent = function() {
-    // rhill 2013-10-12: it helps to state exactly what we are at ctor time.
-    this.arc = null;
-    this.rbLeft = null;
-    this.rbNext = null;
-    this.rbParent = null;
-    this.rbPrevious = null;
-    this.rbRed = false;
-    this.rbRight = null;
-    this.site = null;
-    this.x = this.y = this.ycenter = 0;
-    };
-
-Voronoi.prototype.attachCircleEvent = function(arc) {
-    var lArc = arc.rbPrevious,
-        rArc = arc.rbNext;
-    if (!lArc || !rArc) {return;} // does that ever happen?
-    var lSite = lArc.site,
-        cSite = arc.site,
-        rSite = rArc.site;
-
-    // If site of left beachsection is same as site of
-    // right beachsection, there can't be convergence
-    if (lSite===rSite) {return;}
-
-    // Find the circumscribed circle for the three sites associated
-    // with the beachsection triplet.
-    // rhill 2011-05-26: It is more efficient to calculate in-place
-    // rather than getting the resulting circumscribed circle from an
-    // object returned by calling Voronoi.circumcircle()
-    // http://mathforum.org/library/drmath/view/55002.html
-    // Except that I bring the origin at cSite to simplify calculations.
-    // The bottom-most part of the circumcircle is our Fortune 'circle
-    // event', and its center is a vertex potentially part of the final
-    // Voronoi diagram.
-    var bx = cSite.x,
-        by = cSite.y,
-        ax = lSite.x-bx,
-        ay = lSite.y-by,
-        cx = rSite.x-bx,
-        cy = rSite.y-by;
-
-    // If points l->c->r are clockwise, then center beach section does not
-    // collapse, hence it can't end up as a vertex (we reuse 'd' here, which
-    // sign is reverse of the orientation, hence we reverse the test.
-    // http://en.wikipedia.org/wiki/Curve_orientation#Orientation_of_a_simple_polygon
-    // rhill 2011-05-21: Nasty finite precision error which caused circumcircle() to
-    // return infinites: 1e-12 seems to fix the problem.
-    var d = 2*(ax*cy-ay*cx);
-    if (d >= -2e-12){return;}
-
-    var ha = ax*ax+ay*ay,
-        hc = cx*cx+cy*cy,
-        x = (cy*ha-ay*hc)/d,
-        y = (ax*hc-cx*ha)/d,
-        ycenter = y+by;
-
-    // Important: ybottom should always be under or at sweep, so no need
-    // to waste CPU cycles by checking
-
-    // recycle circle event object if possible
-    var circleEvent = this.circleEventJunkyard.pop();
-    if (!circleEvent) {
-        circleEvent = new this.CircleEvent();
-        }
-    circleEvent.arc = arc;
-    circleEvent.site = cSite;
-    circleEvent.x = x+bx;
-    circleEvent.y = ycenter+this.sqrt(x*x+y*y); // y bottom
-    circleEvent.ycenter = ycenter;
-    arc.circleEvent = circleEvent;
-
-    // find insertion point in RB-tree: circle events are ordered from
-    // smallest to largest
-    var predecessor = null,
-        node = this.circleEvents.root;
-    while (node) {
-        if (circleEvent.y < node.y || (circleEvent.y === node.y && circleEvent.x <= node.x)) {
-            if (node.rbLeft) {
-                node = node.rbLeft;
-                }
-            else {
-                predecessor = node.rbPrevious;
-                break;
-                }
-            }
-        else {
-            if (node.rbRight) {
-                node = node.rbRight;
-                }
-            else {
-                predecessor = node;
-                break;
-                }
-            }
-        }
-    this.circleEvents.rbInsertSuccessor(predecessor, circleEvent);
-    if (!predecessor) {
-        this.firstCircleEvent = circleEvent;
-        }
-    };
-
-Voronoi.prototype.detachCircleEvent = function(arc) {
-    var circleEvent = arc.circleEvent;
-    if (circleEvent) {
-        if (!circleEvent.rbPrevious) {
-            this.firstCircleEvent = circleEvent.rbNext;
-            }
-        this.circleEvents.rbRemoveNode(circleEvent); // remove from RB-tree
-        this.circleEventJunkyard.push(circleEvent);
-        arc.circleEvent = null;
-        }
-    };
-
-// ---------------------------------------------------------------------------
-// Diagram completion methods
-
-// connect dangling edges (not if a cursory test tells us
-// it is not going to be visible.
-// return value:
-//   false: the dangling endpoint couldn't be connected
-//   true: the dangling endpoint could be connected
-Voronoi.prototype.connectEdge = function(edge, bbox) {
-    // skip if end point already connected
-    var vb = edge.vb;
-    if (!!vb) {return true;}
-
-    // make local copy for performance purpose
-    var va = edge.va,
-        xl = bbox.xl,
-        xr = bbox.xr,
-        yt = bbox.yt,
-        yb = bbox.yb,
-        lSite = edge.lSite,
-        rSite = edge.rSite,
-        lx = lSite.x,
-        ly = lSite.y,
-        rx = rSite.x,
-        ry = rSite.y,
-        fx = (lx+rx)/2,
-        fy = (ly+ry)/2,
-        fm, fb;
-
-    // if we reach here, this means cells which use this edge will need
-    // to be closed, whether because the edge was removed, or because it
-    // was connected to the bounding box.
-    this.cells[lSite.voronoiId].closeMe = true;
-    this.cells[rSite.voronoiId].closeMe = true;
-
-    // get the line equation of the bisector if line is not vertical
-    if (ry !== ly) {
-        fm = (lx-rx)/(ry-ly);
-        fb = fy-fm*fx;
-        }
-
-    // remember, direction of line (relative to left site):
-    // upward: left.x < right.x
-    // downward: left.x > right.x
-    // horizontal: left.x == right.x
-    // upward: left.x < right.x
-    // rightward: left.y < right.y
-    // leftward: left.y > right.y
-    // vertical: left.y == right.y
-
-    // depending on the direction, find the best side of the
-    // bounding box to use to determine a reasonable start point
-
-    // rhill 2013-12-02:
-    // While at it, since we have the values which define the line,
-    // clip the end of va if it is outside the bbox.
-    // https://github.com/gorhill/Javascript-Voronoi/issues/15
-    // TODO: Do all the clipping here rather than rely on Liang-Barsky
-    // which does not do well sometimes due to loss of arithmetic
-    // precision. The code here doesn't degrade if one of the vertex is
-    // at a huge distance.
-
-    // special case: vertical line
-    if (fm === undefined) {
-        // doesn't intersect with viewport
-        if (fx < xl || fx >= xr) {return false;}
-        // downward
-        if (lx > rx) {
-            if (!va || va.y < yt) {
-                va = this.createVertex(fx, yt);
-                }
-            else if (va.y >= yb) {
-                return false;
-                }
-            vb = this.createVertex(fx, yb);
-            }
-        // upward
-        else {
-            if (!va || va.y > yb) {
-                va = this.createVertex(fx, yb);
-                }
-            else if (va.y < yt) {
-                return false;
-                }
-            vb = this.createVertex(fx, yt);
-            }
-        }
-    // closer to vertical than horizontal, connect start point to the
-    // top or bottom side of the bounding box
-    else if (fm < -1 || fm > 1) {
-        // downward
-        if (lx > rx) {
-            if (!va || va.y < yt) {
-                va = this.createVertex((yt-fb)/fm, yt);
-                }
-            else if (va.y >= yb) {
-                return false;
-                }
-            vb = this.createVertex((yb-fb)/fm, yb);
-            }
-        // upward
-        else {
-            if (!va || va.y > yb) {
-                va = this.createVertex((yb-fb)/fm, yb);
-                }
-            else if (va.y < yt) {
-                return false;
-                }
-            vb = this.createVertex((yt-fb)/fm, yt);
-            }
-        }
-    // closer to horizontal than vertical, connect start point to the
-    // left or right side of the bounding box
-    else {
-        // rightward
-        if (ly < ry) {
-            if (!va || va.x < xl) {
-                va = this.createVertex(xl, fm*xl+fb);
-                }
-            else if (va.x >= xr) {
-                return false;
-                }
-            vb = this.createVertex(xr, fm*xr+fb);
-            }
-        // leftward
-        else {
-            if (!va || va.x > xr) {
-                va = this.createVertex(xr, fm*xr+fb);
-                }
-            else if (va.x < xl) {
-                return false;
-                }
-            vb = this.createVertex(xl, fm*xl+fb);
-            }
-        }
-    edge.va = va;
-    edge.vb = vb;
-
-    return true;
-    };
-
-// line-clipping code taken from:
-//   Liang-Barsky function by Daniel White
-//   http://www.skytopia.com/project/articles/compsci/clipping.html
-// Thanks!
-// A bit modified to minimize code paths
-Voronoi.prototype.clipEdge = function(edge, bbox) {
-    var ax = edge.va.x,
-        ay = edge.va.y,
-        bx = edge.vb.x,
-        by = edge.vb.y,
-        t0 = 0,
-        t1 = 1,
-        dx = bx-ax,
-        dy = by-ay;
-    // left
-    var q = ax-bbox.xl;
-    if (dx===0 && q<0) {return false;}
-    var r = -q/dx;
-    if (dx<0) {
-        if (r<t0) {return false;}
-        if (r<t1) {t1=r;}
-        }
-    else if (dx>0) {
-        if (r>t1) {return false;}
-        if (r>t0) {t0=r;}
-        }
-    // right
-    q = bbox.xr-ax;
-    if (dx===0 && q<0) {return false;}
-    r = q/dx;
-    if (dx<0) {
-        if (r>t1) {return false;}
-        if (r>t0) {t0=r;}
-        }
-    else if (dx>0) {
-        if (r<t0) {return false;}
-        if (r<t1) {t1=r;}
-        }
-    // top
-    q = ay-bbox.yt;
-    if (dy===0 && q<0) {return false;}
-    r = -q/dy;
-    if (dy<0) {
-        if (r<t0) {return false;}
-        if (r<t1) {t1=r;}
-        }
-    else if (dy>0) {
-        if (r>t1) {return false;}
-        if (r>t0) {t0=r;}
-        }
-    // bottom
-    q = bbox.yb-ay;
-    if (dy===0 && q<0) {return false;}
-    r = q/dy;
-    if (dy<0) {
-        if (r>t1) {return false;}
-        if (r>t0) {t0=r;}
-        }
-    else if (dy>0) {
-        if (r<t0) {return false;}
-        if (r<t1) {t1=r;}
-        }
-
-    // if we reach this point, Voronoi edge is within bbox
-
-    // if t0 > 0, va needs to change
-    // rhill 2011-06-03: we need to create a new vertex rather
-    // than modifying the existing one, since the existing
-    // one is likely shared with at least another edge
-    if (t0 > 0) {
-        edge.va = this.createVertex(ax+t0*dx, ay+t0*dy);
-        }
-
-    // if t1 < 1, vb needs to change
-    // rhill 2011-06-03: we need to create a new vertex rather
-    // than modifying the existing one, since the existing
-    // one is likely shared with at least another edge
-    if (t1 < 1) {
-        edge.vb = this.createVertex(ax+t1*dx, ay+t1*dy);
-        }
-
-    // va and/or vb were clipped, thus we will need to close
-    // cells which use this edge.
-    if ( t0 > 0 || t1 < 1 ) {
-        this.cells[edge.lSite.voronoiId].closeMe = true;
-        this.cells[edge.rSite.voronoiId].closeMe = true;
-    }
-
-    return true;
-    };
-
-// Connect/cut edges at bounding box
-Voronoi.prototype.clipEdges = function(bbox) {
-    // connect all dangling edges to bounding box
-    // or get rid of them if it can't be done
-    var edges = this.edges,
-        iEdge = edges.length,
-        edge,
-        abs_fn = Math.abs;
-
-    // iterate backward so we can splice safely
-    while (iEdge--) {
-        edge = edges[iEdge];
-        // edge is removed if:
-        //   it is wholly outside the bounding box
-        //   it is looking more like a point than a line
-        if (!this.connectEdge(edge, bbox) ||
-            !this.clipEdge(edge, bbox) ||
-            (abs_fn(edge.va.x-edge.vb.x)<1e-9 && abs_fn(edge.va.y-edge.vb.y)<1e-9)) {
-            edge.va = edge.vb = null;
-            edges.splice(iEdge,1);
-            }
-        }
-    };
-
-// Close the cells.
-// The cells are bound by the supplied bounding box.
-// Each cell refers to its associated site, and a list
-// of halfedges ordered counterclockwise.
-Voronoi.prototype.closeCells = function(bbox) {
-    var xl = bbox.xl,
-        xr = bbox.xr,
-        yt = bbox.yt,
-        yb = bbox.yb,
-        cells = this.cells,
-        iCell = cells.length,
-        cell,
-        iLeft,
-        halfedges, nHalfedges,
-        edge,
-        va, vb, vz,
-        lastBorderSegment,
-        abs_fn = Math.abs;
-
-    while (iCell--) {
-        cell = cells[iCell];
-        // prune, order halfedges counterclockwise, then add missing ones
-        // required to close cells
-        if (!cell.prepareHalfedges()) {
-            continue;
-            }
-        if (!cell.closeMe) {
-            continue;
-            }
-        // find first 'unclosed' point.
-        // an 'unclosed' point will be the end point of a halfedge which
-        // does not match the start point of the following halfedge
-        halfedges = cell.halfedges;
-        nHalfedges = halfedges.length;
-        // special case: only one site, in which case, the viewport is the cell
-        // ...
-
-        // all other cases
-        iLeft = 0;
-        while (iLeft < nHalfedges) {
-            va = halfedges[iLeft].getEndpoint();
-            vz = halfedges[(iLeft+1) % nHalfedges].getStartpoint();
-            // if end point is not equal to start point, we need to add the missing
-            // halfedge(s) up to vz
-            if (abs_fn(va.x-vz.x)>=1e-9 || abs_fn(va.y-vz.y)>=1e-9) {
-
-                // rhill 2013-12-02:
-                // "Holes" in the halfedges are not necessarily always adjacent.
-                // https://github.com/gorhill/Javascript-Voronoi/issues/16
-
-                // find entry point:
-                switch (true) {
-
-                    // walk downward along left side
-                    case this.equalWithEpsilon(va.x,xl) && this.lessThanWithEpsilon(va.y,yb):
-                        lastBorderSegment = this.equalWithEpsilon(vz.x,xl);
-                        vb = this.createVertex(xl, lastBorderSegment ? vz.y : yb);
-                        edge = this.createBorderEdge(cell.site, va, vb);
-                        iLeft++;
-                        halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-                        nHalfedges++;
-                        if ( lastBorderSegment ) { break; }
-                        va = vb;
-                        // fall through
-
-                    // walk rightward along bottom side
-                    case this.equalWithEpsilon(va.y,yb) && this.lessThanWithEpsilon(va.x,xr):
-                        lastBorderSegment = this.equalWithEpsilon(vz.y,yb);
-                        vb = this.createVertex(lastBorderSegment ? vz.x : xr, yb);
-                        edge = this.createBorderEdge(cell.site, va, vb);
-                        iLeft++;
-                        halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-                        nHalfedges++;
-                        if ( lastBorderSegment ) { break; }
-                        va = vb;
-                        // fall through
-
-                    // walk upward along right side
-                    case this.equalWithEpsilon(va.x,xr) && this.greaterThanWithEpsilon(va.y,yt):
-                        lastBorderSegment = this.equalWithEpsilon(vz.x,xr);
-                        vb = this.createVertex(xr, lastBorderSegment ? vz.y : yt);
-                        edge = this.createBorderEdge(cell.site, va, vb);
-                        iLeft++;
-                        halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-                        nHalfedges++;
-                        if ( lastBorderSegment ) { break; }
-                        va = vb;
-                        // fall through
-
-                    // walk leftward along top side
-                    case this.equalWithEpsilon(va.y,yt) && this.greaterThanWithEpsilon(va.x,xl):
-                        lastBorderSegment = this.equalWithEpsilon(vz.y,yt);
-                        vb = this.createVertex(lastBorderSegment ? vz.x : xl, yt);
-                        edge = this.createBorderEdge(cell.site, va, vb);
-                        iLeft++;
-                        halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-                        nHalfedges++;
-                        if ( lastBorderSegment ) { break; }
-                        va = vb;
-                        // fall through
-
-                        // walk downward along left side
-                        lastBorderSegment = this.equalWithEpsilon(vz.x,xl);
-                        vb = this.createVertex(xl, lastBorderSegment ? vz.y : yb);
-                        edge = this.createBorderEdge(cell.site, va, vb);
-                        iLeft++;
-                        halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-                        nHalfedges++;
-                        if ( lastBorderSegment ) { break; }
-                        va = vb;
-                        // fall through
-
-                        // walk rightward along bottom side
-                        lastBorderSegment = this.equalWithEpsilon(vz.y,yb);
-                        vb = this.createVertex(lastBorderSegment ? vz.x : xr, yb);
-                        edge = this.createBorderEdge(cell.site, va, vb);
-                        iLeft++;
-                        halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-                        nHalfedges++;
-                        if ( lastBorderSegment ) { break; }
-                        va = vb;
-                        // fall through
-
-                        // walk upward along right side
-                        lastBorderSegment = this.equalWithEpsilon(vz.x,xr);
-                        vb = this.createVertex(xr, lastBorderSegment ? vz.y : yt);
-                        edge = this.createBorderEdge(cell.site, va, vb);
-                        iLeft++;
-                        halfedges.splice(iLeft, 0, this.createHalfedge(edge, cell.site, null));
-                        nHalfedges++;
-                        if ( lastBorderSegment ) { break; }
-                        // fall through
-
-                    default:
-                        throw "Voronoi.closeCells() > this makes no sense!";
-                    }
-                }
-            iLeft++;
-            }
-        cell.closeMe = false;
-        }
-    };
-
-// ---------------------------------------------------------------------------
-// Debugging helper
-/*
-Voronoi.prototype.dumpBeachline = function(y) {
-    console.log('Voronoi.dumpBeachline(%f) > Beachsections, from left to right:', y);
-    if ( !this.beachline ) {
-        console.log('  None');
-        }
-    else {
-        var bs = this.beachline.getFirst(this.beachline.root);
-        while ( bs ) {
-            console.log('  site %d: xl: %f, xr: %f', bs.site.voronoiId, this.leftBreakPoint(bs, y), this.rightBreakPoint(bs, y));
-            bs = bs.rbNext;
-            }
-        }
-    };
-*/
-
-// ---------------------------------------------------------------------------
-// Helper: Quantize sites
-
-// rhill 2013-10-12:
-// This is to solve https://github.com/gorhill/Javascript-Voronoi/issues/15
-// Since not all users will end up using the kind of coord values which would
-// cause the issue to arise, I chose to let the user decide whether or not
-// he should sanitize his coord values through this helper. This way, for
-// those users who uses coord values which are known to be fine, no overhead is
-// added.
-
-Voronoi.prototype.quantizeSites = function(sites) {
-    var ε = this.ε,
-        n = sites.length,
-        site;
-    while ( n-- ) {
-        site = sites[n];
-        site.x = Math.floor(site.x / ε) * ε;
-        site.y = Math.floor(site.y / ε) * ε;
-        }
-    };
-
-// ---------------------------------------------------------------------------
-// Helper: Recycle diagram: all vertex, edge and cell objects are
-// "surrendered" to the Voronoi object for reuse.
-// TODO: rhill-voronoi-core v2: more performance to be gained
-// when I change the semantic of what is returned.
-
-Voronoi.prototype.recycle = function(diagram) {
-    if ( diagram ) {
-        if ( diagram instanceof this.Diagram ) {
-            this.toRecycle = diagram;
-            }
-        else {
-            throw 'Voronoi.recycleDiagram() > Need a Diagram object.';
-            }
-        }
-    };
-
-// ---------------------------------------------------------------------------
-// Top-level Fortune loop
-
-// rhill 2011-05-19:
-//   Voronoi sites are kept client-side now, to allow
-//   user to freely modify content. At compute time,
-//   *references* to sites are copied locally.
-
-Voronoi.prototype.compute = function(sites, bbox) {
-    // to measure execution time
-    var startTime = new Date();
-
-    // init internal state
-    this.reset();
-
-    // any diagram data available for recycling?
-    // I do that here so that this is included in execution time
-    if ( this.toRecycle ) {
-        this.vertexJunkyard = this.vertexJunkyard.concat(this.toRecycle.vertices);
-        this.edgeJunkyard = this.edgeJunkyard.concat(this.toRecycle.edges);
-        this.cellJunkyard = this.cellJunkyard.concat(this.toRecycle.cells);
-        this.toRecycle = null;
-        }
-
-    // Initialize site event queue
-    var siteEvents = sites.slice(0);
-    siteEvents.sort(function(a,b){
-        var r = b.y - a.y;
-        if (r) {return r;}
-        return b.x - a.x;
-        });
-
-    // process queue
-    var site = siteEvents.pop(),
-        siteid = 0,
-        xsitex, // to avoid duplicate sites
-        xsitey,
-        cells = this.cells,
-        circle;
-
-    // main loop
-    for (;;) {
-        // we need to figure whether we handle a site or circle event
-        // for this we find out if there is a site event and it is
-        // 'earlier' than the circle event
-        circle = this.firstCircleEvent;
-
-        // add beach section
-        if (site && (!circle || site.y < circle.y || (site.y === circle.y && site.x < circle.x))) {
-            // only if site is not a duplicate
-            if (site.x !== xsitex || site.y !== xsitey) {
-                // first create cell for new site
-                cells[siteid] = this.createCell(site);
-                site.voronoiId = siteid++;
-                // then create a beachsection for that site
-                this.addBeachsection(site);
-                // remember last site coords to detect duplicate
-                xsitey = site.y;
-                xsitex = site.x;
-                }
-            site = siteEvents.pop();
-            }
-
-        // remove beach section
-        else if (circle) {
-            this.removeBeachsection(circle.arc);
-            }
-
-        // all done, quit
-        else {
-            break;
-            }
-        }
-
-    // wrapping-up:
-    //   connect dangling edges to bounding box
-    //   cut edges as per bounding box
-    //   discard edges completely outside bounding box
-    //   discard edges which are point-like
-    this.clipEdges(bbox);
-
-    //   add missing edges in order to close opened cells
-    this.closeCells(bbox);
-
-    // to measure execution time
-    var stopTime = new Date();
-
-    // prepare return values
-    var diagram = new this.Diagram();
-    diagram.cells = this.cells;
-    diagram.edges = this.edges;
-    diagram.vertices = this.vertices;
-    diagram.execTime = stopTime.getTime()-startTime.getTime();
-
-    // clean up
-    this.reset();
-
-    return diagram;
-    };
-
-module.exports = Voronoi;
-
-},{}]},{},[1])(1)
-});
 window.QueryFilter = class QueryFilter {
   constructor(node) {
     this.new_condition = this.new_condition.bind(this);
@@ -11944,7 +11035,7 @@ window.SparqlText = (function() {
     }
 
     update() {
-      var count, drake, drake_filter, elem, f_string, filter, filter_button, init_string, j, k, l, len, len1, len2, link, query_line, ref, ref1, s_line, select_div, select_div_f;
+      var count, elem, f_string, filter, filter_button, init_string, j, k, l, len, len1, len2, link, query_line, ref, ref1, s_line, select_div, select_div_f;
       div_sparql_text.innerHTML = "";
       init_string = document.createElement('div');
       init_string.className = "init_string";
@@ -11995,17 +11086,13 @@ window.SparqlText = (function() {
         return this.add_filter();
       };
       div_sparql_text.append(filter_button);
-      drake = dragula([s_line, document.getElementsByClassName('q_line')[0]], {
-        copy: true,
-        accepts: (el, target, source, sibling) => {
-          if (source.classList.contains('q_line') && source.classList.contains('q_line')) {
-            return true;
+      return dragula([s_line, document.getElementsByClassName('q_line')[0], document.getElementsByClassName('void_box')[0]], {
+        accepts: (el, target, source) => {
+          if (target.classList.contains('void_box')) {
+            target.innerHTML.replace('&nbsp;', '');
           }
+          return true;
         }
-      });
-      drake_filter = dragula([document.getElementsByClassName('void_box')[0], document.getElementsByClassName('q_line')[0]], {});
-      return drake.on('drop', () => {
-        return console.log('drop');
       });
     }
 
@@ -12028,7 +11115,7 @@ window.Void = class Void {
     this.to_html = this.to_html.bind(this);
     this.div = document.createElement('div');
     this.div.className = 'void_box';
-    this.div.innerHTML = "&nbsp;&nbsp;&nbsp;";
+    this.div.innerHTML = "<div style='display:flex'>&nbsp;&nbsp;&nbsp;</div>";
   }
 
   to_html() {

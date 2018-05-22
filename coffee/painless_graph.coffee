@@ -208,6 +208,27 @@ class window.PainlessGraph
                     else
                         node.removeClass('highlight')
  
+    load: =>
+        
+        parsed_query = window.sparqljs.Parser().parse(
+            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' +
+            'SELECT * { ?mickey foaf:name "Mickey Mouse" . ?mickey foaf:knows ?other. }');
+
+        for triple in parsed_query['where'][0]['triples']
+            console.log triple
+            #if @cy.getElementById(triple['subject'].slice(1)) != undefined
+            #    link = new PainlessLink(this, @cy, triple['predicate'], 'role', @cy.getElementById(triple['subject'].slice(1)))
+            #else 
+            new_node = @cy.add({
+                group: 'nodes', 
+                data: 
+                    {id: @cy.getElementById(triple['subject'].slice(1))}
+                    })
+            link = new PainlessLink(this, @cy, triple['predicate'], 'role')
+            @links.push(link)
+
+
+
     
     init: =>
 
