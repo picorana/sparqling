@@ -152,13 +152,13 @@ class window.SparqlText
         s_line.className = "s_line"
 
 
-        if select_boxes.length == 0
+        if @select_boxes.length == 0
             s_line.innerHTML = "&nbsp;*"
         else
             s_line.append(@create_tab())
 
             count = 0
-            for elem in select_boxes
+            for elem in @select_boxes
                 if @cy.getElementById(elem).id() != undefined
                     s_line.append(@create_highlighting_box(@cy.getElementById(elem)))
                     count += 1
@@ -195,9 +195,29 @@ class window.SparqlText
         filter_button.onclick = () => @add_filter()
         div_sparql_text.append(filter_button)
 
-        dragula([s_line, document.getElementsByClassName('q_line')[0], document.getElementsByClassName('void_box')[0]],{
+        containers = Array.prototype.slice.call(document.getElementsByClassName('q_line'))
+            .concat(Array.prototype.slice.call(document.getElementsByClassName('void_box')))
+            .concat(s_line)
+
+        drake = dragula({
+            containers: containers
+            copy: (el, source) =>
+                if source.classList.contains('q_line')
+                    return true
+                else return false
             accepts: (el, target, source) =>
+                if target.classList.contains('q_line') and source.classList.contains('q_line')
+                    return false
                 if target.classList.contains('void_box')
                     target.innerHTML.replace('&nbsp;', '')
                 return true
                 })
+
+        drake.on('drop', 
+            () => 
+                @select_boxes = []
+                for child in s_line.children
+                    if child.firstChild.innerHTML != undefined
+                        @select_boxes.push(child.firstChild.innerHTML.substr(1))
+                @update()
+            )

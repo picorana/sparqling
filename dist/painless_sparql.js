@@ -11035,19 +11035,20 @@ window.SparqlText = (function() {
     }
 
     update() {
-      var count, elem, f_string, filter, filter_button, init_string, j, k, l, len, len1, len2, link, query_line, ref, ref1, s_line, select_div, select_div_f;
+      var containers, count, drake, elem, f_string, filter, filter_button, init_string, j, k, l, len, len1, len2, link, query_line, ref, ref1, ref2, s_line, select_div, select_div_f;
       div_sparql_text.innerHTML = "";
       init_string = document.createElement('div');
       init_string.className = "init_string";
       s_line = document.createElement('div');
       s_line.className = "s_line";
-      if (select_boxes.length === 0) {
+      if (this.select_boxes.length === 0) {
         s_line.innerHTML = "&nbsp;*";
       } else {
         s_line.append(this.create_tab());
         count = 0;
-        for (j = 0, len = select_boxes.length; j < len; j++) {
-          elem = select_boxes[j];
+        ref = this.select_boxes;
+        for (j = 0, len = ref.length; j < len; j++) {
+          elem = ref[j];
           if (this.cy.getElementById(elem).id() !== void 0) {
             s_line.append(this.create_highlighting_box(this.cy.getElementById(elem)));
             count += 1;
@@ -11063,15 +11064,15 @@ window.SparqlText = (function() {
       select_div_f.innerHTML = " where {";
       init_string.append(select_div_f);
       div_sparql_text.append(init_string);
-      ref = this.links;
-      for (k = 0, len1 = ref.length; k < len1; k++) {
-        link = ref[k];
+      ref1 = this.links;
+      for (k = 0, len1 = ref1.length; k < len1; k++) {
+        link = ref1[k];
         query_line = new window.QueryLine(link, this);
         div_sparql_text.append(query_line.to_html());
       }
-      ref1 = this.filters;
-      for (l = 0, len2 = ref1.length; l < len2; l++) {
-        filter = ref1[l];
+      ref2 = this.filters;
+      for (l = 0, len2 = ref2.length; l < len2; l++) {
+        filter = ref2[l];
         div_sparql_text.append(filter.to_html());
       }
       f_string = document.createElement('div');
@@ -11086,13 +11087,37 @@ window.SparqlText = (function() {
         return this.add_filter();
       };
       div_sparql_text.append(filter_button);
-      return dragula([s_line, document.getElementsByClassName('q_line')[0], document.getElementsByClassName('void_box')[0]], {
+      containers = Array.prototype.slice.call(document.getElementsByClassName('q_line')).concat(Array.prototype.slice.call(document.getElementsByClassName('void_box'))).concat(s_line);
+      drake = dragula({
+        containers: containers,
+        copy: (el, source) => {
+          if (source.classList.contains('q_line')) {
+            return true;
+          } else {
+            return false;
+          }
+        },
         accepts: (el, target, source) => {
+          if (target.classList.contains('q_line') && source.classList.contains('q_line')) {
+            return false;
+          }
           if (target.classList.contains('void_box')) {
             target.innerHTML.replace('&nbsp;', '');
           }
           return true;
         }
+      });
+      return drake.on('drop', () => {
+        var child, len3, m, ref3;
+        this.select_boxes = [];
+        ref3 = s_line.children;
+        for (m = 0, len3 = ref3.length; m < len3; m++) {
+          child = ref3[m];
+          if (child.firstChild.innerHTML !== void 0) {
+            this.select_boxes.push(child.firstChild.innerHTML.substr(1));
+          }
+        }
+        return this.update();
       });
     }
 
