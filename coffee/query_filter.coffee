@@ -1,32 +1,52 @@
 class window.QueryFilter
 
 
-    constructor: (node) ->
+    constructor: (sparql_text, node) ->
         
-        @node = node
+        @node1 = node
+        @node2 = null
+
+        @sparql_text = sparql_text
 
         @conditions = []
         @conditions.push(@new_condition())
 
 
     new_condition: () =>
+
+        if @node1 != undefined and @node1 != null
+            @node1.addClass('filtered')
+        if @node2 != undefined and @node2 != null
+            @node2.addClass('filtered')
+
         d = document.createElement('div')
-        if @node != undefined
-            hl_box = new window.HlBox(@node)
+        d.style.display = 'flex'
+        if @node1 != undefined and @node1 != null
+            hl_box = new window.HlBox(@node1)
             d.appendChild(hl_box.to_html())
         else
-            v = new window.Void
+            v = new window.Void(@, 0)
             d.appendChild(v.to_html())
 
         operator = document.createElement('div')
         operator.innerHTML = ">="
         operator.style.marginLeft = '5px'
         operator.style.marginRight = '5px'
+        operator.contentEditable = 'true'
 
         d.appendChild(operator)
 
+        if @node2 != undefined and @node2 != null
+            hl_box = new window.HlBox(@node2)
+            d.appendChild(hl_box.to_html())
+        else
+            v = new window.Void(@, 1)
+            d.appendChild(v.to_html())
+
         value = document.createElement('div')
-        value.innerHTML = "100 ^^xsd:string"
+        value.style.marginLeft = '5px'
+        value.style.marginRight = '5px'
+        value.innerHTML = "^^xsd:string"
         value.contentEditable = 'true'
 
         d.appendChild(value)
@@ -46,7 +66,7 @@ class window.QueryFilter
         conditions_container = document.createElement('div')
         conditions_container.className = "filter_condition_container"
         for condition in @conditions
-            conditions_container.appendChild(condition)
+            conditions_container.appendChild(@new_condition())
         result_div.append(conditions_container)
 
         remove_button = document.createElement('div')
@@ -57,7 +77,7 @@ class window.QueryFilter
         remove_button.style.visibility = 'hidden'
         remove_button.style.display = 'inline-block'
         remove_button.onclick = () =>
-            console.log 'click'
+            @delete()
         result_div.append(remove_button)
 
         result_div.onmouseover = () =>
@@ -67,3 +87,10 @@ class window.QueryFilter
             
 
         return result_div
+
+
+    delete: =>
+        index = @sparql_text.filters.indexOf(@)
+        @sparql_text.filters.splice(index, 1)
+        @sparql_text.update()
+

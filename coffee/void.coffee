@@ -1,10 +1,13 @@
 class window.Void
     
 
-    constructor: ->
+    constructor: (parent, position) ->
         @div = document.createElement('div')
         @div.className = 'void_box'
-        @div.innerHTML = "<div style='display:flex'>&nbsp;&nbsp;&nbsp;</div>"
+        @div.contentEditable = true
+        $(@div).data('parent', parent)
+        @position = position
+        @div.dataset.filter_position = position
 
     to_html: =>
         return @div

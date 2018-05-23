@@ -184,6 +184,13 @@ class window.PainlessUtils
                     'border-width' : '20px'
                     'border-style' : 'solid'
                 })
+            .selector('node.filtered')
+                .style({
+                    'border-color' : '#ff0000'
+                    'border-opacity' : '1'
+                    'border-width' : '20px'
+                    'border-style' : 'double'
+                })
             .selector('node:selected')
                 .style({
                     'border-color' : '#daa'

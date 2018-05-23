@@ -50,6 +50,8 @@ class window.PainlessSparql
         document.getElementById('tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
         document.getElementById('tools').style.transitionDuration = '0.1s'
         document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+
+
         @cy.resize()
 
         slider = document.createElement("div")

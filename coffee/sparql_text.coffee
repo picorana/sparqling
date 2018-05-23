@@ -138,7 +138,7 @@ class window.SparqlText
 
 
     add_filter: (node) =>
-        @filters.push(new window.QueryFilter(node))
+        @filters.push(new window.QueryFilter(@, node))
         @update()
 
 
@@ -214,7 +214,17 @@ class window.SparqlText
                 })
 
         drake.on('drop', 
-            () => 
+            (el, target) => 
+                if target.classList.contains('void_box')
+                    if target.dataset.filter_position == '0'
+                        $(target).data('parent').node1 = @cy.getElementById(el.firstChild.dataset.node_id)
+                        $(target).data('parent').conditions = []
+                        $(target).data('parent').conditions.push($(target).data('parent').new_condition())
+                    else if target.dataset.filter_position == '1'
+                        $(target).data('parent').node2 = @cy.getElementById(el.firstChild.dataset.node_id)
+                        $(target).data('parent').conditions = []
+                        $(target).data('parent').conditions.push($(target).data('parent').new_condition())
+
                 @select_boxes = []
                 for child in s_line.children
                     if child.firstChild.innerHTML != undefined
