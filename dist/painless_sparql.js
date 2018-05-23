@@ -6772,6 +6772,289 @@ window.HlBox = class HlBox {
   return SimpleScrollbar;
 });
 
+window.PainlessContextMenu = class PainlessContextMenu {
+  constructor(cy, context) {
+    this.init = this.init.bind(this);
+    this.rename_const = this.rename_const.bind(this);
+    this.rename_var = this.rename_var.bind(this);
+    this.context = context;
+    this.cy = cy;
+    this.init();
+  }
+
+  init() {
+    var node_attr_range_menu, node_concept_menu, node_constant_object_menu, node_constant_value_menu, node_link_attr_context_menu, node_link_context_menu, node_variable_context_menu;
+    node_variable_context_menu = {
+      selector: '.node-variable-full-options',
+      commands: [
+        {
+          content: 'delete node',
+          select: (ele) => {
+            var i,
+        j,
+        len,
+        len1,
+        link,
+        ref,
+        to_remove;
+            to_remove = [];
+            ref = ele.data('links');
+            for (i = 0, len = ref.length; i < len; i++) {
+              link = ref[i];
+              if (link !== null && link !== void 0) {
+                to_remove.push(link);
+              }
+            }
+            for (j = 0, len1 = to_remove.length; j < len1; j++) {
+              link = to_remove[j];
+              link.delete();
+            }
+            return this.cy.remove(ele);
+          }
+        },
+        {
+          content: 'center view',
+          select: (ele) => {
+            return this.context.center_view(ele);
+          }
+        },
+        {
+          content: 'add node to select statement',
+          select: (ele) => {
+            return this.context.add_to_select(ele.id());
+          }
+        },
+        {
+          content: 'rename node',
+          select: (ele) => {
+            return this.rename_var(ele);
+          }
+        },
+        {
+          content: 'filter',
+          select: (ele) => {
+            return this.context.sparql_text.add_filter(ele);
+          }
+        }
+      ]
+    };
+    node_link_context_menu = {
+      selector: '.node-role',
+      commands: [
+        {
+          content: 'reverse',
+          select: (ele) => {
+            console.log(ele.data('links'));
+            return ele.data('links')[0].reverse();
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_link_attr_context_menu = {
+      selector: '.node-attribute',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_attr_range_menu = {
+      selector: '.attr-range',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        },
+        {
+          content: 'transform into constant [object]',
+          select: (ele) => {
+            ele.data('color',
+        tinycolor(ele.data('color')).desaturate(50).toString());
+            ele.data('label',
+        'const[o]');
+            return ele.classes('node-constant-object');
+          }
+        },
+        {
+          content: 'transform into constant [value]',
+          select: (ele) => {
+            ele.data('color',
+        tinycolor(ele.data('color')).desaturate(50).toString());
+            ele.data('label',
+        'const[v]');
+            return ele.classes('node-constant-value');
+          }
+        }
+      ]
+    };
+    node_concept_menu = {
+      selector: '.node-concept',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_constant_value_menu = {
+      selector: '.node-constant-value',
+      commands: [
+        {
+          content: 'define value',
+          select: (ele) => {
+            return this.rename_const(ele);
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_constant_object_menu = {
+      selector: '.node-constant-object',
+      commands: [
+        {
+          content: 'define value',
+          select: (ele) => {
+            return this.rename_const(ele);
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    this.cy.cxtmenu(node_variable_context_menu);
+    this.cy.cxtmenu(node_link_context_menu);
+    this.cy.cxtmenu(node_link_attr_context_menu);
+    this.cy.cxtmenu(node_concept_menu);
+    this.cy.cxtmenu(node_constant_value_menu);
+    return this.cy.cxtmenu(node_attr_range_menu);
+  }
+
+  rename_const(ele) {
+    var container, div, keypresshandler, outclickhandler, prevlabel;
+    prevlabel = ele.data('label');
+    ele.data('label', '');
+    container = document.createElement(div);
+    div = document.createElement('div');
+    div.innerHTML = ele.data('label').slice(1);
+    div.style.display = 'inline-block';
+    outclickhandler = (event) => {
+      if (event.target !== div) {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    keypresshandler = (event) => {
+      if (event.key === 'Enter') {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    document.addEventListener('click', outclickhandler);
+    document.addEventListener('keypress', keypresshandler);
+    div.setAttribute('contenteditable', true);
+    container.appendChild(div);
+    container.style.position = "absolute";
+    container.id = "rename_div";
+    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
+    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
+    container.style.backgroundColor = ele.data('color');
+    container.style.fontSize = 'xx-large';
+    container.style.color = '#fdf6e3';
+    container.style.borderRadius = '100px';
+    container.style.fontFamily = 'Courier New';
+    container.style.padding = '2px';
+    container.style.textAlign = 'center';
+    document.body.appendChild(container);
+    return div.focus();
+  }
+
+  rename_var(ele) {
+    var container, div, keypresshandler, outclickhandler, prevlabel, question_mark;
+    prevlabel = ele.data('label').slice(1);
+    ele.data('label', '');
+    container = document.createElement(div);
+    question_mark = document.createElement('div');
+    question_mark.innerHTML = '?';
+    question_mark.style.display = 'inline-block';
+    container.appendChild(question_mark);
+    div = document.createElement('div');
+    div.innerHTML = ele.data('label').slice(1);
+    div.style.display = 'inline-block';
+    outclickhandler = (event) => {
+      if (event.target !== div) {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', '?' + div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    keypresshandler = (event) => {
+      if (event.key === 'Enter') {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', '?' + div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    document.addEventListener('click', outclickhandler);
+    document.addEventListener('keypress', keypresshandler);
+    div.setAttribute('contenteditable', true);
+    container.appendChild(div);
+    container.style.position = "absolute";
+    container.id = "rename_div";
+    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
+    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
+    container.style.backgroundColor = ele.data('color');
+    container.style.fontSize = 'xx-large';
+    container.style.color = '#fdf6e3';
+    container.style.borderRadius = '100px';
+    container.style.fontFamily = 'Courier New';
+    container.style.padding = '2px';
+    container.style.textAlign = 'center';
+    document.body.appendChild(container);
+    return div.focus();
+  }
+
+};
+
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -7535,289 +7818,6 @@ module.exports = register;
 /***/ })
 /******/ ]);
 });
-window.PainlessContextMenu = class PainlessContextMenu {
-  constructor(cy, context) {
-    this.init = this.init.bind(this);
-    this.rename_const = this.rename_const.bind(this);
-    this.rename_var = this.rename_var.bind(this);
-    this.context = context;
-    this.cy = cy;
-    this.init();
-  }
-
-  init() {
-    var node_attr_range_menu, node_concept_menu, node_constant_object_menu, node_constant_value_menu, node_link_attr_context_menu, node_link_context_menu, node_variable_context_menu;
-    node_variable_context_menu = {
-      selector: '.node-variable-full-options',
-      commands: [
-        {
-          content: 'delete node',
-          select: (ele) => {
-            var i,
-        j,
-        len,
-        len1,
-        link,
-        ref,
-        to_remove;
-            to_remove = [];
-            ref = ele.data('links');
-            for (i = 0, len = ref.length; i < len; i++) {
-              link = ref[i];
-              if (link !== null && link !== void 0) {
-                to_remove.push(link);
-              }
-            }
-            for (j = 0, len1 = to_remove.length; j < len1; j++) {
-              link = to_remove[j];
-              link.delete();
-            }
-            return this.cy.remove(ele);
-          }
-        },
-        {
-          content: 'center view',
-          select: (ele) => {
-            return this.context.center_view(ele);
-          }
-        },
-        {
-          content: 'add node to select statement',
-          select: (ele) => {
-            return this.context.add_to_select(ele.id());
-          }
-        },
-        {
-          content: 'rename node',
-          select: (ele) => {
-            return this.rename_var(ele);
-          }
-        },
-        {
-          content: 'filter',
-          select: (ele) => {
-            return this.context.sparql_text.add_filter(ele);
-          }
-        }
-      ]
-    };
-    node_link_context_menu = {
-      selector: '.node-role',
-      commands: [
-        {
-          content: 'reverse',
-          select: (ele) => {
-            console.log(ele.data('links'));
-            return ele.data('links')[0].reverse();
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_link_attr_context_menu = {
-      selector: '.node-attribute',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_attr_range_menu = {
-      selector: '.attr-range',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        },
-        {
-          content: 'transform into constant [object]',
-          select: (ele) => {
-            ele.data('color',
-        tinycolor(ele.data('color')).desaturate(50).toString());
-            ele.data('label',
-        'const[o]');
-            return ele.classes('node-constant-object');
-          }
-        },
-        {
-          content: 'transform into constant [value]',
-          select: (ele) => {
-            ele.data('color',
-        tinycolor(ele.data('color')).desaturate(50).toString());
-            ele.data('label',
-        'const[v]');
-            return ele.classes('node-constant-value');
-          }
-        }
-      ]
-    };
-    node_concept_menu = {
-      selector: '.node-concept',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_constant_value_menu = {
-      selector: '.node-constant-value',
-      commands: [
-        {
-          content: 'define value',
-          select: (ele) => {
-            return this.rename_const(ele);
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_constant_object_menu = {
-      selector: '.node-constant-object',
-      commands: [
-        {
-          content: 'define value',
-          select: (ele) => {
-            return this.rename_const(ele);
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    this.cy.cxtmenu(node_variable_context_menu);
-    this.cy.cxtmenu(node_link_context_menu);
-    this.cy.cxtmenu(node_link_attr_context_menu);
-    this.cy.cxtmenu(node_concept_menu);
-    this.cy.cxtmenu(node_constant_value_menu);
-    return this.cy.cxtmenu(node_attr_range_menu);
-  }
-
-  rename_const(ele) {
-    var container, div, keypresshandler, outclickhandler, prevlabel;
-    prevlabel = ele.data('label');
-    ele.data('label', '');
-    container = document.createElement(div);
-    div = document.createElement('div');
-    div.innerHTML = ele.data('label').slice(1);
-    div.style.display = 'inline-block';
-    outclickhandler = (event) => {
-      if (event.target !== div) {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    keypresshandler = (event) => {
-      if (event.key === 'Enter') {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    document.addEventListener('click', outclickhandler);
-    document.addEventListener('keypress', keypresshandler);
-    div.setAttribute('contenteditable', true);
-    container.appendChild(div);
-    container.style.position = "absolute";
-    container.id = "rename_div";
-    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
-    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
-    container.style.backgroundColor = ele.data('color');
-    container.style.fontSize = 'xx-large';
-    container.style.color = '#fdf6e3';
-    container.style.borderRadius = '100px';
-    container.style.fontFamily = 'Courier New';
-    container.style.padding = '2px';
-    container.style.textAlign = 'center';
-    document.body.appendChild(container);
-    return div.focus();
-  }
-
-  rename_var(ele) {
-    var container, div, keypresshandler, outclickhandler, prevlabel, question_mark;
-    prevlabel = ele.data('label').slice(1);
-    ele.data('label', '');
-    container = document.createElement(div);
-    question_mark = document.createElement('div');
-    question_mark.innerHTML = '?';
-    question_mark.style.display = 'inline-block';
-    container.appendChild(question_mark);
-    div = document.createElement('div');
-    div.innerHTML = ele.data('label').slice(1);
-    div.style.display = 'inline-block';
-    outclickhandler = (event) => {
-      if (event.target !== div) {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', '?' + div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    keypresshandler = (event) => {
-      if (event.key === 'Enter') {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', '?' + div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    document.addEventListener('click', outclickhandler);
-    document.addEventListener('keypress', keypresshandler);
-    div.setAttribute('contenteditable', true);
-    container.appendChild(div);
-    container.style.position = "absolute";
-    container.id = "rename_div";
-    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
-    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
-    container.style.backgroundColor = ele.data('color');
-    container.style.fontSize = 'xx-large';
-    container.style.color = '#fdf6e3';
-    container.style.borderRadius = '100px';
-    container.style.fontFamily = 'Courier New';
-    container.style.padding = '2px';
-    container.style.textAlign = 'center';
-    document.body.appendChild(container);
-    return div.focus();
-  }
-
-};
-
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // 2016-07-07, Brian Grinstead, MIT License
@@ -10555,8 +10555,10 @@ window.PainlessSparql = (function() {
       side_nav_container.id = "sidenav_container";
       side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 40) + "px";
       document.body.appendChild(side_nav_container);
-      document.getElementById('tools').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
-      document.getElementById('tools').style.transitionDuration = '0.1s';
+      if (document.getElementById('zoom_tools') !== void 0) {
+        document.getElementById('zoom_tools').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
+        document.getElementById('zoom_tools').style.transitionDuration = '0.1s';
+      }
       document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * document.documentElement.clientWidth / 100 + 50) + "px";
       this.cy.resize();
       slider = document.createElement("div");
