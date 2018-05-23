@@ -47,10 +47,11 @@ class window.PainlessSparql
 
         document.body.appendChild(side_nav_container)
 
-        if document.getElementById('zoom_tools') != undefined
+###        if document.getElementById('zoom_tools') != undefined
             document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
-            document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
-        document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+            document.getElementById('zoom_tools').style.transitionDuration = '0.1s'###
+        if document.getElementById('cy') != undefined
+            document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
 
 
         @cy.resize()
@@ -70,9 +71,11 @@ class window.PainlessSparql
 
             cur_sidenav_size = cur_sidenav_size + 25
 
-            document.getElementById('tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
-            document.getElementById('tools').style.transitionDuration = '0.1s'
-            document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+            if document.getElementById('zoom_tools') != undefined
+                document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
+                document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
+            if document.getElementById('cy') != undefined
+                document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
             @cy.resize()
         
             if cur_sidenav_size != 100
@@ -92,9 +95,11 @@ class window.PainlessSparql
         slider_button.onclick = () =>
             cur_sidenav_size = cur_sidenav_size - 25
 
-            document.getElementById('tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
-            document.getElementById('tools').style.transitionDuration = '0.1s'
-            document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+            if document.getElementById('zoom_tools') != undefined
+                document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
+                document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
+            if document.getElementById('cy') != undefined    
+                document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
             @cy.resize()
 
             side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
