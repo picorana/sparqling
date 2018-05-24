@@ -41,15 +41,15 @@ class window.PainlessSparql
 
     create_sidenav : =>
 
-        side_nav_container = document.createElement("div")
-        side_nav_container.id = "sidenav_container"
-        side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 40) + "px"
+        @side_nav_container = document.createElement("div")
+        @side_nav_container.id = "sidenav_container"
+        @side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 40) + "px"
 
-        document.body.appendChild(side_nav_container)
+        document.body.appendChild(@side_nav_container)
 
-###        if document.getElementById('zoom_tools') != undefined
+        if document.getElementById('zoom_tools') != undefined
             document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
-            document.getElementById('zoom_tools').style.transitionDuration = '0.1s'###
+            document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
         if document.getElementById('cy') != undefined
             document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
 
@@ -68,25 +68,9 @@ class window.PainlessSparql
         slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_left</i>'
         slider_button.className = 'slider_button'
         slider_button.onclick = () =>
-
             cur_sidenav_size = cur_sidenav_size + 25
-
-            if document.getElementById('zoom_tools') != undefined
-                document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
-                document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
-            if document.getElementById('cy') != undefined
-                document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
-            @cy.resize()
-        
-            if cur_sidenav_size != 100
-                side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
-                side_nav.style.width = cur_sidenav_size + '%'
-            else 
-                side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100) + "px"
-                side_nav.style.width =  (cur_sidenav_size*document.documentElement.clientWidth/100 - 30) + "px"
-            setTimeout(()=> 
-                @graph.cy.resize()
-            , 550)
+            @resize_navbar()
+            
         slider.appendChild(slider_button)
 
         slider_button = document.createElement('div')
@@ -94,19 +78,8 @@ class window.PainlessSparql
         slider_button.className = 'slider_button'
         slider_button.onclick = () =>
             cur_sidenav_size = cur_sidenav_size - 25
+            @resize_navbar()
 
-            if document.getElementById('zoom_tools') != undefined
-                document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
-                document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
-            if document.getElementById('cy') != undefined    
-                document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
-            @cy.resize()
-
-            side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
-            side_nav.style.width = (cur_sidenav_size) + '%'
-            setTimeout(()=> 
-                @graph.cy.resize()
-            , 550)
         slider.appendChild(slider_button)
 
         button = document.createElement("div")
@@ -118,23 +91,46 @@ class window.PainlessSparql
         button.onclick = () => @add_to_query()
         slider.appendChild(button);
 
-        side_nav = document.createElement("div");
-        side_nav.id = "sidenav";
-        side_nav.className = "sidenav";
-        side_nav.style.display = 'inline-block'
-        side_nav.style.width = cur_sidenav_size + '%'
-        side_nav_container.appendChild(side_nav);
+        @side_nav = document.createElement("div");
+        @side_nav.id = "sidenav";
+        @side_nav.className = "sidenav";
+        @side_nav.style.display = 'inline-block'
+        @side_nav.style.width = cur_sidenav_size + '%'
+        @side_nav_container.appendChild(@side_nav);
 
         sparql_textbox = document.createElement("div");
         sparql_textbox.id = "sparql_textbox";
         sparql_textbox.innerHTML = "sparql_query_here";
-        side_nav.appendChild(sparql_textbox);
+        @side_nav.appendChild(sparql_textbox);
 
         @query_canvas = document.createElement("div");
         @query_canvas.id = "query_canvas";
-        side_nav.appendChild(@query_canvas)
+        @side_nav.appendChild(@query_canvas)
 
         @graph = new PainlessGraph(@query_canvas)
+
+
+    resize_navbar: =>
+
+        console.log 'resize_navbar'
+
+        if document.getElementById('zoom_tools') != undefined
+            document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
+            document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
+        if document.getElementById('cy') != undefined
+            document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+        @cy.resize()
+    
+        if cur_sidenav_size != 100
+            @side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
+            @side_nav.style.width = cur_sidenav_size + '%'
+        else 
+            @side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100) + "px"
+            @side_nav.style.width =  (cur_sidenav_size*document.documentElement.clientWidth/100 - 30) + "px"
+        setTimeout(()=> 
+            @graph.cy.resize()
+        , 550)
+
 
     open_nav : -> 
         document.getElementById("sidenav").style.width = "50%";
@@ -167,6 +163,7 @@ class window.PainlessSparql
 
     add_event_listener : ->
         document.onkeypress = @onkeypress_handler
+        window.addEventListener('resize', () => @resize_navbar())
 
         @cy.on('tap', 
             (event) => 
