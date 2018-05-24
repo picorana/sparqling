@@ -56,3 +56,5 @@ The project is developed in `coffeescript`, and the source files are contained i
 ## Disclaimer 
 Based on [GrapholScape](https://github.com/gianluca-pepe/GrapholScape) by [gianluca-pepe](https://github.com/gianluca-pepe).   
 Developed with [cytoscape.js](http://js.cytoscape.org) in [coffeescript](http://coffeescript.org)
+
+Supported by [OBDA Systems](https://www.obdasystems.com).
