@@ -10633,18 +10633,18 @@ window.PainlessSparql = (function() {
     }
 
     resize_navbar() {
-      if (document.getElementById('center_button') !== void 0) {
+      if (document.getElementById('center_button') !== void 0 && document.getElementById('center_button') !== null) {
         document.getElementById('center_button').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
         document.getElementById('center_button').style.transitionDuration = '0.1s';
       }
-      if (document.getElementById('zoom_tools') !== void 0) {
+      if (document.getElementById('zoom_tools') !== void 0 && document.getElementById('zoom_tools') !== null) {
         document.getElementById('zoom_tools').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
         document.getElementById('zoom_tools').style.transitionDuration = '0.1s';
       }
-      if (document.getElementById('cy') !== void 0) {
+      if (document.getElementById('cy') !== void 0 && document.getElementById('cy') !== null) {
         document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * document.documentElement.clientWidth / 100 + 50) + "px";
       }
-      if (document.getElementById('owl_translator') !== void 0) {
+      if (document.getElementById('owl_translator') !== void 0 && document.getElementById('owl_translator') !== null) {
         document.getElementById('owl_translator').style.transitionDuration = '0.1s';
         document.getElementById('owl_translator').style.left = (100 - cur_sidenav_size) / 2 + "%";
         if (cur_sidenav_size > 50) {
@@ -10653,7 +10653,7 @@ window.PainlessSparql = (function() {
           document.getElementById('owl_translator').style.display = 'block';
         }
       }
-      if (document.getElementById('explorer') !== void 0) {
+      if (document.getElementById('explorer') !== void 0 && document.getElementById('explorer') !== null) {
         document.getElementById('explorer').style.transitionDuration = '0.1s';
         document.getElementById('explorer').style.left = (100 - cur_sidenav_size) / 2 + "%";
         if (cur_sidenav_size > 50) {
@@ -10662,7 +10662,7 @@ window.PainlessSparql = (function() {
           document.getElementById('explorer').style.display = 'block';
         }
       }
-      if (document.getElementById('details') !== void 0) {
+      if (document.getElementById('details') !== void 0 && document.getElementById('details') !== null) {
         document.getElementById('details').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 60) + "px";
         document.getElementById('details').style.transitionDuration = '0.1s';
         if (cur_sidenav_size > 25) {

@@ -115,17 +115,17 @@ class window.PainlessSparql
 
     resize_navbar: =>
 
-        if document.getElementById('center_button') != undefined
+        if document.getElementById('center_button') != undefined and document.getElementById('center_button') != null
             document.getElementById('center_button').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
             document.getElementById('center_button').style.transitionDuration = '0.1s'
-        if document.getElementById('zoom_tools') != undefined
+        if document.getElementById('zoom_tools') != undefined and document.getElementById('zoom_tools') != null
             document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
             document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
         
-        if document.getElementById('cy') != undefined
+        if document.getElementById('cy') != undefined and document.getElementById('cy') != null
             document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
 
-        if document.getElementById('owl_translator') != undefined
+        if document.getElementById('owl_translator') != undefined and document.getElementById('owl_translator') != null
             document.getElementById('owl_translator').style.transitionDuration = '0.1s'
             document.getElementById('owl_translator').style.left = (100 - cur_sidenav_size)/2 + "%"
             if cur_sidenav_size > 50
@@ -133,7 +133,7 @@ class window.PainlessSparql
             else 
                 document.getElementById('owl_translator').style.display = 'block'
 
-        if document.getElementById('explorer') != undefined
+        if document.getElementById('explorer') != undefined and document.getElementById('explorer') != null
             document.getElementById('explorer').style.transitionDuration = '0.1s'
             document.getElementById('explorer').style.left = (100 - cur_sidenav_size)/2 + "%"
             if cur_sidenav_size > 50
@@ -141,7 +141,7 @@ class window.PainlessSparql
             else 
                 document.getElementById('explorer').style.display = 'block'
 
-        if document.getElementById('details') != undefined
+        if document.getElementById('details') != undefined and document.getElementById('details') != null
             document.getElementById('details').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 60) + "px"
             document.getElementById('details').style.transitionDuration = '0.1s'
             if cur_sidenav_size > 25
