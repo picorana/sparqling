@@ -7,7 +7,6 @@ class window.PainlessLink
     constructor: (context, cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) ->
         @cy         = cy
         @context    = context
-        console.log @context
 
         @link_name  = link_name
         @link_type  = link_type
@@ -107,6 +106,11 @@ class window.PainlessLink
         @context.links.splice(index, 1)
         @context.sparql_text.update()
 
+        for node in @context.context.cy.nodes()
+            if node.data('label') == @link_name
+                node.style('border-color', 'black')
+                node.style('border-width', '1px')
+
         if @node_link != null and @node_link != undefined
             @cy.remove(@node_link)
         if @node_concept != null and @node_concept != undefined
@@ -119,13 +123,10 @@ class window.PainlessLink
                 index = node_var.data('links').indexOf(@)
                 node_var.data('links').splice(index, 1)
                 if node_var.data('links').length == 0
-                    console.log @context.sparql_text.select_boxes
                     for i in [0 ... @context.sparql_text.select_boxes.length]
                         if @context.sparql_text.select_boxes[i] == node_var.id()
                             @context.sparql_text.select_boxes.splice(i, 1)
-                    @cy.remove(node_var)
-
-                    
+                    @cy.remove(node_var)          
 
         @context.sparql_text.update()
 

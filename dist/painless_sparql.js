@@ -6772,6 +6772,289 @@ window.HlBox = class HlBox {
   return SimpleScrollbar;
 });
 
+window.PainlessContextMenu = class PainlessContextMenu {
+  constructor(cy, context) {
+    this.init = this.init.bind(this);
+    this.rename_const = this.rename_const.bind(this);
+    this.rename_var = this.rename_var.bind(this);
+    this.context = context;
+    this.cy = cy;
+    this.init();
+  }
+
+  init() {
+    var node_attr_range_menu, node_concept_menu, node_constant_object_menu, node_constant_value_menu, node_link_attr_context_menu, node_link_context_menu, node_variable_context_menu;
+    node_variable_context_menu = {
+      selector: '.node-variable-full-options',
+      commands: [
+        {
+          content: 'delete node',
+          select: (ele) => {
+            var i,
+        j,
+        len,
+        len1,
+        link,
+        ref,
+        to_remove;
+            to_remove = [];
+            ref = ele.data('links');
+            for (i = 0, len = ref.length; i < len; i++) {
+              link = ref[i];
+              if (link !== null && link !== void 0) {
+                to_remove.push(link);
+              }
+            }
+            for (j = 0, len1 = to_remove.length; j < len1; j++) {
+              link = to_remove[j];
+              link.delete();
+            }
+            return this.cy.remove(ele);
+          }
+        },
+        {
+          content: 'center view',
+          select: (ele) => {
+            return this.context.center_view(ele);
+          }
+        },
+        {
+          content: 'add node to select statement',
+          select: (ele) => {
+            return this.context.add_to_select(ele.id());
+          }
+        },
+        {
+          content: 'rename node',
+          select: (ele) => {
+            return this.rename_var(ele);
+          }
+        },
+        {
+          content: 'filter',
+          select: (ele) => {
+            return this.context.sparql_text.add_filter(ele);
+          }
+        }
+      ]
+    };
+    node_link_context_menu = {
+      selector: '.node-role',
+      commands: [
+        {
+          content: 'reverse',
+          select: (ele) => {
+            console.log(ele.data('links'));
+            return ele.data('links')[0].reverse();
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_link_attr_context_menu = {
+      selector: '.node-attribute',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_attr_range_menu = {
+      selector: '.attr-range',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        },
+        {
+          content: 'transform into constant [object]',
+          select: (ele) => {
+            ele.data('color',
+        tinycolor(ele.data('color')).desaturate(50).toString());
+            ele.data('label',
+        'const[o]');
+            return ele.classes('node-constant-object');
+          }
+        },
+        {
+          content: 'transform into constant [value]',
+          select: (ele) => {
+            ele.data('color',
+        tinycolor(ele.data('color')).desaturate(50).toString());
+            ele.data('label',
+        'const[v]');
+            return ele.classes('node-constant-value');
+          }
+        }
+      ]
+    };
+    node_concept_menu = {
+      selector: '.node-concept',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_constant_value_menu = {
+      selector: '.node-constant-value',
+      commands: [
+        {
+          content: 'define value',
+          select: (ele) => {
+            return this.rename_const(ele);
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_constant_object_menu = {
+      selector: '.node-constant-object',
+      commands: [
+        {
+          content: 'define value',
+          select: (ele) => {
+            return this.rename_const(ele);
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    this.cy.cxtmenu(node_variable_context_menu);
+    this.cy.cxtmenu(node_link_context_menu);
+    this.cy.cxtmenu(node_link_attr_context_menu);
+    this.cy.cxtmenu(node_concept_menu);
+    this.cy.cxtmenu(node_constant_value_menu);
+    return this.cy.cxtmenu(node_attr_range_menu);
+  }
+
+  rename_const(ele) {
+    var container, div, keypresshandler, outclickhandler, prevlabel;
+    prevlabel = ele.data('label');
+    ele.data('label', '');
+    container = document.createElement(div);
+    div = document.createElement('div');
+    div.innerHTML = ele.data('label').slice(1);
+    div.style.display = 'inline-block';
+    outclickhandler = (event) => {
+      if (event.target !== div) {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    keypresshandler = (event) => {
+      if (event.key === 'Enter') {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    document.addEventListener('click', outclickhandler);
+    document.addEventListener('keypress', keypresshandler);
+    div.setAttribute('contenteditable', true);
+    container.appendChild(div);
+    container.style.position = "absolute";
+    container.id = "rename_div";
+    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
+    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
+    container.style.backgroundColor = ele.data('color');
+    container.style.fontSize = 'xx-large';
+    container.style.color = '#fdf6e3';
+    container.style.borderRadius = '100px';
+    container.style.fontFamily = 'Courier New';
+    container.style.padding = '2px';
+    container.style.textAlign = 'center';
+    document.body.appendChild(container);
+    return div.focus();
+  }
+
+  rename_var(ele) {
+    var container, div, keypresshandler, outclickhandler, prevlabel, question_mark;
+    prevlabel = ele.data('label').slice(1);
+    ele.data('label', '');
+    container = document.createElement(div);
+    question_mark = document.createElement('div');
+    question_mark.innerHTML = '?';
+    question_mark.style.display = 'inline-block';
+    container.appendChild(question_mark);
+    div = document.createElement('div');
+    div.innerHTML = ele.data('label').slice(1);
+    div.style.display = 'inline-block';
+    outclickhandler = (event) => {
+      if (event.target !== div) {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', '?' + div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    keypresshandler = (event) => {
+      if (event.key === 'Enter') {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', '?' + div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    document.addEventListener('click', outclickhandler);
+    document.addEventListener('keypress', keypresshandler);
+    div.setAttribute('contenteditable', true);
+    container.appendChild(div);
+    container.style.position = "absolute";
+    container.id = "rename_div";
+    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
+    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
+    container.style.backgroundColor = ele.data('color');
+    container.style.fontSize = 'xx-large';
+    container.style.color = '#fdf6e3';
+    container.style.borderRadius = '100px';
+    container.style.fontFamily = 'Courier New';
+    container.style.padding = '2px';
+    container.style.textAlign = 'center';
+    document.body.appendChild(container);
+    return div.focus();
+  }
+
+};
+
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -7535,289 +7818,6 @@ module.exports = register;
 /***/ })
 /******/ ]);
 });
-window.PainlessContextMenu = class PainlessContextMenu {
-  constructor(cy, context) {
-    this.init = this.init.bind(this);
-    this.rename_const = this.rename_const.bind(this);
-    this.rename_var = this.rename_var.bind(this);
-    this.context = context;
-    this.cy = cy;
-    this.init();
-  }
-
-  init() {
-    var node_attr_range_menu, node_concept_menu, node_constant_object_menu, node_constant_value_menu, node_link_attr_context_menu, node_link_context_menu, node_variable_context_menu;
-    node_variable_context_menu = {
-      selector: '.node-variable-full-options',
-      commands: [
-        {
-          content: 'delete node',
-          select: (ele) => {
-            var i,
-        j,
-        len,
-        len1,
-        link,
-        ref,
-        to_remove;
-            to_remove = [];
-            ref = ele.data('links');
-            for (i = 0, len = ref.length; i < len; i++) {
-              link = ref[i];
-              if (link !== null && link !== void 0) {
-                to_remove.push(link);
-              }
-            }
-            for (j = 0, len1 = to_remove.length; j < len1; j++) {
-              link = to_remove[j];
-              link.delete();
-            }
-            return this.cy.remove(ele);
-          }
-        },
-        {
-          content: 'center view',
-          select: (ele) => {
-            return this.context.center_view(ele);
-          }
-        },
-        {
-          content: 'add node to select statement',
-          select: (ele) => {
-            return this.context.add_to_select(ele.id());
-          }
-        },
-        {
-          content: 'rename node',
-          select: (ele) => {
-            return this.rename_var(ele);
-          }
-        },
-        {
-          content: 'filter',
-          select: (ele) => {
-            return this.context.sparql_text.add_filter(ele);
-          }
-        }
-      ]
-    };
-    node_link_context_menu = {
-      selector: '.node-role',
-      commands: [
-        {
-          content: 'reverse',
-          select: (ele) => {
-            console.log(ele.data('links'));
-            return ele.data('links')[0].reverse();
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_link_attr_context_menu = {
-      selector: '.node-attribute',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_attr_range_menu = {
-      selector: '.attr-range',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        },
-        {
-          content: 'transform into constant [object]',
-          select: (ele) => {
-            ele.data('color',
-        tinycolor(ele.data('color')).desaturate(50).toString());
-            ele.data('label',
-        'const[o]');
-            return ele.classes('node-constant-object');
-          }
-        },
-        {
-          content: 'transform into constant [value]',
-          select: (ele) => {
-            ele.data('color',
-        tinycolor(ele.data('color')).desaturate(50).toString());
-            ele.data('label',
-        'const[v]');
-            return ele.classes('node-constant-value');
-          }
-        }
-      ]
-    };
-    node_concept_menu = {
-      selector: '.node-concept',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_constant_value_menu = {
-      selector: '.node-constant-value',
-      commands: [
-        {
-          content: 'define value',
-          select: (ele) => {
-            return this.rename_const(ele);
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_constant_object_menu = {
-      selector: '.node-constant-object',
-      commands: [
-        {
-          content: 'define value',
-          select: (ele) => {
-            return this.rename_const(ele);
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    this.cy.cxtmenu(node_variable_context_menu);
-    this.cy.cxtmenu(node_link_context_menu);
-    this.cy.cxtmenu(node_link_attr_context_menu);
-    this.cy.cxtmenu(node_concept_menu);
-    this.cy.cxtmenu(node_constant_value_menu);
-    return this.cy.cxtmenu(node_attr_range_menu);
-  }
-
-  rename_const(ele) {
-    var container, div, keypresshandler, outclickhandler, prevlabel;
-    prevlabel = ele.data('label');
-    ele.data('label', '');
-    container = document.createElement(div);
-    div = document.createElement('div');
-    div.innerHTML = ele.data('label').slice(1);
-    div.style.display = 'inline-block';
-    outclickhandler = (event) => {
-      if (event.target !== div) {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    keypresshandler = (event) => {
-      if (event.key === 'Enter') {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    document.addEventListener('click', outclickhandler);
-    document.addEventListener('keypress', keypresshandler);
-    div.setAttribute('contenteditable', true);
-    container.appendChild(div);
-    container.style.position = "absolute";
-    container.id = "rename_div";
-    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
-    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
-    container.style.backgroundColor = ele.data('color');
-    container.style.fontSize = 'xx-large';
-    container.style.color = '#fdf6e3';
-    container.style.borderRadius = '100px';
-    container.style.fontFamily = 'Courier New';
-    container.style.padding = '2px';
-    container.style.textAlign = 'center';
-    document.body.appendChild(container);
-    return div.focus();
-  }
-
-  rename_var(ele) {
-    var container, div, keypresshandler, outclickhandler, prevlabel, question_mark;
-    prevlabel = ele.data('label').slice(1);
-    ele.data('label', '');
-    container = document.createElement(div);
-    question_mark = document.createElement('div');
-    question_mark.innerHTML = '?';
-    question_mark.style.display = 'inline-block';
-    container.appendChild(question_mark);
-    div = document.createElement('div');
-    div.innerHTML = ele.data('label').slice(1);
-    div.style.display = 'inline-block';
-    outclickhandler = (event) => {
-      if (event.target !== div) {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', '?' + div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    keypresshandler = (event) => {
-      if (event.key === 'Enter') {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', '?' + div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    document.addEventListener('click', outclickhandler);
-    document.addEventListener('keypress', keypresshandler);
-    div.setAttribute('contenteditable', true);
-    container.appendChild(div);
-    container.style.position = "absolute";
-    container.id = "rename_div";
-    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
-    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
-    container.style.backgroundColor = ele.data('color');
-    container.style.fontSize = 'xx-large';
-    container.style.color = '#fdf6e3';
-    container.style.borderRadius = '100px';
-    container.style.fontFamily = 'Courier New';
-    container.style.padding = '2px';
-    container.style.textAlign = 'center';
-    document.body.appendChild(container);
-    return div.focus();
-  }
-
-};
-
 //_require cyto_style.coffee
 //_require sparql_text.coffee
 //_require painless_link.coffee 
@@ -7991,7 +7991,8 @@ window.PainlessGraph = (function() {
 
     add_link(link_name, link_type, datatype) {
       /** if a var node is selected, the link is added to the var node and one new var node is created*/
-      var link;
+      var i, len, link, node, ref;
+      ref = this.context.cy.nodes();
       /** adds a new link in the graph. 
           links that are not concepts (roles and attributes) add a new variable into the graph.
           links are always added to the selected variable in the graph, if there are no selected variables,   
@@ -8004,6 +8005,13 @@ window.PainlessGraph = (function() {
 
           TODO: use an enum to represent link types instead of hardcoded strings
       */
+      for (i = 0, len = ref.length; i < len; i++) {
+        node = ref[i];
+        if (node.data('label') === link_name) {
+          node.style('border-color', '#e38400');
+          node.style('border-width', '5px');
+        }
+      }
       this.save_state();
       if (link_type === 'concept') {
         if (this.cy.nodes(":selected").length > 0 && this.cy.nodes(":selected").hasClass('node-variable')) {
@@ -8136,7 +8144,6 @@ window.PainlessLink = (function() {
       this.create_concept = this.create_concept.bind(this);
       this.cy = cy;
       this.context = context;
-      console.log(this.context);
       this.link_name = link_name;
       this.link_type = link_type;
       this.node_var1 = node_var1;
@@ -8234,10 +8241,18 @@ window.PainlessLink = (function() {
     }
 
     delete() {
-      var i, index, j, k, len, node_var, ref, ref1;
+      var i, index, j, k, l, len, len1, node, node_var, ref, ref1, ref2;
       index = this.context.links.indexOf(this);
       this.context.links.splice(index, 1);
       this.context.sparql_text.update();
+      ref = this.context.context.cy.nodes();
+      for (j = 0, len = ref.length; j < len; j++) {
+        node = ref[j];
+        if (node.data('label') === this.link_name) {
+          node.style('border-color', 'black');
+          node.style('border-width', '1px');
+        }
+      }
       if (this.node_link !== null && this.node_link !== void 0) {
         this.cy.remove(this.node_link);
       }
@@ -8247,15 +8262,14 @@ window.PainlessLink = (function() {
       if (this.datatype_node !== null && this.datatype_node !== void 0) {
         this.cy.remove(this.datatype_node);
       }
-      ref = [this.node_var1, this.node_var2];
-      for (j = 0, len = ref.length; j < len; j++) {
-        node_var = ref[j];
+      ref1 = [this.node_var1, this.node_var2];
+      for (k = 0, len1 = ref1.length; k < len1; k++) {
+        node_var = ref1[k];
         if (node_var !== null && node_var !== void 0) {
           index = node_var.data('links').indexOf(this);
           node_var.data('links').splice(index, 1);
           if (node_var.data('links').length === 0) {
-            console.log(this.context.sparql_text.select_boxes);
-            for (i = k = 0, ref1 = this.context.sparql_text.select_boxes.length; (0 <= ref1 ? k < ref1 : k > ref1); i = 0 <= ref1 ? ++k : --k) {
+            for (i = l = 0, ref2 = this.context.sparql_text.select_boxes.length; (0 <= ref2 ? l < ref2 : l > ref2); i = 0 <= ref2 ? ++l : --l) {
               if (this.context.sparql_text.select_boxes[i] === node_var.id()) {
                 this.context.sparql_text.select_boxes.splice(i, 1);
               }
@@ -10614,7 +10628,7 @@ window.PainlessSparql = (function() {
       this.query_canvas = document.createElement("div");
       this.query_canvas.id = "query_canvas";
       this.side_nav.appendChild(this.query_canvas);
-      this.graph = new PainlessGraph(this.query_canvas);
+      this.graph = new PainlessGraph(this);
       return this.resize_navbar();
     }
 
@@ -10691,8 +10705,7 @@ window.PainlessSparql = (function() {
         return console.log(this.graph.cy.nodes(":selected").data('links'));
       } else if (event.key === "l") {
         this.graph.layout_index += 1;
-        this.graph.reshape();
-        return console.log(this.graph.layout);
+        return this.graph.reshape();
       } else if (event.keyCode === 46 || event.keyCode === 8 || event.keyCode === 127) {
         ref = this.graph.cy.nodes(":selected").data('links');
         results = [];

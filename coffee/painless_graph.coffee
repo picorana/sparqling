@@ -166,6 +166,12 @@ class window.PainlessGraph
 
             TODO: use an enum to represent link types instead of hardcoded strings
         ###
+
+        for node in @context.cy.nodes()
+            if node.data('label') == link_name
+                node.style('border-color', '#e38400')
+                node.style('border-width', '5px')
+
         @save_state()
         if link_type == 'concept'
             if @cy.nodes(":selected").length > 0 and @cy.nodes(":selected").hasClass('node-variable')

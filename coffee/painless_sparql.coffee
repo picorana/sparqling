@@ -20,6 +20,7 @@ class window.PainlessSparql
 
 
     add_to_query: =>
+
         selected_node = @cy.nodes(":selected")
         
         if selected_node.length == 0
@@ -107,7 +108,7 @@ class window.PainlessSparql
         @query_canvas.id = "query_canvas";
         @side_nav.appendChild(@query_canvas)
 
-        @graph = new PainlessGraph(@query_canvas)
+        @graph = new PainlessGraph(this)
 
         @resize_navbar()
 
@@ -184,7 +185,6 @@ class window.PainlessSparql
         else if event.key == "l"
             @graph.layout_index += 1
             @graph.reshape()
-            console.log @graph.layout
 
         else if event.keyCode == 46 or event.keyCode == 8 or event.keyCode == 127
             for link in @graph.cy.nodes(":selected").data('links')
