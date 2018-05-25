@@ -40,10 +40,10 @@ class window.PainlessMenu
 
         menu.append(@create_navigation_div())
 
-        menu.append(@create_div('<i class="material-icons">undo</i>',                 'menu_button', null, => @context.graph.undo()))
-        menu.append(@create_div('<i class="material-icons">filter_center_focus</i>',  'menu_button', null, => @context.graph.center_view()))
-        menu.append(@create_div('<i class="material-icons">file_copy</i>',            'menu_button', null, => @context.graph.copy_to_clipboard()))
-        menu.append(@create_div('<i class="material-icons">save</i>',                 'menu_button', null, => @context.graph.download()))
-        menu.append(@create_div('<i class="material-icons">open_in_browser</i>',      'menu_button', null, => @context.graph.load()))
-        menu.append(@create_div('<i class="material-icons">clear_all</i>',            'menu_button', null, => @context.graph.clear_all()))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">undo</i>',                 'menu_button', null, => @context.graph.undo()))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>',  'menu_button', null, => @context.graph.center_view()))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>',            'menu_button', null, => @context.graph.copy_to_clipboard()))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">save</i>',                 'menu_button', null, => @context.graph.download()))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',      'menu_button', null, => @context.graph.load()))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>',            'menu_button', null, => @context.graph.clear_all()))
 

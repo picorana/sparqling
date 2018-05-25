@@ -135,13 +135,18 @@ class window.PainlessGraph
 
         for link in node2.data('links')
             if link.link_type == 'concept'
-                links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
+                @links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
             else
+
                 if link.node_var1 == node2 and link.node_var2 == node2
-                    links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
+                    console.log 'case1'
+                    @links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
                 else if link.node_var1 == node2
-                    links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
-                else links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
+                    console.log 'case2'
+                    @links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
+                else 
+                    console.log 'case3'
+                    @links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
             
             link.delete()
 
