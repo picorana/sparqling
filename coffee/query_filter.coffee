@@ -91,6 +91,10 @@ class window.QueryFilter
 
     delete: =>
         index = @sparql_text.filters.indexOf(@)
+        if @node1 != undefined and @node1 != null
+            @node1.removeClass('filtered')
+        if @node2 != undefined and @node2 != null
+            @node2.removeClass('filtered')
         @sparql_text.filters.splice(index, 1)
         @sparql_text.update()
 

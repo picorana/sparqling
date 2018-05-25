@@ -6895,6 +6895,12 @@ window.PainlessContextMenu = class PainlessContextMenu {
         'const[v]');
             return ele.classes('node-constant-value');
           }
+        },
+        {
+          content: 'filter',
+          select: (ele) => {
+            return this.context.sparql_text.add_filter(ele);
+          }
         }
       ]
     };
@@ -10845,6 +10851,12 @@ window.QueryFilter = class QueryFilter {
   delete() {
     var index;
     index = this.sparql_text.filters.indexOf(this);
+    if (this.node1 !== void 0 && this.node1 !== null) {
+      this.node1.removeClass('filtered');
+    }
+    if (this.node2 !== void 0 && this.node2 !== null) {
+      this.node2.removeClass('filtered');
+    }
     this.sparql_text.filters.splice(index, 1);
     return this.sparql_text.update();
   }
@@ -11051,6 +11063,7 @@ window.SparqlText = (function() {
       minicross.dataset.node_id = st.dataset.node_id;
       minicross.style.visibility = 'hidden';
       minicross.onclick = ($) => {
+        console.log('a');
         return this.remove_from_select_boxes(minicross.dataset.node_id);
       };
       container.append(minicross);
@@ -11064,7 +11077,8 @@ window.SparqlText = (function() {
     }
 
     remove_from_select_boxes(node_id) {
-      select_boxes = select_boxes.filter(function(elem) {
+      console.log(this.select_boxes);
+      this.select_boxes = this.select_boxes.filter(function(elem) {
         return elem !== node_id;
       });
       return this.update();

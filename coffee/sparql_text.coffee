@@ -87,6 +87,7 @@ class window.SparqlText
         minicross.dataset.node_id = st.dataset.node_id
         minicross.style.visibility = 'hidden'
         minicross.onclick = ($) =>
+            console.log 'a'
             @remove_from_select_boxes(minicross.dataset.node_id)
         container.append(minicross)
         container.onmouseover = ($) ->
@@ -98,7 +99,8 @@ class window.SparqlText
 
 
     remove_from_select_boxes: (node_id) =>
-        select_boxes = select_boxes.filter((elem) -> return elem != node_id)
+        console.log @select_boxes
+        @select_boxes = @select_boxes.filter((elem) -> return elem != node_id)
         @update()
 
 

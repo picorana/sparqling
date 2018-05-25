@@ -61,6 +61,7 @@ class window.PainlessContextMenu
                         ele.data('label', 'const[v]')
                         ele.classes('node-constant-value')
                 }
+                {content: 'filter',                         select: (ele) => @context.sparql_text.add_filter(ele)}
             ]
         }
 
