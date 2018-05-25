@@ -6772,289 +6772,6 @@ window.HlBox = class HlBox {
   return SimpleScrollbar;
 });
 
-window.PainlessContextMenu = class PainlessContextMenu {
-  constructor(cy, context) {
-    this.init = this.init.bind(this);
-    this.rename_const = this.rename_const.bind(this);
-    this.rename_var = this.rename_var.bind(this);
-    this.context = context;
-    this.cy = cy;
-    this.init();
-  }
-
-  init() {
-    var node_attr_range_menu, node_concept_menu, node_constant_object_menu, node_constant_value_menu, node_link_attr_context_menu, node_link_context_menu, node_variable_context_menu;
-    node_variable_context_menu = {
-      selector: '.node-variable-full-options',
-      commands: [
-        {
-          content: 'delete node',
-          select: (ele) => {
-            var i,
-        j,
-        len,
-        len1,
-        link,
-        ref,
-        to_remove;
-            to_remove = [];
-            ref = ele.data('links');
-            for (i = 0, len = ref.length; i < len; i++) {
-              link = ref[i];
-              if (link !== null && link !== void 0) {
-                to_remove.push(link);
-              }
-            }
-            for (j = 0, len1 = to_remove.length; j < len1; j++) {
-              link = to_remove[j];
-              link.delete();
-            }
-            return this.cy.remove(ele);
-          }
-        },
-        {
-          content: 'center view',
-          select: (ele) => {
-            return this.context.center_view(ele);
-          }
-        },
-        {
-          content: 'add node to select statement',
-          select: (ele) => {
-            return this.context.add_to_select(ele.id());
-          }
-        },
-        {
-          content: 'rename node',
-          select: (ele) => {
-            return this.rename_var(ele);
-          }
-        },
-        {
-          content: 'filter',
-          select: (ele) => {
-            return this.context.sparql_text.add_filter(ele);
-          }
-        }
-      ]
-    };
-    node_link_context_menu = {
-      selector: '.node-role',
-      commands: [
-        {
-          content: 'reverse',
-          select: (ele) => {
-            console.log(ele.data('links'));
-            return ele.data('links')[0].reverse();
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_link_attr_context_menu = {
-      selector: '.node-attribute',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_attr_range_menu = {
-      selector: '.attr-range',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        },
-        {
-          content: 'transform into constant [object]',
-          select: (ele) => {
-            ele.data('color',
-        tinycolor(ele.data('color')).desaturate(50).toString());
-            ele.data('label',
-        'const[o]');
-            return ele.classes('node-constant-object');
-          }
-        },
-        {
-          content: 'transform into constant [value]',
-          select: (ele) => {
-            ele.data('color',
-        tinycolor(ele.data('color')).desaturate(50).toString());
-            ele.data('label',
-        'const[v]');
-            return ele.classes('node-constant-value');
-          }
-        }
-      ]
-    };
-    node_concept_menu = {
-      selector: '.node-concept',
-      commands: [
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_constant_value_menu = {
-      selector: '.node-constant-value',
-      commands: [
-        {
-          content: 'define value',
-          select: (ele) => {
-            return this.rename_const(ele);
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    node_constant_object_menu = {
-      selector: '.node-constant-object',
-      commands: [
-        {
-          content: 'define value',
-          select: (ele) => {
-            return this.rename_const(ele);
-          }
-        },
-        {
-          content: 'delete',
-          select: (ele) => {
-            return ele.data('links')[0].delete();
-          }
-        }
-      ]
-    };
-    this.cy.cxtmenu(node_variable_context_menu);
-    this.cy.cxtmenu(node_link_context_menu);
-    this.cy.cxtmenu(node_link_attr_context_menu);
-    this.cy.cxtmenu(node_concept_menu);
-    this.cy.cxtmenu(node_constant_value_menu);
-    return this.cy.cxtmenu(node_attr_range_menu);
-  }
-
-  rename_const(ele) {
-    var container, div, keypresshandler, outclickhandler, prevlabel;
-    prevlabel = ele.data('label');
-    ele.data('label', '');
-    container = document.createElement(div);
-    div = document.createElement('div');
-    div.innerHTML = ele.data('label').slice(1);
-    div.style.display = 'inline-block';
-    outclickhandler = (event) => {
-      if (event.target !== div) {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    keypresshandler = (event) => {
-      if (event.key === 'Enter') {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    document.addEventListener('click', outclickhandler);
-    document.addEventListener('keypress', keypresshandler);
-    div.setAttribute('contenteditable', true);
-    container.appendChild(div);
-    container.style.position = "absolute";
-    container.id = "rename_div";
-    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
-    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
-    container.style.backgroundColor = ele.data('color');
-    container.style.fontSize = 'xx-large';
-    container.style.color = '#fdf6e3';
-    container.style.borderRadius = '100px';
-    container.style.fontFamily = 'Courier New';
-    container.style.padding = '2px';
-    container.style.textAlign = 'center';
-    document.body.appendChild(container);
-    return div.focus();
-  }
-
-  rename_var(ele) {
-    var container, div, keypresshandler, outclickhandler, prevlabel, question_mark;
-    prevlabel = ele.data('label').slice(1);
-    ele.data('label', '');
-    container = document.createElement(div);
-    question_mark = document.createElement('div');
-    question_mark.innerHTML = '?';
-    question_mark.style.display = 'inline-block';
-    container.appendChild(question_mark);
-    div = document.createElement('div');
-    div.innerHTML = ele.data('label').slice(1);
-    div.style.display = 'inline-block';
-    outclickhandler = (event) => {
-      if (event.target !== div) {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', '?' + div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    keypresshandler = (event) => {
-      if (event.key === 'Enter') {
-        if (div.innerHTML === '') {
-          div.innerHTML = prevlabel;
-        }
-        ele.data('label', '?' + div.innerHTML);
-        container.parentNode.removeChild(container);
-        document.removeEventListener('click', outclickhandler);
-        return document.removeEventListener('keypress', keypresshandler);
-      }
-    };
-    document.addEventListener('click', outclickhandler);
-    document.addEventListener('keypress', keypresshandler);
-    div.setAttribute('contenteditable', true);
-    container.appendChild(div);
-    container.style.position = "absolute";
-    container.id = "rename_div";
-    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
-    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
-    container.style.backgroundColor = ele.data('color');
-    container.style.fontSize = 'xx-large';
-    container.style.color = '#fdf6e3';
-    container.style.borderRadius = '100px';
-    container.style.fontFamily = 'Courier New';
-    container.style.padding = '2px';
-    container.style.textAlign = 'center';
-    document.body.appendChild(container);
-    return div.focus();
-  }
-
-};
-
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -7818,6 +7535,289 @@ module.exports = register;
 /***/ })
 /******/ ]);
 });
+window.PainlessContextMenu = class PainlessContextMenu {
+  constructor(cy, context) {
+    this.init = this.init.bind(this);
+    this.rename_const = this.rename_const.bind(this);
+    this.rename_var = this.rename_var.bind(this);
+    this.context = context;
+    this.cy = cy;
+    this.init();
+  }
+
+  init() {
+    var node_attr_range_menu, node_concept_menu, node_constant_object_menu, node_constant_value_menu, node_link_attr_context_menu, node_link_context_menu, node_variable_context_menu;
+    node_variable_context_menu = {
+      selector: '.node-variable-full-options',
+      commands: [
+        {
+          content: 'delete node',
+          select: (ele) => {
+            var i,
+        j,
+        len,
+        len1,
+        link,
+        ref,
+        to_remove;
+            to_remove = [];
+            ref = ele.data('links');
+            for (i = 0, len = ref.length; i < len; i++) {
+              link = ref[i];
+              if (link !== null && link !== void 0) {
+                to_remove.push(link);
+              }
+            }
+            for (j = 0, len1 = to_remove.length; j < len1; j++) {
+              link = to_remove[j];
+              link.delete();
+            }
+            return this.cy.remove(ele);
+          }
+        },
+        {
+          content: 'center view',
+          select: (ele) => {
+            return this.context.center_view(ele);
+          }
+        },
+        {
+          content: 'add node to select statement',
+          select: (ele) => {
+            return this.context.add_to_select(ele.id());
+          }
+        },
+        {
+          content: 'rename node',
+          select: (ele) => {
+            return this.rename_var(ele);
+          }
+        },
+        {
+          content: 'filter',
+          select: (ele) => {
+            return this.context.sparql_text.add_filter(ele);
+          }
+        }
+      ]
+    };
+    node_link_context_menu = {
+      selector: '.node-role',
+      commands: [
+        {
+          content: 'reverse',
+          select: (ele) => {
+            console.log(ele.data('links'));
+            return ele.data('links')[0].reverse();
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_link_attr_context_menu = {
+      selector: '.node-attribute',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_attr_range_menu = {
+      selector: '.attr-range',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        },
+        {
+          content: 'transform into constant [object]',
+          select: (ele) => {
+            ele.data('color',
+        tinycolor(ele.data('color')).desaturate(50).toString());
+            ele.data('label',
+        'const[o]');
+            return ele.classes('node-constant-object');
+          }
+        },
+        {
+          content: 'transform into constant [value]',
+          select: (ele) => {
+            ele.data('color',
+        tinycolor(ele.data('color')).desaturate(50).toString());
+            ele.data('label',
+        'const[v]');
+            return ele.classes('node-constant-value');
+          }
+        }
+      ]
+    };
+    node_concept_menu = {
+      selector: '.node-concept',
+      commands: [
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_constant_value_menu = {
+      selector: '.node-constant-value',
+      commands: [
+        {
+          content: 'define value',
+          select: (ele) => {
+            return this.rename_const(ele);
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    node_constant_object_menu = {
+      selector: '.node-constant-object',
+      commands: [
+        {
+          content: 'define value',
+          select: (ele) => {
+            return this.rename_const(ele);
+          }
+        },
+        {
+          content: 'delete',
+          select: (ele) => {
+            return ele.data('links')[0].delete();
+          }
+        }
+      ]
+    };
+    this.cy.cxtmenu(node_variable_context_menu);
+    this.cy.cxtmenu(node_link_context_menu);
+    this.cy.cxtmenu(node_link_attr_context_menu);
+    this.cy.cxtmenu(node_concept_menu);
+    this.cy.cxtmenu(node_constant_value_menu);
+    return this.cy.cxtmenu(node_attr_range_menu);
+  }
+
+  rename_const(ele) {
+    var container, div, keypresshandler, outclickhandler, prevlabel;
+    prevlabel = ele.data('label');
+    ele.data('label', '');
+    container = document.createElement(div);
+    div = document.createElement('div');
+    div.innerHTML = ele.data('label').slice(1);
+    div.style.display = 'inline-block';
+    outclickhandler = (event) => {
+      if (event.target !== div) {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    keypresshandler = (event) => {
+      if (event.key === 'Enter') {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    document.addEventListener('click', outclickhandler);
+    document.addEventListener('keypress', keypresshandler);
+    div.setAttribute('contenteditable', true);
+    container.appendChild(div);
+    container.style.position = "absolute";
+    container.id = "rename_div";
+    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
+    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
+    container.style.backgroundColor = ele.data('color');
+    container.style.fontSize = 'xx-large';
+    container.style.color = '#fdf6e3';
+    container.style.borderRadius = '100px';
+    container.style.fontFamily = 'Courier New';
+    container.style.padding = '2px';
+    container.style.textAlign = 'center';
+    document.body.appendChild(container);
+    return div.focus();
+  }
+
+  rename_var(ele) {
+    var container, div, keypresshandler, outclickhandler, prevlabel, question_mark;
+    prevlabel = ele.data('label').slice(1);
+    ele.data('label', '');
+    container = document.createElement(div);
+    question_mark = document.createElement('div');
+    question_mark.innerHTML = '?';
+    question_mark.style.display = 'inline-block';
+    container.appendChild(question_mark);
+    div = document.createElement('div');
+    div.innerHTML = ele.data('label').slice(1);
+    div.style.display = 'inline-block';
+    outclickhandler = (event) => {
+      if (event.target !== div) {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', '?' + div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    keypresshandler = (event) => {
+      if (event.key === 'Enter') {
+        if (div.innerHTML === '') {
+          div.innerHTML = prevlabel;
+        }
+        ele.data('label', '?' + div.innerHTML);
+        container.parentNode.removeChild(container);
+        document.removeEventListener('click', outclickhandler);
+        return document.removeEventListener('keypress', keypresshandler);
+      }
+    };
+    document.addEventListener('click', outclickhandler);
+    document.addEventListener('keypress', keypresshandler);
+    div.setAttribute('contenteditable', true);
+    container.appendChild(div);
+    container.style.position = "absolute";
+    container.id = "rename_div";
+    container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth() / 4 + 'px';
+    container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth() / 4 + 'px';
+    container.style.backgroundColor = ele.data('color');
+    container.style.fontSize = 'xx-large';
+    container.style.color = '#fdf6e3';
+    container.style.borderRadius = '100px';
+    container.style.fontFamily = 'Courier New';
+    container.style.padding = '2px';
+    container.style.textAlign = 'center';
+    document.body.appendChild(container);
+    return div.focus();
+  }
+
+};
+
 //_require cyto_style.coffee
 //_require sparql_text.coffee
 //_require painless_link.coffee 
@@ -8320,75 +8320,6 @@ window.PainlessLink = (function() {
   return PainlessLink;
 
 }).call(this);
-
-window.PainlessMenu = class PainlessMenu {
-  constructor(context) {
-    this.change_size = this.change_size.bind(this);
-    this.create_navigation_div = this.create_navigation_div.bind(this);
-    this.init = this.init.bind(this);
-    this.context = context;
-    this.init();
-  }
-
-  change_size(query_canvas_size) {
-    this.context.query_canvas.style.height = query_canvas_size + "%";
-    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
-    return setTimeout(() => {
-      return this.context.graph.cy.resize();
-    }, 550);
-  }
-
-  create_div(innerHTML = null, className = null, id = null, onclick = null) {
-    var div;
-    div = document.createElement('div');
-    div.innerHTML = innerHTML;
-    div.className = className;
-    div.id = id;
-    div.onclick = onclick;
-    return div;
-  }
-
-  create_navigation_div() {
-    var nav_div;
-    nav_div = this.create_div(null, null, 'nav_div');
-    nav_div.append(this.create_div('▲', 'resize_button', null, () => {
-      return this.change_size(90);
-    }));
-    nav_div.append(this.create_div('≡', 'resize_button', null, () => {
-      return this.change_size(60);
-    }));
-    nav_div.append(this.create_div('▼', 'resize_button', null, () => {
-      return this.change_size(0);
-    }));
-    return nav_div;
-  }
-
-  init() {
-    var menu;
-    menu = this.create_div(null, null, 'painless_menu');
-    document.getElementById('sidenav').append(menu);
-    menu.append(this.create_navigation_div());
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">undo</i>', 'menu_button', null, () => {
-      return this.context.graph.undo();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>', 'menu_button', null, () => {
-      return this.context.graph.center_view();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>', 'menu_button', null, () => {
-      return this.context.graph.copy_to_clipboard();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">save</i>', 'menu_button', null, () => {
-      return this.context.graph.download();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>', 'menu_button', null, () => {
-      return this.context.graph.load();
-    }));
-    return menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>', 'menu_button', null, () => {
-      return this.context.graph.clear_all();
-    }));
-  }
-
-};
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.sparqljs = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
@@ -10500,6 +10431,75 @@ module.exports = {
 
 },{"./lib/SparqlGenerator":4,"./lib/SparqlParser":5}]},{},[6])(6)
 });
+window.PainlessMenu = class PainlessMenu {
+  constructor(context) {
+    this.change_size = this.change_size.bind(this);
+    this.create_navigation_div = this.create_navigation_div.bind(this);
+    this.init = this.init.bind(this);
+    this.context = context;
+    this.init();
+  }
+
+  change_size(query_canvas_size) {
+    this.context.query_canvas.style.height = query_canvas_size + "%";
+    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
+    return setTimeout(() => {
+      return this.context.graph.cy.resize();
+    }, 550);
+  }
+
+  create_div(innerHTML = null, className = null, id = null, onclick = null) {
+    var div;
+    div = document.createElement('div');
+    div.innerHTML = innerHTML;
+    div.className = className;
+    div.id = id;
+    div.onclick = onclick;
+    return div;
+  }
+
+  create_navigation_div() {
+    var nav_div;
+    nav_div = this.create_div(null, null, 'nav_div');
+    nav_div.append(this.create_div('▲', 'resize_button', null, () => {
+      return this.change_size(90);
+    }));
+    nav_div.append(this.create_div('≡', 'resize_button', null, () => {
+      return this.change_size(60);
+    }));
+    nav_div.append(this.create_div('▼', 'resize_button', null, () => {
+      return this.change_size(0);
+    }));
+    return nav_div;
+  }
+
+  init() {
+    var menu;
+    menu = this.create_div(null, null, 'painless_menu');
+    document.getElementById('sidenav').append(menu);
+    menu.append(this.create_navigation_div());
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">undo</i>', 'menu_button', null, () => {
+      return this.context.graph.undo();
+    }));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>', 'menu_button', null, () => {
+      return this.context.graph.center_view();
+    }));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>', 'menu_button', null, () => {
+      return this.context.graph.copy_to_clipboard();
+    }));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">save</i>', 'menu_button', null, () => {
+      return this.context.graph.download();
+    }));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>', 'menu_button', null, () => {
+      return this.context.graph.load();
+    }));
+    return menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>', 'menu_button', null, () => {
+      return this.context.graph.clear_all();
+    }));
+  }
+
+};
+
 window.PainlessSparql = (function() {
   var cur_sidenav_size, tappedBefore, tappedTimeout;
 
@@ -10560,11 +10560,11 @@ window.PainlessSparql = (function() {
       this.side_nav_container.id = "sidenav_container";
       this.side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 40) + "px";
       document.body.appendChild(this.side_nav_container);
-      if (document.getElementById('zoom_tools') !== void 0) {
+      if (document.getElementById('zoom_tools') !== void 0 && document.getElementById('zoom_tools') !== null) {
         document.getElementById('zoom_tools').style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
         document.getElementById('zoom_tools').style.transitionDuration = '0.1s';
       }
-      if (document.getElementById('cy') !== void 0) {
+      if (document.getElementById('cy') !== void 0 && document.getElementById('cy') !== null) {
         document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * document.documentElement.clientWidth / 100 + 50) + "px";
       }
       this.cy.resize();

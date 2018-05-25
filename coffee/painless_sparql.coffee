@@ -47,10 +47,10 @@ class window.PainlessSparql
 
         document.body.appendChild(@side_nav_container)
 
-        if document.getElementById('zoom_tools') != undefined
+        if document.getElementById('zoom_tools') != undefined and document.getElementById('zoom_tools') != null
             document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
             document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
-        if document.getElementById('cy') != undefined
+        if document.getElementById('cy') != undefined and document.getElementById('cy') != null
             document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
 
 
