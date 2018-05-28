@@ -6,13 +6,20 @@ class window.QueryFilter
         @node1 = node
         @node2 = null
 
+        @datatype = "^^xsd:string"
+        @operator_sym = ">="
+
         @sparql_text = sparql_text
 
         @conditions = []
         @conditions.push(@new_condition())
 
+        @slots = []
+
 
     new_condition: () =>
+
+        @slots = []
 
         if @node1 != undefined and @node1 != null
             @node1.addClass('filtered')
@@ -24,30 +31,36 @@ class window.QueryFilter
         if @node1 != undefined and @node1 != null
             hl_box = new window.HlBox(@node1)
             d.appendChild(hl_box.to_html())
+            @slots.push(hl_box)
         else
             v = new window.Void(@, 0)
             d.appendChild(v.to_html())
+            @slots.push(v)
 
         operator = document.createElement('div')
-        operator.innerHTML = ">="
+        operator.innerHTML = @operator_sym
         operator.style.marginLeft = '5px'
         operator.style.marginRight = '5px'
         operator.contentEditable = 'true'
+        operator.addEventListener('input', ()=> @operator_sym = operator.innerHTML)
 
         d.appendChild(operator)
 
         if @node2 != undefined and @node2 != null
             hl_box = new window.HlBox(@node2)
             d.appendChild(hl_box.to_html())
+            @slots.push(hl_box)
         else
             v = new window.Void(@, 1)
             d.appendChild(v.to_html())
+            @slots.push(v)
 
         value = document.createElement('div')
         value.style.marginLeft = '5px'
         value.style.marginRight = '5px'
-        value.innerHTML = "^^xsd:string"
+        value.innerHTML = @datatype
         value.contentEditable = 'true'
+        value.addEventListener('input', ()=> @datatype = value.innerHTML)
 
         d.appendChild(value)
 
@@ -55,9 +68,24 @@ class window.QueryFilter
 
 
     to_string: =>
-        if @node1 instanceof window.Void
-            console.log 'aaa'
+        result = 'filter ('
+        if @slots[0] instanceof HlBox
+            if @node1 != undefined and @node1 != null
+                result += ' ' + @node1.id()
+        else result += @slots[0].val
 
+        if @operator_sym != undefined and @operator_sym != null
+            result += ' ' + @operator_sym
+
+        if @slots[1] instanceof HlBox
+            if @node2 != undefined and @node2 != null
+                result += ' ' + @node2.id()
+        else result += @slots[1].val
+
+        if @datatype != undefined and @datatype != null
+            result += ' ' + @datatype
+
+        return result + ' )'
 
 
     to_html: =>
