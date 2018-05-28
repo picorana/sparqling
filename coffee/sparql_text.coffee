@@ -112,15 +112,13 @@ class window.SparqlText
         else for elem in select_boxes
             result += '?' + elem + ' '
         result += '\r\nwhere {'
-        for elem in document.getElementsByClassName('q_line')
+        for link in @links
             result += '\r\n'
-            count = 0
-            for d in elem.getElementsByClassName('highlighting_box')
-                result += d.innerHTML + ' '
-                count += 1
-                if count%3 == 0
-                    result += ' .\r\n'
-        result += '}'
+            result += link.to_string() 
+        for filter in @filters
+            result += '\r\n'
+            result += filter.to_string()
+        result += '\r\n}'
         console.log result
         return result
 

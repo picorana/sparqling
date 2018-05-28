@@ -122,10 +122,12 @@ class window.PainlessLink
 
                 index = node_var.data('links').indexOf(@)
                 node_var.data('links').splice(index, 1)
+
                 if node_var.data('links').length == 0
                     for i in [0 ... @context.sparql_text.select_boxes.length]
                         if @context.sparql_text.select_boxes[i] == node_var.id()
                             @context.sparql_text.select_boxes.splice(i, 1)
+
                     @cy.remove(node_var)          
 
         @context.sparql_text.update()
@@ -172,7 +174,13 @@ class window.PainlessLink
 
         @node_concept     = @create_node('node-concept')
         @create_edge(@node_var1, @node_concept, 'edge-concept')
-            
+
+
+    to_string: =>
+        if @link_type != 'concept' 
+            return @source.data('label') + ' ' + @link_name + ' ' + @target.data('label') + ' .'
+        else 
+            return @node_var1.data('label') + ' rdf:type ' + @node_concept.data('label') + ' .'
 
 
 

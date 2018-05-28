@@ -54,6 +54,11 @@ class window.QueryFilter
         return d
 
 
+    to_string: =>
+        if @node1 instanceof window.Void
+            console.log 'aaa'
+
+
 
     to_html: =>
         result_div = document.createElement('div')

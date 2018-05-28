@@ -6,10 +6,8 @@ class window.PainlessGraph
     ###* manages the graph visualization
         TODO: hardcoded collision distance should be in constants
     ###
-    
-    state_buffer    = null
-    links           = []
 
+    state_buffer    = null
 
     constructor: (context) ->
         ###*
@@ -19,7 +17,7 @@ class window.PainlessGraph
         @utils = new window.PainlessUtils()
         @context = context
 
-        @links = links
+        @links = []
 
         @layout_names   = ['cola', 'cose-bilkent', 'circle', 'cose', 'grid', 'breadthfirst', 'concentric']
         @layout_index   = 0
@@ -27,7 +25,7 @@ class window.PainlessGraph
         @init()
         @reshape()
        
-        @sparql_text = new SparqlText(@cy, links)
+        @sparql_text = new SparqlText(@cy, @links)
         @sparql_text.update()
 
         new window.PainlessContextMenu(@cy, this)
@@ -71,7 +69,15 @@ class window.PainlessGraph
 
     clear_all: =>
         for link in @links
-            link.delete()
+            try link.delete()
+            catch e then console.log e
+
+        @cy.remove(@cy.nodes())
+        @cy.remove(@cy.edges())
+
+        @links = []
+
+        @sparql_text.filters = []
         @sparql_text.update()
 
 
@@ -190,7 +196,8 @@ class window.PainlessGraph
                 @sparql_text.add_to_select(link.node_var1.id())
                 @sparql_text.add_to_select(link.node_var2.id())
 
-        links.push(link)
+        @links.push(link)
+        console.log @links
         @sparql_text.update()
         @reshape()
    

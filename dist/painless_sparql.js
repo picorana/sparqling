@@ -7831,7 +7831,7 @@ window.PainlessGraph = (function() {
   /** manages the graph visualization
       TODO: hardcoded collision distance should be in constants
   */
-  var links, state_buffer;
+  var state_buffer;
 
   class PainlessGraph {
     constructor(context) {
@@ -7850,12 +7850,12 @@ window.PainlessGraph = (function() {
       */
       this.utils = new window.PainlessUtils();
       this.context = context;
-      this.links = links;
+      this.links = [];
       this.layout_names = ['cola', 'cose-bilkent', 'circle', 'cose', 'grid', 'breadthfirst', 'concentric'];
       this.layout_index = 0;
       this.init();
       this.reshape();
-      this.sparql_text = new SparqlText(this.cy, links);
+      this.sparql_text = new SparqlText(this.cy, this.links);
       this.sparql_text.update();
       new window.PainlessContextMenu(this.cy, this);
     }
@@ -7898,12 +7898,21 @@ window.PainlessGraph = (function() {
     }
 
     clear_all() {
-      var i, len, link, ref;
+      var e, i, len, link, ref;
       ref = this.links;
       for (i = 0, len = ref.length; i < len; i++) {
         link = ref[i];
-        link.delete();
+        try {
+          link.delete();
+        } catch (error) {
+          e = error;
+          console.log(e);
+        }
       }
+      this.cy.remove(this.cy.nodes());
+      this.cy.remove(this.cy.edges());
+      this.links = [];
+      this.sparql_text.filters = [];
       return this.sparql_text.update();
     }
 
@@ -8037,7 +8046,8 @@ window.PainlessGraph = (function() {
           this.sparql_text.add_to_select(link.node_var2.id());
         }
       }
-      links.push(link);
+      this.links.push(link);
+      console.log(this.links);
       this.sparql_text.update();
       return this.reshape();
     }
@@ -8125,8 +8135,6 @@ window.PainlessGraph = (function() {
 
   state_buffer = null;
 
-  links = [];
-
   return PainlessGraph;
 
 }).call(this);
@@ -8148,6 +8156,7 @@ window.PainlessLink = (function() {
       this.delete = this.delete.bind(this);
       this.create_link = this.create_link.bind(this);
       this.create_concept = this.create_concept.bind(this);
+      this.to_string = this.to_string.bind(this);
       this.cy = cy;
       this.context = context;
       this.link_name = link_name;
@@ -8333,6 +8342,14 @@ window.PainlessLink = (function() {
       return this.create_edge(this.node_var1, this.node_concept, 'edge-concept');
     }
 
+    to_string() {
+      if (this.link_type !== 'concept') {
+        return this.source.data('label') + ' ' + this.link_name + ' ' + this.target.data('label') + ' .';
+      } else {
+        return this.node_var1.data('label') + ' rdf:type ' + this.node_concept.data('label') + ' .';
+      }
+    }
+
   };
 
   color_index = 0;
@@ -8340,6 +8357,75 @@ window.PainlessLink = (function() {
   return PainlessLink;
 
 }).call(this);
+
+window.PainlessMenu = class PainlessMenu {
+  constructor(context) {
+    this.change_size = this.change_size.bind(this);
+    this.create_navigation_div = this.create_navigation_div.bind(this);
+    this.init = this.init.bind(this);
+    this.context = context;
+    this.init();
+  }
+
+  change_size(query_canvas_size) {
+    this.context.query_canvas.style.height = query_canvas_size + "%";
+    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
+    return setTimeout(() => {
+      return this.context.graph.cy.resize();
+    }, 550);
+  }
+
+  create_div(innerHTML = null, className = null, id = null, onclick = null) {
+    var div;
+    div = document.createElement('div');
+    div.innerHTML = innerHTML;
+    div.className = className;
+    div.id = id;
+    div.onclick = onclick;
+    return div;
+  }
+
+  create_navigation_div() {
+    var nav_div;
+    nav_div = this.create_div(null, null, 'nav_div');
+    nav_div.append(this.create_div('▲', 'resize_button', null, () => {
+      return this.change_size(90);
+    }));
+    nav_div.append(this.create_div('≡', 'resize_button', null, () => {
+      return this.change_size(60);
+    }));
+    nav_div.append(this.create_div('▼', 'resize_button', null, () => {
+      return this.change_size(0);
+    }));
+    return nav_div;
+  }
+
+  init() {
+    var menu;
+    menu = this.create_div(null, null, 'painless_menu');
+    document.getElementById('sidenav').append(menu);
+    menu.append(this.create_navigation_div());
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">undo</i>', 'menu_button', null, () => {
+      return this.context.graph.undo();
+    }));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>', 'menu_button', null, () => {
+      return this.context.graph.center_view();
+    }));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>', 'menu_button', null, () => {
+      return this.context.graph.copy_to_clipboard();
+    }));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">save</i>', 'menu_button', null, () => {
+      return this.context.graph.download();
+    }));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>', 'menu_button', null, () => {
+      return this.context.graph.load();
+    }));
+    return menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>', 'menu_button', null, () => {
+      return this.context.graph.clear_all();
+    }));
+  }
+
+};
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.sparqljs = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
@@ -10451,75 +10537,6 @@ module.exports = {
 
 },{"./lib/SparqlGenerator":4,"./lib/SparqlParser":5}]},{},[6])(6)
 });
-window.PainlessMenu = class PainlessMenu {
-  constructor(context) {
-    this.change_size = this.change_size.bind(this);
-    this.create_navigation_div = this.create_navigation_div.bind(this);
-    this.init = this.init.bind(this);
-    this.context = context;
-    this.init();
-  }
-
-  change_size(query_canvas_size) {
-    this.context.query_canvas.style.height = query_canvas_size + "%";
-    sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%";
-    return setTimeout(() => {
-      return this.context.graph.cy.resize();
-    }, 550);
-  }
-
-  create_div(innerHTML = null, className = null, id = null, onclick = null) {
-    var div;
-    div = document.createElement('div');
-    div.innerHTML = innerHTML;
-    div.className = className;
-    div.id = id;
-    div.onclick = onclick;
-    return div;
-  }
-
-  create_navigation_div() {
-    var nav_div;
-    nav_div = this.create_div(null, null, 'nav_div');
-    nav_div.append(this.create_div('▲', 'resize_button', null, () => {
-      return this.change_size(90);
-    }));
-    nav_div.append(this.create_div('≡', 'resize_button', null, () => {
-      return this.change_size(60);
-    }));
-    nav_div.append(this.create_div('▼', 'resize_button', null, () => {
-      return this.change_size(0);
-    }));
-    return nav_div;
-  }
-
-  init() {
-    var menu;
-    menu = this.create_div(null, null, 'painless_menu');
-    document.getElementById('sidenav').append(menu);
-    menu.append(this.create_navigation_div());
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">undo</i>', 'menu_button', null, () => {
-      return this.context.graph.undo();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>', 'menu_button', null, () => {
-      return this.context.graph.center_view();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>', 'menu_button', null, () => {
-      return this.context.graph.copy_to_clipboard();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">save</i>', 'menu_button', null, () => {
-      return this.context.graph.download();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>', 'menu_button', null, () => {
-      return this.context.graph.load();
-    }));
-    return menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>', 'menu_button', null, () => {
-      return this.context.graph.clear_all();
-    }));
-  }
-
-};
-
 window.PainlessSparql = (function() {
   var cur_sidenav_size, tappedBefore, tappedTimeout;
 
@@ -10765,6 +10782,7 @@ window.PainlessSparql = (function() {
 window.QueryFilter = class QueryFilter {
   constructor(sparql_text, node) {
     this.new_condition = this.new_condition.bind(this);
+    this.to_string = this.to_string.bind(this);
     this.to_html = this.to_html.bind(this);
     this.delete = this.delete.bind(this);
     this.node1 = node;
@@ -10811,6 +10829,12 @@ window.QueryFilter = class QueryFilter {
     value.contentEditable = 'true';
     d.appendChild(value);
     return d;
+  }
+
+  to_string() {
+    if (this.node1 instanceof window.Void) {
+      return console.log('aaa');
+    }
   }
 
   to_html() {
@@ -11086,7 +11110,7 @@ window.SparqlText = (function() {
 
     generate_plaintext_query() {
       /** warning: VERY HACKY */
-      var count, d, elem, j, k, l, len, len1, len2, ref, ref1, result;
+      var elem, filter, j, k, l, len, len1, len2, link, ref, ref1, result;
       result = "Select ";
       if (select_boxes.length === 0) {
         result += '*';
@@ -11097,22 +11121,19 @@ window.SparqlText = (function() {
         }
       }
       result += '\r\nwhere {';
-      ref = document.getElementsByClassName('q_line');
+      ref = this.links;
       for (k = 0, len1 = ref.length; k < len1; k++) {
-        elem = ref[k];
+        link = ref[k];
         result += '\r\n';
-        count = 0;
-        ref1 = elem.getElementsByClassName('highlighting_box');
-        for (l = 0, len2 = ref1.length; l < len2; l++) {
-          d = ref1[l];
-          result += d.innerHTML + ' ';
-          count += 1;
-          if (count % 3 === 0) {
-            result += ' .\r\n';
-          }
-        }
+        result += link.to_string();
       }
-      result += '}';
+      ref1 = this.filters;
+      for (l = 0, len2 = ref1.length; l < len2; l++) {
+        filter = ref1[l];
+        result += '\r\n';
+        result += filter.to_string();
+      }
+      result += '\r\n}';
       console.log(result);
       return result;
     }
