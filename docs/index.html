@@ -140,7 +140,7 @@
       document.getElementById('home').style.display = 'none';
       var graph = new GrapholScape(files[0], document.getElementById('grapholscape_container'));
 
-      var ps = new PainlessSparql(graph);
+      var ps = new Sparqling(graph);
 
     }
 
@@ -160,7 +160,7 @@
         var graph = new GrapholScape(null,document.getElementById('grapholscape_container'),examples[this.getAttribute('exmp_id')][1]);
         graph.drawDiagram(graph.getDiagramName(0));
 
-        var ps = new PainlessSparql(graph);
+        var ps = new Sparqling(graph);
       };
 
       examples_list.appendChild(li);
