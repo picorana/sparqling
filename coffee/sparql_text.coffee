@@ -54,7 +54,7 @@ class window.SparqlText
         st.ondblclick = () =>
             st.setAttribute('contenteditable', 'true')
             @cy.center(node)
-            setTimeout(() => 
+            setTimeout(() -> 
                 st.focus()
             , 0);
 
@@ -205,7 +205,7 @@ class window.SparqlText
                 if source.classList.contains('q_line')
                     return true
                 else return false
-            accepts: (el, target, source) =>
+            accepts: (el, target, source) ->
                 if target.classList.contains('q_line') and source.classList.contains('q_line')
                     return false
                 if target.classList.contains('void_box')

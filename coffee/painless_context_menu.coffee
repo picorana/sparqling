@@ -29,12 +29,8 @@ class window.PainlessContextMenu
         node_link_context_menu = {
             selector: '.node-role',
             commands: [
-                {content: 'reverse', select: 
-                    (ele)=>
-                        console.log ele.data('links') 
-                        ele.data('links')[0].reverse()
-                },
-                {content: 'delete', select: (ele)=> ele.data('links')[0].delete()}
+                {content: 'reverse', select: (ele) -> ele.data('links')[0].reverse()},
+                {content: 'delete', select: (ele) -> ele.data('links')[0].delete()}
             ]
         }
 
@@ -97,7 +93,7 @@ class window.PainlessContextMenu
         @cy.cxtmenu(node_attr_range_menu)
 
 
-    rename_const: (ele) =>
+    rename_const: (ele) ->
         prevlabel = ele.data('label')
         ele.data('label', '')
         container = document.createElement(div)

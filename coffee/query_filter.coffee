@@ -129,9 +129,9 @@ class window.QueryFilter
             @delete()
         result_div.append(remove_button)
 
-        result_div.onmouseover = () =>
+        result_div.onmouseover = () ->
             remove_button.style.visibility = 'visible'
-        result_div.onmouseout = () =>
+        result_div.onmouseout = () ->
             remove_button.style.visibility = 'hidden'
             
 

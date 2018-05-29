@@ -4,38 +4,38 @@
 
 A graphical tool to write SPARQL queries.
 
-## [Demo](https://picorana.github.io/GrapholScape/)
+## [Demo](https://picorana.github.io/sparqling/)
 
 ## Usage
 Clone the repository with 
 
-	git clone https://github.com/picorana/painless_sparql
+	git clone https://github.com/picorana/sparqling
 
 Then import app.js and the css style in your graphol html visualization:
 	
-	<link href="../painless_sparql/css/style.css"/ rel="stylesheet">
-	<script type="text/javascript" src="./js/app.js"></script>
+	<link href="../sparqling/css/style.css"/ rel="stylesheet">
+	<script type="text/javascript" src="./dist/sparqling.js"></script>
 
 After importing the script, initialize it with
 
-	var ps = new PainlessSparql(graph);
+	var ps = new Sparqling(graph);
 	
 in which `graph` is an instance of a GrapholScape graph.
 
 An example graphol visualization can be found here: [GrapholScape](https://gianluca-pepe.github.io/GrapholScape/)   
-A working demo of this project can be found here: [demo](https://picorana.github.io/GrapholScape/)
+A working demo of this project can be found here: [demo](https://picorana.github.io/sparqling/)
 
 CDN:   
 	
-	https://rawgit.com/picorana/painless_sparql/master/css/style.css
-	https://rawgit.com/picorana/painless_sparql/master/js/app.js
+	https://rawgit.com/picorana/sparqling/master/css/style.css
+	https://rawgit.com/picorana/sparqling/master/dist/sparqling_min.js
 
 
 ## Contribute
 
 Clone the repository
 
-	git clone https://github.com/picorana/painless_sparql
+	git clone https://github.com/picorana/sparqling
 
 and run    
 
@@ -48,10 +48,10 @@ Then run
 	gulp
 
 in the base project directory. The default behaviour of gulp is to watch for changes in the `.coffee ` folder and recompile
-the coffee files, bundling them into app.js. You can force `gulp` to just build once with `gulp build` 
+the coffee files, bundling them into sparqling.js. You can force `gulp` to just build once with `gulp build` 
 or to watch for changes with `gulp watch`
 
-The project is developed in `coffeescript`, and the source files are contained in the `coffee` folder of this repository. `gulp` is used to compile coffeescript to javascript and to bundle the project files together with the third party libraries. The final result is stored in the `js` folder.
+The project is developed in `coffeescript`, and the source files are contained in the `coffee` folder of this repository. `gulp` is used to compile coffeescript to javascript and to bundle the project files together with the third party libraries. The final result is stored in the `dist` folder.
 
 ## Disclaimer 
 Based on [GrapholScape](https://github.com/gianluca-pepe/GrapholScape) by [gianluca-pepe](https://github.com/gianluca-pepe).   

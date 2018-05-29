@@ -56,9 +56,9 @@ class window.QueryLine
         button_div.append(remove_button)
 
         q_line.append(button_div)
-        q_line.onmouseover = () =>
+        q_line.onmouseover = () ->
             button_div.style.visibility = 'visible'
-        q_line.onmouseout = () =>
+        q_line.onmouseout = () ->
             button_div.style.visibility = 'hidden'
 
         q_line.className = 'q_line'
@@ -79,7 +79,7 @@ class window.QueryLine
         st.ondblclick = () =>
             st.setAttribute('contenteditable', 'true')
             @sparql_text.cy.center(node)
-            setTimeout(() => 
+            setTimeout(() -> 
                 st.focus()
             , 0);
 

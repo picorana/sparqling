@@ -61,7 +61,7 @@ class window.PainlessGraph
             document.body.appendChild(a)
             a.click()
             setTimeout(
-                () => 
+                () -> 
                     document.body.removeChild(a)
                     window.URL.revokeObjectURL(url) 
             , 0); 
