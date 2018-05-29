@@ -10485,28 +10485,41 @@ window.PainlessMenu = class PainlessMenu {
     }, 550);
   }
 
-  create_div(innerHTML = null, className = null, id = null, onclick = null) {
-    var div;
+  create_div(innerHTML = null, className = null, id = null, onclick = null, tooltip = null) {
+    var div, span;
     div = document.createElement('div');
     div.innerHTML = innerHTML;
-    div.className = className;
+    div.className = className + ' tooltip';
     div.id = id;
     div.onclick = onclick;
+    if (tooltip !== null) {
+      span = document.createElement('span');
+      span.innerHTML = tooltip;
+      span.className = 'tooltiptext';
+      span.style.display = 'none';
+      div.append(span);
+      div.onmouseover = () => {
+        return span.style.display = 'block';
+      };
+      div.onmouseout = () => {
+        return span.style.display = 'none';
+      };
+    }
     return div;
   }
 
   create_navigation_div() {
     var nav_div;
     nav_div = this.create_div(null, null, 'nav_div');
-    nav_div.append(this.create_div('▲', 'resize_button', null, () => {
+    nav_div.append(this.create_div('▲', 'resize_button', null, (() => {
       return this.change_size(90);
-    }));
-    nav_div.append(this.create_div('≡', 'resize_button', null, () => {
+    }), 'expand graph'));
+    nav_div.append(this.create_div('≡', 'resize_button', null, (() => {
       return this.change_size(60);
-    }));
-    nav_div.append(this.create_div('▼', 'resize_button', null, () => {
+    }), 'center'));
+    nav_div.append(this.create_div('▼', 'resize_button', null, (() => {
       return this.change_size(0);
-    }));
+    }), 'expand sparql'));
     return nav_div;
   }
 
@@ -10515,24 +10528,24 @@ window.PainlessMenu = class PainlessMenu {
     menu = this.create_div(null, null, 'painless_menu');
     document.getElementById('sidenav').append(menu);
     menu.append(this.create_navigation_div());
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">undo</i>', 'menu_button', null, () => {
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">undo</i>', 'menu_button', null, (() => {
       return this.context.graph.undo();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>', 'menu_button', null, () => {
+    }), 'undo'));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>', 'menu_button', null, (() => {
       return this.context.graph.center_view();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>', 'menu_button', null, () => {
+    }), 'center view'));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>', 'menu_button', null, (() => {
       return this.context.graph.copy_to_clipboard();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">save</i>', 'menu_button', null, () => {
+    }), 'copy to clipboard'));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">save</i>', 'menu_button', null, (() => {
       return this.context.graph.download();
-    }));
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>', 'menu_button', null, () => {
+    }), 'export'));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>', 'menu_button', null, (() => {
       return this.context.graph.load();
-    }));
-    return menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>', 'menu_button', null, () => {
+    }), 'import'));
+    return menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>', 'menu_button', null, (() => {
       return this.context.graph.clear_all();
-    }));
+    }), 'clear all'));
   }
 
 };
