@@ -1,0 +1,70 @@
+#sidenav_container {
+	position: fixed;
+	top: 0;
+	z-index: 2;
+	right: 0;
+	width: 53%;
+	height: 100%;
+	transition: 0.1s;
+}
+
+#sidenav {
+	display: inline-block;
+	height: 100%; 
+	width: 50%; 
+	position: fixed; 
+	z-index: 2; 
+	top: 0; 
+	right: 0; 
+	background-color: #002b36;
+    /*overflow-y: hidden; */
+	transition: 0.1s;
+}
+
+
+#nav_div {
+    text-align: center;
+    color: #ccc;
+    vertical-align: middle;
+}
+
+
+#add_to_query_button {
+	position: absolute;
+	cursor: pointer;
+	left: -60px;
+	bottom: 65px;
+	width: 50px;
+	background-color: #fdf6e3;
+	border-radius: 50px;
+	font-size: xx-small;
+	font-family: "Roboto";
+	border-color: #002b36;
+	z-index: 3;
+}
+
+
+#add_to_query::hover{
+	cursor: grab;
+}
+
+.cxtmenu-content{
+    font-size: xx-small;
+    font-family: "Roboto";
+}
+
+/* 	
+*	--- 
+* 	SIDENAV HANDLE
+*	---
+*/
+#slider {
+	z-index: 1000;
+}
+
+.slider_button {
+	bottom: 0;
+	margin-top: 5px;
+	margin-left: 5px;
+	cursor: pointer;
+}

@@ -17,7 +17,8 @@
     "tinycolor2" : "^1.4.0",
     "popper.js" : "*",
     "tooltip.js" : "*",
-    "sparqljs" : "*"
+    "sparqljs" : "*",
+    "gulp-less" : "*"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

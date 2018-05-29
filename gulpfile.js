@@ -3,7 +3,8 @@ var coffee = require("gulp-coffee");
 var uglify = require("gulp-uglify-es").default;
 var gulpConcat = require("gulp-concat");
 var merge2 = require("merge2");
-var order = require("gulp-order");
+var less = require("gulp-less");
+var path = require("path");
 
 gulp.task("build", function() {
   var c = gulp.src("./coffee/*.coffee").pipe(coffee({ bare: true }));
@@ -18,6 +19,14 @@ gulp.task("build", function() {
 
   merge2([j, c])
     .pipe(gulpConcat("./dist/sparqling.js"))
+    .pipe(gulp.dest("."));
+});
+
+gulp.task("less", function() {
+  return gulp
+    .src("./less/**/*.less")
+    .pipe(less())
+    .pipe(gulpConcat("./css/style.css"))
     .pipe(gulp.dest("."));
 });
 
@@ -39,7 +48,8 @@ gulp.task("compress", function() {
 });
 
 gulp.task("watch", function() {
-  gulp.watch("./coffee/*.coffee", ["build"]);
+  gulp.watch("./coffee/**/*.coffee", ["build"]);
+  gulp.watch("./less/**/*.less", ["less"]);
 });
 
 gulp.task("default", ["watch"]);
