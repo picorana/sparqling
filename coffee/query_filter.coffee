@@ -6,6 +6,9 @@ class window.QueryFilter
         @node1 = node
         @node2 = null
 
+        @v1_val = null
+        @v2_val = null
+
         @datatype = "^^xsd:string"
         @operator_sym = ">="
 
@@ -33,9 +36,14 @@ class window.QueryFilter
             d.appendChild(hl_box.to_html())
             @slots.push(hl_box)
         else
-            v = new window.Void(@, 0)
-            d.appendChild(v.to_html())
-            @slots.push(v)
+            @v = new window.Void(@, 0, @v1_val)
+            @v.div.addEventListener('input', ()=> 
+                console.log @v.div.innerHTML
+                @v1_val = @v.div.innerHTML
+                @v.val = @v.div.innerHTML
+                )
+            d.appendChild(@v.to_html())
+            @slots.push(@v)
 
         operator = document.createElement('div')
         operator.innerHTML = @operator_sym
@@ -51,9 +59,13 @@ class window.QueryFilter
             d.appendChild(hl_box.to_html())
             @slots.push(hl_box)
         else
-            v = new window.Void(@, 1)
-            d.appendChild(v.to_html())
-            @slots.push(v)
+            @v = new window.Void(@, 1, @v2_val)
+            @v.div.addEventListener('input', ()=> 
+                @v2_val = @v.div.innerHTML
+                @v.val = @v.div.innerHTML
+                )
+            d.appendChild(@v.to_html())
+            @slots.push(@v)
 
         value = document.createElement('div')
         value.style.marginLeft = '5px'
@@ -72,7 +84,9 @@ class window.QueryFilter
         if @slots[0] instanceof HlBox
             if @node1 != undefined and @node1 != null
                 result += ' ' + @node1.id()
-        else result += @slots[0].val
+        else if @v1_val != null
+            result += @v1_val
+        else return ''
 
         if @operator_sym != undefined and @operator_sym != null
             result += ' ' + @operator_sym
@@ -80,7 +94,9 @@ class window.QueryFilter
         if @slots[1] instanceof HlBox
             if @node2 != undefined and @node2 != null
                 result += ' ' + @node2.id()
-        else result += @slots[1].val
+        else if @v2_val != null
+            result += @v2_val
+        else return ''
 
         if @datatype != undefined and @datatype != null
             result += ' ' + @datatype
