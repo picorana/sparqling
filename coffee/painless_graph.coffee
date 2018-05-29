@@ -113,7 +113,7 @@ class window.PainlessGraph
 
     undo : ->
         if state_buffer == null or state_buffer.length < 1
-            console.warn "no saved states"
+            @context.alert "no saved states"
         else
             @cy.json(state_buffer[state_buffer.length - 1])
             @cy.style(@utils.generate_style())

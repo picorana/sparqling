@@ -24,6 +24,8 @@ class window.Sparqling
         @sparql_text    = @graph.sparql_text
         @menu           = new window.PainlessMenu(this)
         @add_event_listener()
+        @dialog = @create_dialog()
+        document.body.style.overflow = 'hidden'
 
 
     add_to_query: =>
@@ -32,12 +34,32 @@ class window.Sparqling
         selected_node = @graphol_cy.nodes(":selected")
         
         if selected_node.length == 0
-            console.warn "please, select a node in the main graph"
+            @alert "please, select a node in the main graph"
         
         switch selected_node.data('type')
             when "role"         then @graph.add_link(selected_node.data('label'), 'role')
             when "attribute"    then @graph.add_link(selected_node.data('label'), 'attribute', @extract_datatype(selected_node))
             when "concept"      then @graph.add_link(selected_node.data('label'), 'concept')
+
+
+    create_dialog: ->
+        dialog = document.createElement('div')
+        dialog.className = 'dialog'
+        dialog.style.bottom = '-20%'
+        dialog.style.display = 'grid'
+        
+        dialog.style.backgroundColor = '#ffaaaaaa'
+        document.body.append(dialog)
+        return dialog
+
+
+    alert: (msg) =>
+        @dialog.innerHTML = msg
+        @dialog.style.bottom = '5%'
+        @dialog.onmouseover = () => 
+            setTimeout(( () => @dialog.style.bottom = '-20%'), 300)
+        setTimeout(( () => @dialog.style.bottom = '-20%'), 3000)
+            
 
 
     extract_datatype: (inode) =>
