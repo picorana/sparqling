@@ -21,10 +21,10 @@ class window.PainlessMenu
         div.onclick     = onclick
 
         if tooltip != null
-            span            = document.createElement('span')
-            span.innerHTML  = tooltip
-            span.className  = 'tooltiptext'
-            span.style.display = 'none'
+            span                = document.createElement('span')
+            span.innerHTML      = tooltip
+            span.className      = 'tooltiptext'
+            span.style.display  = 'none'
             div.append(span)
 
             div.onmouseover     = () => span.style.display = 'block'

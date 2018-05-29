@@ -1,4 +1,6 @@
-class window.PainlessSparql
+class window.Sparqling
+
+    instance = null
 
     @graph = null
     cur_sidenav_size = 50
@@ -6,22 +8,28 @@ class window.PainlessSparql
     tappedBefore = null
     tappedTimeout = null
  
-    constructor: (graph) ->
-        @cy = graph.cy
 
-        @init()
+    constructor: (graph) ->
+        if instance
+            return instance
+        else    
+            @graphol_cy = graph.cy
+            @cy = @graphol_cy
+            @init()
+            instance = this
 
 
     init : ->
         @create_sidenav()
-        @sparql_text = @graph.sparql_text
-        @menu = new window.PainlessMenu(this)
+        @sparql_text    = @graph.sparql_text
+        @menu           = new window.PainlessMenu(this)
         @add_event_listener()
 
 
     add_to_query: =>
+        ###* Adds the selected node in grapholscape to the query ###
 
-        selected_node = @cy.nodes(":selected")
+        selected_node = @graphol_cy.nodes(":selected")
         
         if selected_node.length == 0
             console.warn "please, select a node in the main graph"
@@ -55,7 +63,7 @@ class window.PainlessSparql
             document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
 
 
-        @cy.resize()
+        @graphol_cy.resize()
 
         slider = document.createElement("div")
         slider.style.backgroundColor = '#93a1a1'
@@ -115,76 +123,66 @@ class window.PainlessSparql
 
     resize_navbar: =>
 
-        if document.getElementById('center_button') != undefined and document.getElementById('center_button') != null
-            document.getElementById('center_button').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
-            document.getElementById('center_button').style.transitionDuration = '0.1s'
-        if document.getElementById('zoom_tools') != undefined and document.getElementById('zoom_tools') != null
-            document.getElementById('zoom_tools').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
-            document.getElementById('zoom_tools').style.transitionDuration = '0.1s'
+        client_width    = document.documentElement.clientWidth
+
+        center_button   = document.getElementById('center_button')
+        zoom_tools      = document.getElementById('zoom_tools')
+        owl_translator  = document.getElementById('owl_translator')
+        explorer        = document.getElementById('explorer')
+        details         = document.getElementById('details')
+
+        if center_button != undefined and center_button != null
+            center_button.style.right = (cur_sidenav_size * client_width / 100 + 50) + "px"
+            center_button.style.transitionDuration = '0.1s'
+
+        if zoom_tools != undefined and zoom_tools != null
+            zoom_tools.style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 50) + "px"
+            zoom_tools.style.transitionDuration = '0.1s'
         
         if document.getElementById('cy') != undefined and document.getElementById('cy') != null
-            document.getElementById('cy').style.width = ((100-cur_sidenav_size)*document.documentElement.clientWidth/100 + 50) + "px"
+            document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * client_width /100 + 50) + "px"
 
-        if document.getElementById('owl_translator') != undefined and document.getElementById('owl_translator') != null
-            document.getElementById('owl_translator').style.transitionDuration = '0.1s'
-            document.getElementById('owl_translator').style.left = (100 - cur_sidenav_size)/2 + "%"
+        if owl_translator != undefined and owl_translator != null
+            owl_translator.style.transitionDuration = '0.1s'
+            owl_translator.style.left = (100 - cur_sidenav_size)/2 + "%"
             if cur_sidenav_size > 50
-                document.getElementById('owl_translator').style.display = 'none'
+                owl_translator.style.display = 'none'
             else 
-                document.getElementById('owl_translator').style.display = 'block'
+                owl_translator.style.display = 'block'
 
-        if document.getElementById('explorer') != undefined and document.getElementById('explorer') != null
-            document.getElementById('explorer').style.transitionDuration = '0.1s'
-            document.getElementById('explorer').style.left = (100 - cur_sidenav_size)/2 + "%"
+        if explorer != undefined and explorer != null
+            explorer.style.transitionDuration = '0.1s'
+            explorer.style.left = (100 - cur_sidenav_size)/2 + "%"
             if cur_sidenav_size > 50
-                document.getElementById('explorer').style.display = 'none'
+                explorer.style.display = 'none'
             else 
-                document.getElementById('explorer').style.display = 'block'
+                explorer.style.display = 'block'
 
-        if document.getElementById('details') != undefined and document.getElementById('details') != null
-            document.getElementById('details').style.right = (cur_sidenav_size*document.documentElement.clientWidth/100 + 60) + "px"
-            document.getElementById('details').style.transitionDuration = '0.1s'
+        if details != undefined and details != null
+            details.style.right = (cur_sidenav_size * client_width / 100 + 60) + "px"
+            details.style.transitionDuration = '0.1s'
             if cur_sidenav_size > 25
-                document.getElementById('details').style.display = 'none'
+                details.style.display = 'none'
             else 
-                document.getElementById('details').style.display = 'block'
+                details.style.display = 'block'
 
-        @cy.resize()
+        @graphol_cy.resize()
     
         if cur_sidenav_size != 100
-            @side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100 + 30) + "px"
+            @side_nav_container.style.width = (cur_sidenav_size * client_width / 100 + 30) + "px"
             @side_nav.style.width = cur_sidenav_size + '%'
         else 
-            @side_nav_container.style.width = (cur_sidenav_size*document.documentElement.clientWidth/100) + "px"
-            @side_nav.style.width =  (cur_sidenav_size*document.documentElement.clientWidth/100 - 30) + "px"
+            @side_nav_container.style.width = (cur_sidenav_size * client_width / 100) + "px"
+            @side_nav.style.width =  (cur_sidenav_size * client_width / 100 - 30) + "px"
 
         setTimeout(()=> 
             @graph.cy.resize()
-        , 550)
-
-
-    open_nav : -> 
-        document.getElementById("sidenav").style.width = "50%";
-
-
-    close_nav : ->
-        document.getElementById("sidenav").style.width = "0px";
+        , 150)
 
 
     onkeypress_handler : (event) =>
-
-        if event.key == "a" 
-            #@open_nav()
-        
-        else if event.key == "b"
-            #@close_nav()
-        
-        else if event.key == "d"
+        if event.key == "d"
             console.log @graph.cy.nodes(":selected").data('links')
-
-        else if event.key == "l"
-            @graph.layout_index += 1
-            @graph.reshape()
 
         else if event.keyCode == 46 or event.keyCode == 8 or event.keyCode == 127
             for link in @graph.cy.nodes(":selected").data('links')
@@ -195,7 +193,7 @@ class window.PainlessSparql
         document.onkeypress = @onkeypress_handler
         window.addEventListener('resize', () => @resize_navbar())
 
-        @cy.on('tap', 
+        @graphol_cy.on('tap', 
             (event) => 
                 tappedNow = event.target;
                 if tappedTimeout && tappedBefore 

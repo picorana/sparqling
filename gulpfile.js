@@ -17,7 +17,7 @@ gulp.task("build", function() {
   ]);
 
   merge2([j, c])
-    .pipe(gulpConcat("./dist/painless_sparql.js"))
+    .pipe(gulpConcat("./dist/sparqling.js"))
     .pipe(gulp.dest("."));
 });
 
@@ -33,7 +33,7 @@ gulp.task("compress", function() {
   ]);
 
   merge2([j, c])
-    .pipe(gulpConcat("./dist/painless_sparql_min.js"))
+    .pipe(gulpConcat("./dist/sparqling_min.js"))
     .pipe(uglify())
     .pipe(gulp.dest("."));
 });
