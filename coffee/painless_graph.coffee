@@ -70,7 +70,7 @@ class window.PainlessGraph
     clear_all: =>
         for link in @links
             try link.delete()
-            catch e then console.log e
+            catch e then console.log link
 
         @cy.remove(@cy.nodes())
         @cy.remove(@cy.edges())
@@ -137,26 +137,34 @@ class window.PainlessGraph
 
     merge: (node1, node2) ->
         ###* merges node1 and node2, repositioning all node2's edges into node1 ###
+        # node2 è il nodo che viene trascinato
+
         @save_state()
 
-        for link in node2.data('links')
-            if link.link_type == 'concept'
-                @links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
-            else
+        links_to_add = []
 
-                if link.node_var1 == node2 and link.node_var2 == node2
-                    console.log 'case1'
-                    @links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
-                else if link.node_var1 == node2
-                    console.log 'case2'
-                    @links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
-                else 
-                    console.log 'case3'
-                    @links.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
-            
+        for link in node2.data('links')
+
+            if link.link_type == 'concept'
+                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
+
+            else if link.node_var1.id() == node2.id() and link.node_var2.id() == node2.id()
+                console.log 'case1'
+                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
+            else if link.node_var1.id() == node2.id()
+                console.log 'case2'
+                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
+            else 
+                console.log 'case3'
+                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
+
             link.delete()
 
+        for link in links_to_add
+            @links.push(link)
+
         @cy.remove(node2) 
+        @sparql_text.update()
 
 
     add_link: (link_name, link_type, datatype) =>

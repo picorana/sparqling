@@ -209,6 +209,9 @@ class window.Sparqling
         if event.key == "d"
             console.log @graph.cy.nodes(":selected").data('links')
 
+        if event.key == "c"
+            console.log @graph.links
+
         else if event.keyCode == 46 or event.keyCode == 8 or event.keyCode == 127
             for link in @graph.cy.nodes(":selected").data('links')
                 link.delete()
