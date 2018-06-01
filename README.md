@@ -5,6 +5,7 @@
 A graphical tool to write SPARQL queries.
 
 ## [Demo](https://picorana.github.io/sparqling/)
+## [Video](https://www.youtube.com/watch?v=5Vla5h8W5sg&feature=youtu.be)
 
 ## Usage
 Clone the repository with 
