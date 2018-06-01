@@ -1,4 +1,4 @@
-<div style='text-align: center'><h1><b>Painless Sparql</b></h1></div>
+<div style='text-align: center'><h1><b>Sparqling</b></h1></div>
 
 <a class="badge-align" href="https://www.codacy.com/app/picorana/painless_sparql?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=picorana/painless_sparql&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/b728a529586a4a1ba3cb6c1d17471b17"/></a> <img src="https://david-dm.org/picorana/painless_sparql.svg"/>
 
