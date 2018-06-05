@@ -2,6 +2,8 @@
 
 class window.SparqlText
 
+    instance = null
+
     select_boxes        = []
     
     div_sparql_text     = null
@@ -10,14 +12,19 @@ class window.SparqlText
 
 
     constructor: (cy, links) ->
-       div_sparql_text = document.getElementById('sparql_textbox')
-       div_sparql_text.className = "unselectable"
+        if instance
+            return instance
+        else
+            div_sparql_text = document.getElementById('sparql_textbox')
+            div_sparql_text.className = "unselectable"
 
-       @select_boxes = select_boxes
-   
-       @cy      = cy
-       @links   = links
-       @filters = []
+            @select_boxes = select_boxes
+
+            @cy      = cy
+            @links   = links
+            @filters = []
+
+            instance = this
 
 
     add_to_select: (id) ->

@@ -7825,13 +7825,13 @@ module.exports = register;
 //_require cyto_style.coffee
 //_require sparql_text.coffee
 //_require painless_link.coffee 
-window.PainlessGraph = (function() {
+window.SparqlingGraph = (function() {
   /** manages the graph visualization
       TODO: hardcoded collision distance should be in constants
   */
   var state_buffer;
 
-  class PainlessGraph {
+  class SparqlingGraph {
     constructor(context) {
       this.reshape = this.reshape.bind(this);
       this.download = this.download.bind(this);
@@ -8010,7 +8010,7 @@ window.PainlessGraph = (function() {
     add_link(link_name, link_type, datatype) {
       /** if a var node is selected, the link is added to the var node and one new var node is created*/
       var i, len, link, node, ref;
-      ref = this.context.cy.nodes();
+      ref = this.context.graphol_cy.nodes();
       /** adds a new link in the graph. 
           links that are not concepts (roles and attributes) add a new variable into the graph.
           links are always added to the selected variable in the graph, if there are no selected variables,   
@@ -8180,7 +8180,7 @@ window.PainlessGraph = (function() {
 
   state_buffer = null;
 
-  return PainlessGraph;
+  return SparqlingGraph;
 
 }).call(this);
 
@@ -10596,33 +10596,36 @@ window.PainlessMenu = class PainlessMenu {
 };
 
 window.Sparqling = (function() {
-  var cur_sidenav_size, instance, tappedBefore, tappedTimeout;
+  /** 
+      Main class of the application, keeps together all the different components,
+      and defines the interaction with the grapholscape graph.
+  */
+  /** doubleclick timers */
+  var instance, tappedBefore, tappedTimeout;
 
   class Sparqling {
     constructor(graph) {
       this.add_to_query = this.add_to_query.bind(this);
       this.alert = this.alert.bind(this);
       this.extract_datatype = this.extract_datatype.bind(this);
-      this.create_sidenav = this.create_sidenav.bind(this);
-      this.resize_navbar = this.resize_navbar.bind(this);
       this.onkeypress_handler = this.onkeypress_handler.bind(this);
+      this.doubleclick_handler = this.doubleclick_handler.bind(this);
       if (instance) {
         return instance;
       } else {
         this.graphol_cy = graph.cy;
-        this.cy = this.graphol_cy;
         this.init();
         instance = this;
       }
     }
 
     init() {
-      this.create_sidenav();
+      this.sidenav = new SparqlingNavbar(this);
+      this.graph = new SparqlingGraph(this);
       this.sparql_text = this.graph.sparql_text;
-      this.menu = new window.PainlessMenu(this);
+      this.menu = new PainlessMenu(this);
       this.add_event_listener();
-      this.dialog = this.create_dialog();
-      return document.body.style.overflow = 'hidden';
+      return this.dialog = this.create_dialog();
     }
 
     add_to_query() {
@@ -10680,132 +10683,9 @@ window.Sparqling = (function() {
       }
     }
 
-    create_sidenav() {
-      var button, slider, slider_button, sparql_textbox, zoom_tools;
-      this.side_nav_container = document.createElement("div");
-      this.side_nav_container.id = "sidenav_container";
-      this.side_nav_container.style.width = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 40) + "px";
-      document.body.appendChild(this.side_nav_container);
-      zoom_tools = document.getElementById('zoom_tools');
-      if (zoom_tools !== void 0 && zoom_tools !== null) {
-        zoom_tools.style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
-        zoom_tools.style.transitionDuration = '0.1s';
-      }
-      if (document.getElementById('cy') !== void 0 && document.getElementById('cy') !== null) {
-        document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * document.documentElement.clientWidth / 100 + 50) + "px";
-      }
-      this.graphol_cy.resize();
-      slider = document.createElement("div");
-      slider.style.backgroundColor = '#93a1a1';
-      slider.style.height = '100%';
-      slider.id = 'slider';
-      slider.style.width = '100%';
-      slider.style.display = 'inline-block';
-      sidenav_container.appendChild(slider);
-      slider_button = document.createElement('div');
-      slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_left</i>';
-      slider_button.className = 'slider_button';
-      slider_button.onclick = () => {
-        cur_sidenav_size = cur_sidenav_size + 25;
-        return this.resize_navbar();
-      };
-      slider.appendChild(slider_button);
-      slider_button = document.createElement('div');
-      slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_right</i>';
-      slider_button.className = 'slider_button';
-      slider_button.onclick = () => {
-        cur_sidenav_size = cur_sidenav_size - 25;
-        return this.resize_navbar();
-      };
-      slider.appendChild(slider_button);
-      button = document.createElement("div");
-      button.innerHTML = '<i class="material-icons">add</i><p style="font-size:xx-small; margin-top: -5px">node</p>';
-      button.className = "slider_button";
-      button.style.bottom = 0;
-      button.style.position = 'fixed';
-      button.style.marginLeft = '5px';
-      button.onclick = () => {
-        return this.add_to_query();
-      };
-      slider.appendChild(button);
-      this.side_nav = document.createElement("div");
-      this.side_nav.id = "sidenav";
-      this.side_nav.className = "sidenav";
-      this.side_nav.style.display = 'inline-block';
-      this.side_nav.style.width = cur_sidenav_size + '%';
-      this.side_nav_container.appendChild(this.side_nav);
-      sparql_textbox = document.createElement("div");
-      sparql_textbox.id = "sparql_textbox";
-      sparql_textbox.innerHTML = "sparql_query_here";
-      this.side_nav.appendChild(sparql_textbox);
-      this.query_canvas = document.createElement("div");
-      this.query_canvas.id = "query_canvas";
-      this.side_nav.appendChild(this.query_canvas);
-      this.graph = new PainlessGraph(this);
-      return this.resize_navbar();
-    }
-
-    resize_navbar() {
-      var center_button, client_width, details, explorer, owl_translator, zoom_tools;
-      client_width = document.documentElement.clientWidth;
-      center_button = document.getElementById('center_button');
-      zoom_tools = document.getElementById('zoom_tools');
-      owl_translator = document.getElementById('owl_translator');
-      explorer = document.getElementById('explorer');
-      details = document.getElementById('details');
-      if (center_button !== void 0 && center_button !== null) {
-        center_button.style.right = (cur_sidenav_size * client_width / 100 + 50) + "px";
-        center_button.style.transitionDuration = '0.1s';
-      }
-      if (zoom_tools !== void 0 && zoom_tools !== null) {
-        zoom_tools.style.right = (cur_sidenav_size * document.documentElement.clientWidth / 100 + 50) + "px";
-        zoom_tools.style.transitionDuration = '0.1s';
-      }
-      if (document.getElementById('cy') !== void 0 && document.getElementById('cy') !== null) {
-        document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * client_width / 100 + 50) + "px";
-      }
-      if (owl_translator !== void 0 && owl_translator !== null) {
-        owl_translator.style.transitionDuration = '0.1s';
-        owl_translator.style.left = (100 - cur_sidenav_size) / 2 + "%";
-        if (cur_sidenav_size > 50) {
-          owl_translator.style.display = 'none';
-        } else {
-          owl_translator.style.display = 'block';
-        }
-      }
-      if (explorer !== void 0 && explorer !== null) {
-        explorer.style.transitionDuration = '0.1s';
-        explorer.style.left = (100 - cur_sidenav_size) / 2 + "%";
-        if (cur_sidenav_size > 50) {
-          explorer.style.display = 'none';
-        } else {
-          explorer.style.display = 'block';
-        }
-      }
-      if (details !== void 0 && details !== null) {
-        details.style.right = (cur_sidenav_size * client_width / 100 + 60) + "px";
-        details.style.transitionDuration = '0.1s';
-        if (cur_sidenav_size > 25) {
-          details.style.display = 'none';
-        } else {
-          details.style.display = 'block';
-        }
-      }
-      this.graphol_cy.resize();
-      if (cur_sidenav_size !== 100) {
-        this.side_nav_container.style.width = (cur_sidenav_size * client_width / 100 + 30) + "px";
-        this.side_nav.style.width = cur_sidenav_size + '%';
-      } else {
-        this.side_nav_container.style.width = (cur_sidenav_size * client_width / 100) + "px";
-        this.side_nav.style.width = (cur_sidenav_size * client_width / 100 - 30) + "px";
-      }
-      return setTimeout(() => {
-        return this.graph.cy.resize();
-      }, 150);
-    }
-
     onkeypress_handler(event) {
       var i, len, link, ref, results;
+      // debug bindings - to be removed
       if (event.key === "d") {
         console.log(this.graph.cy.nodes(":selected").data('links'));
       }
@@ -10822,28 +10702,37 @@ window.Sparqling = (function() {
       }
     }
 
+    doubleclick_handler(event) {
+      var originalTapEvent, tappedNow;
+      tappedNow = event.target;
+      if (tappedTimeout && tappedBefore) {
+        clearTimeout(tappedTimeout);
+      }
+      if (tappedBefore === tappedNow) {
+        tappedNow.trigger('doubleTap', event);
+        tappedBefore = null;
+        originalTapEvent = null;
+        return this.add_to_query();
+      } else {
+        tappedTimeout = setTimeout(() => {
+          return tappedBefore = null;
+        }, 300);
+        return tappedBefore = tappedNow;
+      }
+    }
+
     add_event_listener() {
-      document.onkeypress = this.onkeypress_handler;
+      // keypress handler
+      window.addEventListener('keypress', (event) => {
+        return this.onkeypress_handler(event);
+      });
+      // fix sizes on window resize
       window.addEventListener('resize', () => {
         return this.resize_navbar();
       });
+      // doubleclick handler on grapholscape
       return this.graphol_cy.on('tap', (event) => {
-        var originalTapEvent, tappedNow;
-        tappedNow = event.target;
-        if (tappedTimeout && tappedBefore) {
-          clearTimeout(tappedTimeout);
-        }
-        if (tappedBefore === tappedNow) {
-          tappedNow.trigger('doubleTap', event);
-          tappedBefore = null;
-          originalTapEvent = null;
-          return this.add_to_query();
-        } else {
-          tappedTimeout = setTimeout(() => {
-            return tappedBefore = null;
-          }, 300);
-          return tappedBefore = tappedNow;
-        }
+        return this.doubleclick_handler(event);
       });
     }
 
@@ -10851,9 +10740,6 @@ window.Sparqling = (function() {
 
   instance = null;
 
-  cur_sidenav_size = 50;
-
-  // doubleclick timers
   tappedBefore = null;
 
   tappedTimeout = null;
@@ -11130,7 +11016,7 @@ window.QueryLine = class QueryLine {
 
 //_require query_filter.coffee
 window.SparqlText = (function() {
-  var cy, div_sparql_text, links, select_boxes;
+  var cy, div_sparql_text, instance, links, select_boxes;
 
   class SparqlText {
     constructor(cy, links) {
@@ -11140,12 +11026,17 @@ window.SparqlText = (function() {
       this.copy_to_clipboard = this.copy_to_clipboard.bind(this);
       this.add_filter = this.add_filter.bind(this);
       this.update = this.update.bind(this);
-      div_sparql_text = document.getElementById('sparql_textbox');
-      div_sparql_text.className = "unselectable";
-      this.select_boxes = select_boxes;
-      this.cy = cy;
-      this.links = links;
-      this.filters = [];
+      if (instance) {
+        return instance;
+      } else {
+        div_sparql_text = document.getElementById('sparql_textbox');
+        div_sparql_text.className = "unselectable";
+        this.select_boxes = select_boxes;
+        this.cy = cy;
+        this.links = links;
+        this.filters = [];
+        instance = this;
+      }
     }
 
     add_to_select(id) {
@@ -11390,6 +11281,8 @@ window.SparqlText = (function() {
 
   };
 
+  instance = null;
+
   select_boxes = [];
 
   div_sparql_text = null;
@@ -11399,6 +11292,129 @@ window.SparqlText = (function() {
   links = null;
 
   return SparqlText;
+
+}).call(this);
+
+window.SparqlingNavbar = (function() {
+  var cur_sidenav_size;
+
+  class SparqlingNavbar {
+    constructor(context) {
+      this.create_sidenav = this.create_sidenav.bind(this);
+      this.resize_navbar = this.resize_navbar.bind(this);
+      this.context = context;
+      this.create_sidenav();
+    }
+
+    create_sidenav() {
+      var button, slider, slider_button, sparql_textbox;
+      this.side_nav_container = document.createElement("div");
+      this.side_nav_container.id = "sidenav_container";
+      document.body.appendChild(this.side_nav_container);
+      this.context.graphol_cy.resize();
+      slider = document.createElement("div");
+      slider.id = 'slider';
+      sidenav_container.appendChild(slider);
+      slider_button = document.createElement('div');
+      slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_left</i>';
+      slider_button.className = 'slider_button';
+      slider_button.onclick = () => {
+        return this.resize_navbar(cur_sidenav_size + 25);
+      };
+      slider.appendChild(slider_button);
+      slider_button = document.createElement('div');
+      slider_button.innerHTML = '<i class="material-icons">keyboard_arrow_right</i>';
+      slider_button.className = 'slider_button';
+      slider_button.onclick = () => {
+        return this.resize_navbar(cur_sidenav_size - 25);
+      };
+      slider.appendChild(slider_button);
+      button = document.createElement("div");
+      button.innerHTML = '<i class="material-icons">add</i><p style="font-size:xx-small; margin-top: -5px">query</p>';
+      button.className = "slider_button_down";
+      button.onclick = () => {
+        return this.add_to_query();
+      };
+      slider.appendChild(button);
+      this.side_nav = document.createElement("div");
+      this.side_nav.id = "sidenav";
+      this.side_nav.style.width = cur_sidenav_size + '%';
+      this.side_nav_container.appendChild(this.side_nav);
+      sparql_textbox = document.createElement("div");
+      sparql_textbox.id = "sparql_textbox";
+      sparql_textbox.innerHTML = "sparql_query_here";
+      this.side_nav.appendChild(sparql_textbox);
+      this.query_canvas = document.createElement("div");
+      this.query_canvas.id = "query_canvas";
+      this.side_nav.appendChild(this.query_canvas);
+      return this.resize_navbar();
+    }
+
+    resize_navbar(new_size = cur_sidenav_size) {
+      var center_button, client_width, details, explorer, owl_translator, zoom_tools;
+      cur_sidenav_size = new_size;
+      client_width = document.documentElement.clientWidth;
+      center_button = document.getElementById('center_button');
+      zoom_tools = document.getElementById('zoom_tools');
+      owl_translator = document.getElementById('owl_translator');
+      explorer = document.getElementById('explorer');
+      details = document.getElementById('details');
+      if (center_button !== void 0 && center_button !== null) {
+        center_button.style.right = (cur_sidenav_size * client_width / 100 + 50) + "px";
+        center_button.style.transitionDuration = '0.1s';
+      }
+      if (zoom_tools !== void 0 && zoom_tools !== null) {
+        zoom_tools.style.right = (cur_sidenav_size * client_width / 100 + 50) + "px";
+        zoom_tools.style.transitionDuration = '0.1s';
+      }
+      if (document.getElementById('cy') !== void 0 && document.getElementById('cy') !== null) {
+        document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * client_width / 100 + 50) + "px";
+      }
+      if (owl_translator !== void 0 && owl_translator !== null) {
+        owl_translator.style.transitionDuration = '0.1s';
+        owl_translator.style.left = (100 - cur_sidenav_size) / 2 + "%";
+        if (cur_sidenav_size > 50) {
+          owl_translator.style.display = 'none';
+        } else {
+          owl_translator.style.display = 'block';
+        }
+      }
+      if (explorer !== void 0 && explorer !== null) {
+        explorer.style.transitionDuration = '0.1s';
+        explorer.style.left = (100 - cur_sidenav_size) / 2 + "%";
+        if (cur_sidenav_size > 50) {
+          explorer.style.display = 'none';
+        } else {
+          explorer.style.display = 'block';
+        }
+      }
+      if (details !== void 0 && details !== null) {
+        details.style.right = (cur_sidenav_size * client_width / 100 + 60) + "px";
+        details.style.transitionDuration = '0.1s';
+        if (cur_sidenav_size > 25) {
+          details.style.display = 'none';
+        } else {
+          details.style.display = 'block';
+        }
+      }
+      if (cur_sidenav_size !== 100) {
+        this.side_nav_container.style.width = (cur_sidenav_size * client_width / 100 + 30) + "px";
+        this.side_nav.style.width = cur_sidenav_size + '%';
+      } else {
+        this.side_nav_container.style.width = (cur_sidenav_size * client_width / 100) + "px";
+        this.side_nav.style.width = (cur_sidenav_size * client_width / 100 - 30) + "px";
+      }
+      this.context.graphol_cy.resize();
+      return setTimeout(() => {
+        return this.context.graph.cy.resize();
+      }, 150);
+    }
+
+  };
+
+  cur_sidenav_size = 50;
+
+  return SparqlingNavbar;
 
 }).call(this);
 

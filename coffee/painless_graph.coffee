@@ -2,7 +2,7 @@
 #_require sparql_text.coffee
 #_require painless_link.coffee 
 
-class window.PainlessGraph
+class window.SparqlingGraph
     ###* manages the graph visualization
         TODO: hardcoded collision distance should be in constants
     ###
@@ -181,7 +181,7 @@ class window.PainlessGraph
             TODO: use an enum to represent link types instead of hardcoded strings
         ###
 
-        for node in @context.cy.nodes()
+        for node in @context.graphol_cy.nodes()
             if node.data('label') == link_name
                 node.style('border-color', '#e38400')
                 node.style('border-width', '5px')

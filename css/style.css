@@ -95,6 +95,9 @@
   z-index: 10000;
 }
 
+body {
+  overflow: hidden;
+}
 #sidenav_container {
   position: fixed;
   top: 0;
@@ -113,7 +116,6 @@
   top: 0;
   right: 0;
   background-color: #002b36;
-  /*overflow-y: hidden; */
   transition: 0.1s;
 }
 #nav_div {
@@ -141,16 +143,22 @@
   font-size: xx-small;
   font-family: "Roboto";
 }
-/* 	
-*	--- 
-* 	SIDENAV HANDLE
-*	---
-*/
 #slider {
   z-index: 1000;
+  background-color: #93a1a1;
+  height: 100%;
+  width: 100%;
+  display: inline-block;
 }
 .slider_button {
   bottom: 0;
+  margin-top: 5px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+.slider_button_down {
+  bottom: 0;
+  position: fixed;
   margin-top: 5px;
   margin-left: 5px;
   cursor: pointer;
