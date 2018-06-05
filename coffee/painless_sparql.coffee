@@ -2,9 +2,9 @@ class window.Sparqling
 
     instance = null
 
-    @graph = null
     cur_sidenav_size = 50
 
+    # doubleclick timers
     tappedBefore = null
     tappedTimeout = null
  
@@ -43,12 +43,9 @@ class window.Sparqling
 
 
     create_dialog: ->
-        dialog = document.createElement('div')
-        dialog.className = 'dialog'
-        dialog.style.bottom = '-20%'
-        dialog.style.display = 'grid'
-        
-        dialog.style.backgroundColor = '#ffaaaaaa'
+        dialog                  = document.createElement('div')
+        dialog.className        = 'dialog'
+
         document.body.append(dialog)
         return dialog
 

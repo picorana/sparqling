@@ -237,21 +237,80 @@ class window.PainlessGraph
     load: =>
         
         parsed_query = window.sparqljs.Parser().parse(
-            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' +
+            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX xmlns: <http://baa> ' +
             'SELECT * { ?mickey foaf:name "Mickey Mouse" . ?mickey foaf:knows ?other. }');
 
         for triple in parsed_query['where'][0]['triples']
-            console.log triple
-            #if @cy.getElementById(triple['subject'].slice(1)) != undefined
-            #    link = new PainlessLink(this, @cy, triple['predicate'], 'role', @cy.getElementById(triple['subject'].slice(1)))
-            #else 
-            new_node = @cy.add({
-                group: 'nodes', 
-                data: 
-                    {id: @cy.getElementById(triple['subject'].slice(1))}
+
+            if @cy.getElementById(triple['subject'].slice(1)).length == 0
+
+                subj = @cy.add({ 
+                    group: 'nodes'
+                    classes: 'node-variable'
+                    data: {
+                        id: triple['subject'].slice(1)
+                        label: triple['subject'].slice(1)
+                        color: '#' + palette[0]
+                        links: []
+                    }
+                })
+
+                subj = subj[0]
+
+            else 
+
+                subj = @cy.getElementById(triple['subject'].slice(1))
+
+            if triple['object'].charAt(0) == '?'
+
+                if @cy.getElementById(triple['object'].slice(1)).length == 0
+
+                    obj = @cy.add({ 
+                        group: 'nodes'
+                        classes: 'node-variable'
+                        data: {
+                            id: triple['object'].slice(1)
+                            label: triple['object'].slice(1)
+                            color: '#aaa'
+                            links: []
+                        }
                     })
-            link = new PainlessLink(this, @cy, triple['predicate'], 'role')
+
+                    obj = obj[0]
+
+                else
+
+                    obj = @cy.getElementById(triple['object'].slice(1))
+
+            else 
+
+                obj = @cy.add({ 
+                    group: 'nodes'
+                    classes: 'node-constant-value'
+                    data: {
+                        id: triple['object']
+                        label: triple['object']
+                        color: '#aaa'
+                        links: []
+                    }
+                })
+
+                obj = obj[0]
+
+
+            $.each(parsed_query['prefixes'], (elem) => 
+                console.log triple['predicate'].indexOf(parsed_query['prefixes'][elem])
+                if triple['predicate'].indexOf(parsed_query['prefixes'][elem]) != -1
+                    triple['predicate'] = triple['predicate'].substr(parsed_query['prefixes'][elem].length)
+                    )
+
+
+
+            link = new PainlessLink(this, @cy, triple['predicate'], 'role', subj, obj)
             @links.push(link)
+
+            @reshape()
+            @sparql_text.update()
 
 
 

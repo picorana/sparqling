@@ -1,9 +1,10 @@
 .dialog {
   position: absolute;
+  display: grid;
   width: 60%;
   margin-left: 20%;
   height: 50px;
-  bottom: 5%;
+  bottom: -20%;
   z-index: 400000;
   border-radius: 200px;
   border-width: 5px;
@@ -15,6 +16,7 @@
   transition: 0.5s ease-out;
   text-align: center;
   align-items: center;
+  background-color: #ffaaaaaa;
 }
 
 .gu-mirror {
