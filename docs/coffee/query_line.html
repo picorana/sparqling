@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>query_line.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>query_line.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">QueryLine</span></span>
+
+
+    constructor: <span class="hljs-function"><span class="hljs-params">(link, sparql_text)</span> -&gt;</span>
+        @link = link
+        @sparql_text = sparql_text
+
+    
+    to_html: <span class="hljs-function">=&gt;</span>
+        q_line = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+
+        <span class="hljs-keyword">if</span> @link.link_type == <span class="hljs-string">'concept'</span>
+            q_line.append(@create_highlighting_box(@link.node_var1))
+            
+            f = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"div"</span>)
+            f.innerHTML = (<span class="hljs-string">"rdf:type "</span> + @link.node_concept.data(<span class="hljs-string">'label'</span>) + <span class="hljs-string">" ."</span>)
+            
+            q_line.append(f)
+
+        <span class="hljs-keyword">else</span>
+            q_line.append(@create_highlighting_box(@link.source))
+            
+            link_div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+            link_div.innerHTML = @link.node_link.data(<span class="hljs-string">'label'</span>) + <span class="hljs-string">"&amp;nbsp;"</span>
+            q_line.append(link_div)
+            
+            q_line.append(@create_highlighting_box(@link.target))
+            f = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"div"</span>)
+            f.innerHTML = <span class="hljs-string">" ."</span>
+            q_line.append(f)
+
+        button_div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        button_div.style.visibility = <span class="hljs-string">'hidden'</span>
+
+        <span class="hljs-keyword">if</span> @link.link_type != <span class="hljs-string">'concept'</span>
+            reverse_button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+            reverse_button.innerHTML = <span class="hljs-string">'🔄'</span>
+            reverse_button.style.color = <span class="hljs-string">'#ADD8E6'</span>
+            reverse_button.style.fontSize = <span class="hljs-string">'large'</span>
+            reverse_button.style.marginLeft = <span class="hljs-string">'8px'</span>
+            reverse_button.style.display = <span class="hljs-string">'inline-block'</span>
+            reverse_button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span>
+                @link.reverse()
+                @sparql_text.update()
+            button_div.append(reverse_button)
+
+        remove_button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        remove_button.innerHTML = <span class="hljs-string">'❎'</span>
+        remove_button.style.color = <span class="hljs-string">'#F08080'</span>
+        remove_button.style.fontSize = <span class="hljs-string">'large'</span>
+        remove_button.style.marginLeft = <span class="hljs-string">'8px'</span>
+        remove_button.style.display = <span class="hljs-string">'inline-block'</span>
+        remove_button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span>
+            @link.<span class="hljs-keyword">delete</span>()
+            @sparql_text.update()
+        button_div.append(remove_button)
+
+        q_line.append(button_div)
+        q_line.onmouseover = <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span>
+            button_div.style.visibility = <span class="hljs-string">'visible'</span>
+        q_line.onmouseout = <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span>
+            button_div.style.visibility = <span class="hljs-string">'hidden'</span>
+
+        q_line.className = <span class="hljs-string">'q_line'</span>
+
+        <span class="hljs-keyword">return</span> q_line
+
+
+    create_highlighting_box: <span class="hljs-function"><span class="hljs-params">(node)</span> =&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>##* creates a box in the sparql text that helps locate in the graph where the node is ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        container = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        container.className = <span class="hljs-string">'highlighting_box_container'</span>
+
+        st = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        st.className = <span class="hljs-string">"highlighting_box"</span>
+        st.id = node.id() + Math.round(Math.random()*<span class="hljs-number">1000</span>)
+        st.dataset.prevname = node.id()
+        st.dataset.node_id = node.id()
+        st.ondblclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span>
+            st.setAttribute(<span class="hljs-string">'contenteditable'</span>, <span class="hljs-string">'true'</span>)
+            @sparql_text.cy.center(node)
+            setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span> 
+                st.focus()
+            , <span class="hljs-number">0</span>);
+
+            st.onkeydown = <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span>
+                node.data(<span class="hljs-string">'label'</span>, st.innerHTML)
+
+                <span class="hljs-keyword">if</span> event.keyCode == <span class="hljs-number">13</span>
+                    event.preventDefault();
+                    <span class="hljs-keyword">if</span> st.innerHTML.length &lt;= <span class="hljs-number">2</span>
+                        st.innerHTML = node.id()
+                    st.setAttribute(<span class="hljs-string">'contenteditable'</span>, <span class="hljs-string">'false'</span>)
+                    @sparql_text.update()
+        st.onmouseover = <span class="hljs-function"><span class="hljs-params">($)</span> -&gt;</span>
+            node.addClass(<span class="hljs-string">"highlight"</span>)
+        st.onmouseout = <span class="hljs-function"><span class="hljs-params">($)</span> -&gt;</span>
+            node.removeClass(<span class="hljs-string">"highlight"</span>)
+        st.onclick = <span class="hljs-function"><span class="hljs-params">($)</span> =&gt;</span>
+            @sparql_text.cy.nodes().unselect()
+            node.select()
+        st.innerHTML = node.data(<span class="hljs-string">'label'</span>)
+        st.style.backgroundColor = node.data(<span class="hljs-string">'color'</span>)
+        
+        container.append(st)
+
+        <span class="hljs-keyword">return</span> container</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

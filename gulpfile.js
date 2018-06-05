@@ -17,9 +17,10 @@ var module_list = [
 
 gulp.task("build", function() {
   var c = gulp.src("./coffee/*.coffee").pipe(coffee({ bare: true }));
+  var l = gulp.src("./coffee/*.litcoffee").pipe(coffee({ bare: true }));
   var j = gulp.src(module_list);
 
-  merge2([j, c])
+  merge2([j, l, c])
     .pipe(gulpConcat("./dist/sparqling.js"))
     .pipe(gulp.dest("."));
 });
@@ -34,9 +35,10 @@ gulp.task("less", function() {
 
 gulp.task("compress", function() {
   var c = gulp.src("./coffee/*.coffee").pipe(coffee({ bare: true }));
+  var l = gulp.src("./coffee/*.litcoffee").pipe(coffee({ bare: true }));
   var j = gulp.src(module_list);
 
-  merge2([j, c])
+  merge2([j, l, c])
     .pipe(gulpConcat("./dist/sparqling_min.js"))
     .pipe(uglify())
     .pipe(gulp.dest("."));

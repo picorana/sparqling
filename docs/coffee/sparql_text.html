@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>sparql_text.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>sparql_text.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p><em>require query</em>filter.coffee</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">SparqlText</span></span>
+
+    instance = <span class="hljs-literal">null</span>
+
+    select_boxes        = []
+    
+    div_sparql_text     = <span class="hljs-literal">null</span>
+    cy                  = <span class="hljs-literal">null</span>
+    links               = <span class="hljs-literal">null</span>
+
+
+    constructor: <span class="hljs-function"><span class="hljs-params">(cy, links)</span> -&gt;</span>
+        <span class="hljs-keyword">if</span> instance
+            <span class="hljs-keyword">return</span> instance
+        <span class="hljs-keyword">else</span>
+            div_sparql_text = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'sparql_textbox'</span>)
+            div_sparql_text.className = <span class="hljs-string">"unselectable"</span>
+
+            @select_boxes = select_boxes
+
+            @cy      = cy
+            @links   = links
+            @filters = []
+
+            instance = <span class="hljs-keyword">this</span>
+
+
+    add_to_select: <span class="hljs-function"><span class="hljs-params">(id)</span> -&gt;</span>
+        select_boxes.push(id)
+        @update()
+
+
+    create_tab: <span class="hljs-function">-&gt;</span>
+        nbsp = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        nbsp.innerHTML = <span class="hljs-string">'&amp;nbsp;'</span>
+        <span class="hljs-keyword">return</span> nbsp
+
+
+    rename: <span class="hljs-function"><span class="hljs-params">(st)</span> -&gt;</span>
+        node = @cy.getElementById(st.dataset.node_id)
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0</span> ... select_boxes.length]
+            <span class="hljs-keyword">if</span> select_boxes[i] == st.dataset.prevname
+                select_boxes[i] = st.innerHTML.substr(i)
+        node.data(<span class="hljs-string">'label'</span>, st.innerHTML.substr(<span class="hljs-number">1</span>))
+
+
+    create_highlighting_box: <span class="hljs-function"><span class="hljs-params">(node)</span> =&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>##* creates a box in the sparql text that helps locate in the graph where the node is ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        container = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        container.className = <span class="hljs-string">'highlighting_box_container'</span>
+
+        st = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        st.className = <span class="hljs-string">"highlighting_box"</span>
+        st.id = node.id() + Math.round(Math.random()*<span class="hljs-number">1000</span>)
+        st.dataset.prevname = node.id()
+        st.dataset.node_id = node.id()
+
+        st.ondblclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span>
+            st.setAttribute(<span class="hljs-string">'contenteditable'</span>, <span class="hljs-string">'true'</span>)
+            @cy.center(node)
+            setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span> 
+                st.focus()
+            , <span class="hljs-number">0</span>);
+
+            st.onkeydown = <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span>
+                node.data(<span class="hljs-string">'label'</span>, st.innerHTML)
+
+                <span class="hljs-keyword">if</span> event.keyCode == <span class="hljs-number">13</span>
+                    event.preventDefault();
+                    <span class="hljs-keyword">if</span> st.innerHTML.length &lt;= <span class="hljs-number">2</span>
+                        st.innerHTML = node.id()
+                    st.setAttribute(<span class="hljs-string">'contenteditable'</span>, <span class="hljs-string">'false'</span>)
+                    @update()
+
+        st.onmouseover = <span class="hljs-function"><span class="hljs-params">($)</span> -&gt;</span>
+            node.addClass(<span class="hljs-string">"highlight"</span>)
+        st.onmouseout = <span class="hljs-function"><span class="hljs-params">($)</span> -&gt;</span>
+            node.removeClass(<span class="hljs-string">"highlight"</span>)
+        st.onclick = <span class="hljs-function"><span class="hljs-params">($)</span> =&gt;</span>
+            @cy.nodes().unselect()
+            node.select()
+        st.innerHTML = node.data(<span class="hljs-string">'label'</span>)
+        st.style.backgroundColor = node.data(<span class="hljs-string">'color'</span>)
+        
+        container.append(st)
+
+        minicross = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        minicross.innerHTML = <span class="hljs-string">' x '</span>
+        minicross.className = <span class="hljs-string">'minicross'</span>
+        minicross.dataset.linkedhbox = st.id
+        minicross.dataset.node_id = st.dataset.node_id
+        minicross.style.visibility = <span class="hljs-string">'hidden'</span>
+        minicross.onclick = <span class="hljs-function"><span class="hljs-params">($)</span> =&gt;</span>
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">'a'</span>
+            @remove_from_select_boxes(minicross.dataset.node_id)
+        container.append(minicross)
+        container.onmouseover = <span class="hljs-function"><span class="hljs-params">($)</span> -&gt;</span>
+            minicross.style.visibility = <span class="hljs-string">'visible'</span>
+        container.onmouseout = <span class="hljs-function"><span class="hljs-params">($)</span> -&gt;</span>
+            minicross.style.visibility = <span class="hljs-string">'hidden'</span>
+
+        <span class="hljs-keyword">return</span> container
+
+
+    remove_from_select_boxes: <span class="hljs-function"><span class="hljs-params">(node_id)</span> =&gt;</span>
+        <span class="hljs-built_in">console</span>.log @select_boxes
+        @select_boxes = @select_boxes.filter(<span class="hljs-function"><span class="hljs-params">(elem)</span> -&gt;</span> <span class="hljs-keyword">return</span> elem != node_id)
+        @update()
+
+
+    generate_plaintext_query: <span class="hljs-function">=&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>##* warning: VERY HACKY ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        result = <span class="hljs-string">"Select "</span>
+        <span class="hljs-keyword">if</span> select_boxes.length == <span class="hljs-number">0</span>
+            result += <span class="hljs-string">'*'</span>
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">for</span> elem <span class="hljs-keyword">in</span> select_boxes
+            result += <span class="hljs-string">'?'</span> + elem + <span class="hljs-string">' '</span>
+        result += <span class="hljs-string">'\r\nwhere {'</span>
+        <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> @links
+            result += <span class="hljs-string">'\r\n'</span>
+            result += link.to_string() 
+        <span class="hljs-keyword">for</span> filter <span class="hljs-keyword">in</span> @filters
+            result += <span class="hljs-string">'\r\n'</span>
+            result += filter.to_string()
+        result += <span class="hljs-string">'\r\n}'</span>
+        <span class="hljs-built_in">console</span>.log result
+        <span class="hljs-keyword">return</span> result
+
+
+    copy_to_clipboard: <span class="hljs-function">=&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>##* ugly hack to make you able to copy text to clipboard.</p>
+<p>##</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        tmp_div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'textarea'</span>) 
+        tmp_div.value = @generate_plaintext_query()
+        tmp_div.id = <span class="hljs-string">"tmp_div"</span>
+        <span class="hljs-built_in">document</span>.body.appendChild(tmp_div)
+        thing = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'tmp_div'</span>)
+        thing.select()
+        <span class="hljs-built_in">document</span>.execCommand(<span class="hljs-string">'Copy'</span>)
+        tmp_div.style.display = <span class="hljs-string">'none'</span>
+        <span class="hljs-built_in">document</span>.body.removeChild(tmp_div)
+
+
+    add_filter: <span class="hljs-function"><span class="hljs-params">(node)</span> =&gt;</span>
+        @filters.push(<span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.QueryFilter(@, node))
+        @update()
+
+
+    update: <span class="hljs-function">=&gt;</span>
+        div_sparql_text.innerHTML = <span class="hljs-string">""</span>
+        
+        init_string = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        init_string.className = <span class="hljs-string">"init_string"</span>
+
+        s_line = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        s_line.className = <span class="hljs-string">"s_line"</span>
+
+
+        <span class="hljs-keyword">if</span> @select_boxes.length == <span class="hljs-number">0</span>
+            s_line.innerHTML = <span class="hljs-string">"&amp;nbsp;*"</span>
+        <span class="hljs-keyword">else</span>
+            s_line.append(@create_tab())
+
+            count = <span class="hljs-number">0</span>
+            <span class="hljs-keyword">for</span> elem <span class="hljs-keyword">in</span> @select_boxes
+                <span class="hljs-keyword">if</span> @cy.getElementById(elem).id() != <span class="hljs-literal">undefined</span>
+                    s_line.append(@create_highlighting_box(@cy.getElementById(elem)))
+                    count += <span class="hljs-number">1</span>
+
+        select_div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        select_div.innerHTML = <span class="hljs-string">"Select "</span>
+        init_string.append(select_div)
+
+        init_string.append(s_line)
+        init_string.append(<span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'br'</span>))
+
+        select_div_f = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        select_div_f.innerHTML =  <span class="hljs-string">" where {"</span>
+        init_string.append(select_div_f)
+        
+        div_sparql_text.append(init_string)
+       
+        <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> @links
+            query_line = <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.QueryLine(link, <span class="hljs-keyword">this</span>)
+            div_sparql_text.append(query_line.to_html())
+
+        <span class="hljs-keyword">for</span> filter <span class="hljs-keyword">in</span> @filters
+            div_sparql_text.append(filter.to_html())
+        
+        f_string = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        f_string.style.display = <span class="hljs-string">'inline-block'</span>
+        f_string.style.marginRight = <span class="hljs-string">'5px'</span>
+        f_string.innerHTML = <span class="hljs-string">'} '</span>
+        div_sparql_text.append(f_string)
+
+        filter_button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        filter_button.className = <span class="hljs-string">'filter_button'</span>
+        filter_button.innerHTML = <span class="hljs-string">'+ filter'</span>
+        filter_button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> @add_filter()
+        div_sparql_text.append(filter_button)
+
+        containers = Array.prototype.slice.call(<span class="hljs-built_in">document</span>.getElementsByClassName(<span class="hljs-string">'q_line'</span>))
+            .concat(Array.prototype.slice.call(<span class="hljs-built_in">document</span>.getElementsByClassName(<span class="hljs-string">'void_box'</span>)))
+            .concat(s_line)
+
+        drake = dragula({
+            containers: containers
+            copy: <span class="hljs-function"><span class="hljs-params">(el, source)</span> =&gt;</span>
+                <span class="hljs-keyword">if</span> source.classList.contains(<span class="hljs-string">'q_line'</span>)
+                    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+                <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+            accepts: <span class="hljs-function"><span class="hljs-params">(el, target, source)</span> -&gt;</span>
+                <span class="hljs-keyword">if</span> target.classList.contains(<span class="hljs-string">'q_line'</span>) <span class="hljs-keyword">and</span> source.classList.contains(<span class="hljs-string">'q_line'</span>)
+                    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+                <span class="hljs-keyword">if</span> target.classList.contains(<span class="hljs-string">'void_box'</span>)
+                    target.innerHTML.replace(<span class="hljs-string">'&amp;nbsp;'</span>, <span class="hljs-string">''</span>)
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+                })
+
+        drake.<span class="hljs-literal">on</span>(<span class="hljs-string">'drop'</span>, 
+            <span class="hljs-function"><span class="hljs-params">(el, target)</span> =&gt;</span> 
+                <span class="hljs-keyword">if</span> target.classList.contains(<span class="hljs-string">'void_box'</span>)
+                    <span class="hljs-keyword">if</span> target.dataset.filter_position == <span class="hljs-string">'0'</span>
+                        $(target).data(<span class="hljs-string">'parent'</span>).node1 = @cy.getElementById(el.firstChild.dataset.node_id)
+                        $(target).data(<span class="hljs-string">'parent'</span>).conditions = []
+                        $(target).data(<span class="hljs-string">'parent'</span>).conditions.push($(target).data(<span class="hljs-string">'parent'</span>).new_condition())
+                    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> target.dataset.filter_position == <span class="hljs-string">'1'</span>
+                        $(target).data(<span class="hljs-string">'parent'</span>).node2 = @cy.getElementById(el.firstChild.dataset.node_id)
+                        $(target).data(<span class="hljs-string">'parent'</span>).conditions = []
+                        $(target).data(<span class="hljs-string">'parent'</span>).conditions.push($(target).data(<span class="hljs-string">'parent'</span>).new_condition())
+
+                @select_boxes = []
+                <span class="hljs-keyword">for</span> child <span class="hljs-keyword">in</span> s_line.children
+                    <span class="hljs-keyword">if</span> child.firstChild.innerHTML != <span class="hljs-literal">undefined</span>
+                        @select_boxes.push(child.firstChild.innerHTML.substr(<span class="hljs-number">1</span>))
+                @update()
+            )</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

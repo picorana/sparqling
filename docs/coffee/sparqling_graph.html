@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>sparqling_graph.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>sparqling_graph.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p><em>require cyto</em>style.coffee
+<em>require sparql</em>text.coffee
+<em>require painless</em>link.coffee </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">SparqlingGraph</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>##* manages the graph visualization</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        TODO: hardcoded collision distance should be <span class="hljs-keyword">in</span> constants</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>##</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    state_buffer    = <span class="hljs-literal">null</span>
+
+    constructor: <span class="hljs-function"><span class="hljs-params">(context)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>##*</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        TODO: sparql_text should be managed <span class="hljs-keyword">by</span> painless_sparql.coffee</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>##</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+        @utils = <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.PainlessUtils()
+        @context = context
+
+        @links = []
+
+        @layout_names   = [<span class="hljs-string">'cola'</span>, <span class="hljs-string">'cose-bilkent'</span>, <span class="hljs-string">'circle'</span>, <span class="hljs-string">'cose'</span>, <span class="hljs-string">'grid'</span>, <span class="hljs-string">'breadthfirst'</span>, <span class="hljs-string">'concentric'</span>]
+        @layout_index   = <span class="hljs-number">0</span>
+
+        @init()
+        @reshape()
+       
+        @sparql_text = <span class="hljs-keyword">new</span> SparqlText(@cy, @links)
+        @sparql_text.update()
+
+        <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.PainlessContextMenu(@cy, <span class="hljs-keyword">this</span>)
+
+        
+
+    reshape: <span class="hljs-function">=&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>##* resets node positions in the graph view ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+        @layout = @layout_names[@layout_index % @layout_names.length]
+        @cy.layout({
+            name: @layout
+            fit: <span class="hljs-literal">false</span>
+            animate: <span class="hljs-literal">true</span>
+            nodeDimensionsIncludeLabels: <span class="hljs-literal">true</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>padding: </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            edgeLength: <span class="hljs-number">200</span>
+        }).run()
+
+
+    download: <span class="hljs-function">=&gt;</span> 
+        data = JSON.stringify(@cy.json())
+        filename = <span class="hljs-string">"sparql.json"</span>
+        type = <span class="hljs-string">"text/plain"</span>
+        file = <span class="hljs-keyword">new</span> Blob([data], {type: type});
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">window</span>.navigator.msSaveOrOpenBlob
+            <span class="hljs-built_in">window</span>.navigator.msSaveOrOpenBlob(file, filename);
+        <span class="hljs-keyword">else</span>
+            a = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"a"</span>)
+            url = URL.createObjectURL(file)
+            a.href = url
+            a.download = filename
+            <span class="hljs-built_in">document</span>.body.appendChild(a)
+            a.click()
+            setTimeout(
+                <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span> 
+                    <span class="hljs-built_in">document</span>.body.removeChild(a)
+                    <span class="hljs-built_in">window</span>.URL.revokeObjectURL(url) 
+            , <span class="hljs-number">0</span>); 
+        
+
+    clear_all: <span class="hljs-function">=&gt;</span>
+        <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> @links
+            <span class="hljs-keyword">try</span> link.<span class="hljs-keyword">delete</span>()
+            <span class="hljs-keyword">catch</span> e <span class="hljs-keyword">then</span> <span class="hljs-built_in">console</span>.log link
+
+        @cy.remove(@cy.nodes())
+        @cy.remove(@cy.edges())
+
+        @links = []
+
+        @sparql_text.filters = []
+        @sparql_text.update()
+
+
+    center_view: <span class="hljs-function"><span class="hljs-params">(ele = <span class="hljs-literal">null</span>)</span> =&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>##* </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        TODO: pan <span class="hljs-keyword">and</span> center should actually be two different buttons!</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>##</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+        <span class="hljs-keyword">if</span> ele == <span class="hljs-literal">null</span>
+            <span class="hljs-keyword">if</span> @cy.nodes(<span class="hljs-string">':selected'</span>).length &gt; <span class="hljs-number">0</span>
+                @cy.center(@cy.nodes(<span class="hljs-string">':selected'</span>))
+            <span class="hljs-keyword">else</span> @cy.fit()
+        <span class="hljs-keyword">else</span>
+            @cy.center(ele)
+
+
+    add_to_select: <span class="hljs-function"><span class="hljs-params">(node_id)</span> =&gt;</span>
+        @sparql_text.add_to_select(node_id)
+
+    
+    copy_to_clipboard: <span class="hljs-function">-&gt;</span>
+        @sparql_text.copy_to_clipboard()
+
+
+    save_state: <span class="hljs-function">-&gt;</span>
+        <span class="hljs-keyword">if</span> state_buffer == <span class="hljs-literal">null</span>
+            state_buffer = []
+        <span class="hljs-keyword">if</span> @cy.json() != state_buffer[state_buffer.length - <span class="hljs-number">1</span>]
+            state_buffer.push(@cy.json())
+        <span class="hljs-keyword">if</span> state_buffer.length &gt;= state_buffer_max_length 
+           state_buffer.shift() 
+
+
+    undo : <span class="hljs-function">-&gt;</span>
+        <span class="hljs-keyword">if</span> state_buffer == <span class="hljs-literal">null</span> <span class="hljs-keyword">or</span> state_buffer.length &lt; <span class="hljs-number">1</span>
+            @context.alert <span class="hljs-string">"no saved states"</span>
+        <span class="hljs-keyword">else</span>
+            @cy.json(state_buffer[state_buffer.length - <span class="hljs-number">1</span>])
+            @cy.style(@utils.generate_style())
+            state_buffer.pop()
+            @reshape()
+
+
+    reverse_relationship: <span class="hljs-function">=&gt;</span>
+        s_node = @cy.nodes(<span class="hljs-string">":selected"</span>)
+        <span class="hljs-keyword">if</span> s_node == <span class="hljs-literal">null</span>
+            <span class="hljs-built_in">console</span>.warn <span class="hljs-string">'please select a node in the sparql graph'</span>
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> s_node.hasClass(<span class="hljs-string">"node-variable"</span>)
+            <span class="hljs-built_in">console</span>.warn <span class="hljs-string">'please select a role and not a variable'</span>
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> s_node.data(<span class="hljs-string">'links'</span>).link_type == <span class="hljs-string">'attribute'</span> 
+            <span class="hljs-built_in">console</span>.warn <span class="hljs-string">'attributes cannot be reversed'</span>
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> s_node.hasClass(<span class="hljs-string">"node-role"</span>) <span class="hljs-keyword">or</span> s_node.hasClass(<span class="hljs-string">"node-domain"</span>) <span class="hljs-keyword">or</span> s_node.hasClass(<span class="hljs-string">"node-range"</span>)
+            @cy.nodes(<span class="hljs-string">":selected"</span>).data(<span class="hljs-string">'links'</span>).reverse()
+        <span class="hljs-keyword">else</span> <span class="hljs-built_in">console</span>.warn <span class="hljs-string">'this action cannot be performed on the selected node'</span>
+
+
+
+    merge: <span class="hljs-function"><span class="hljs-params">(node1, node2)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>##* merges node1 and node2, repositioning all node2’s edges into node1 ###
+node2 è il nodo che viene trascinato</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+        @save_state()
+
+        links_to_add = []
+
+        <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> node2.data(<span class="hljs-string">'links'</span>)
+
+            <span class="hljs-keyword">if</span> link.link_type == <span class="hljs-string">'concept'</span>
+                links_to_add.push(<span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, link.link_name, link.link_type, node_var1 = node1))
+
+            <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> link.node_var1.id() == node2.id() <span class="hljs-keyword">and</span> link.node_var2.id() == node2.id()
+                <span class="hljs-built_in">console</span>.log <span class="hljs-string">'case1'</span>
+                links_to_add.push(<span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
+            <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> link.node_var1.id() == node2.id()
+                <span class="hljs-built_in">console</span>.log <span class="hljs-string">'case2'</span>
+                links_to_add.push(<span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
+            <span class="hljs-keyword">else</span> 
+                <span class="hljs-built_in">console</span>.log <span class="hljs-string">'case3'</span>
+                links_to_add.push(<span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
+
+            link.<span class="hljs-keyword">delete</span>()
+
+        <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> links_to_add
+            @links.push(link)
+
+        @cy.remove(node2) 
+        @sparql_text.update()
+
+
+    add_link: <span class="hljs-function"><span class="hljs-params">(link_name, link_type, datatype)</span> =&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>##* adds a new link in the graph. </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            links that are <span class="hljs-keyword">not</span> concepts (roles <span class="hljs-keyword">and</span> attributes) add a <span class="hljs-keyword">new</span> variable into the graph.
+            links are always added to the selected variable <span class="hljs-keyword">in</span> the graph, <span class="hljs-keyword">if</span> there are <span class="hljs-literal">no</span> selected variables,   
+                two <span class="hljs-keyword">new</span> variables are created.
+
+            links can be:
+            - concepts   
+            - roles
+            - attributes
+
+            TODO: use an enum to represent link types instead <span class="hljs-keyword">of</span> hardcoded strings</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>##</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+        <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> @context.graphol_cy.nodes()
+            <span class="hljs-keyword">if</span> node.data(<span class="hljs-string">'label'</span>) == link_name
+                node.style(<span class="hljs-string">'border-color'</span>, <span class="hljs-string">'#e38400'</span>)
+                node.style(<span class="hljs-string">'border-width'</span>, <span class="hljs-string">'5px'</span>)
+
+        @save_state()
+        <span class="hljs-keyword">if</span> link_type == <span class="hljs-string">'concept'</span>
+            <span class="hljs-keyword">if</span> @cy.nodes(<span class="hljs-string">":selected"</span>).length &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> @cy.nodes(<span class="hljs-string">":selected"</span>).hasClass(<span class="hljs-string">'node-variable'</span>)
+                link = <span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, link_name, link_type, @cy.nodes(<span class="hljs-string">":selected"</span>))
+            <span class="hljs-keyword">else</span>
+                link = <span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, link_name, link_type)
+                @sparql_text.add_to_select(link.node_var1.id())
+        <span class="hljs-keyword">else</span>
+            <span class="hljs-keyword">if</span> @cy.nodes(<span class="hljs-string">":selected"</span>).length &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> @cy.nodes(<span class="hljs-string">":selected"</span>).hasClass(<span class="hljs-string">'node-variable'</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>##* if a var node is selected, the link is added to the var node and one new var node is created###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                link = <span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, link_name, link_type, @cy.nodes(<span class="hljs-string">":selected"</span>), <span class="hljs-literal">null</span>, datatype)
+                @sparql_text.add_to_select(link.node_var2.id())
+            <span class="hljs-keyword">else</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>##* otherwise, two new var nodes are created ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                link = <span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, link_name, link_type, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>, datatype)
+                @sparql_text.add_to_select(link.node_var1.id())
+                @sparql_text.add_to_select(link.node_var2.id())
+
+        @links.push(link)
+        <span class="hljs-built_in">console</span>.log @links
+        @sparql_text.update()
+        @reshape()
+   
+
+    compute_distance: <span class="hljs-function"><span class="hljs-params">(node1, node2)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>##* computes distance between two node positions ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        a = Math.abs(node1.position(<span class="hljs-string">'x'</span>) - node2.position(<span class="hljs-string">'x'</span>))
+        b = Math.abs(node1.position(<span class="hljs-string">'y'</span>) - node2.position(<span class="hljs-string">'y'</span>))
+        <span class="hljs-keyword">return</span> Math.sqrt(a*a + b*b)
+
+
+    check_collisions: <span class="hljs-function">=&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>##* check if there are any collisions in all the node variables</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        returns the colliding nodes <span class="hljs-keyword">if</span> there are any.
+
+        TODO: collision highlight <span class="hljs-keyword">is</span> broken!
+        TODO: remove hardcoded collision distance threshold</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>##</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> @cy.nodes(<span class="hljs-string">".node-variable"</span>)
+            <span class="hljs-keyword">for</span> node2 <span class="hljs-keyword">in</span> @cy.nodes(<span class="hljs-string">".node-variable"</span>)
+                <span class="hljs-keyword">if</span> node != node2
+                    <span class="hljs-keyword">if</span> @compute_distance(node, node2) &lt; <span class="hljs-number">100</span>
+                        node.addClass(<span class="hljs-string">'highlight'</span>)
+                        node2.addClass(<span class="hljs-string">'highlight'</span>)
+                        <span class="hljs-keyword">return</span> [node, node2]
+                    <span class="hljs-keyword">else</span>
+                        node.removeClass(<span class="hljs-string">'highlight'</span>)
+ 
+    load: <span class="hljs-function">=&gt;</span>
+        
+        parsed_query = <span class="hljs-built_in">window</span>.sparqljs.Parser().parse(
+            <span class="hljs-string">'PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt; PREFIX xmlns: &lt;http://baa&gt; '</span> +
+            <span class="hljs-string">'SELECT * { ?mickey foaf:name "Mickey Mouse" . ?mickey foaf:knows ?other. }'</span>);
+
+        <span class="hljs-keyword">for</span> triple <span class="hljs-keyword">in</span> parsed_query[<span class="hljs-string">'where'</span>][<span class="hljs-number">0</span>][<span class="hljs-string">'triples'</span>]
+
+            <span class="hljs-keyword">if</span> @cy.getElementById(triple[<span class="hljs-string">'subject'</span>].slice(<span class="hljs-number">1</span>)).length == <span class="hljs-number">0</span>
+
+                subj = @cy.add({ 
+                    group: <span class="hljs-string">'nodes'</span>
+                    classes: <span class="hljs-string">'node-variable'</span>
+                    data: {
+                        id: triple[<span class="hljs-string">'subject'</span>].slice(<span class="hljs-number">1</span>)
+                        label: triple[<span class="hljs-string">'subject'</span>].slice(<span class="hljs-number">1</span>)
+                        color: <span class="hljs-string">'#'</span> + palette[<span class="hljs-number">0</span>]
+                        links: []
+                    }
+                })
+
+                subj = subj[<span class="hljs-number">0</span>]
+
+            <span class="hljs-keyword">else</span> 
+
+                subj = @cy.getElementById(triple[<span class="hljs-string">'subject'</span>].slice(<span class="hljs-number">1</span>))
+
+            <span class="hljs-keyword">if</span> triple[<span class="hljs-string">'object'</span>].charAt(<span class="hljs-number">0</span>) == <span class="hljs-string">'?'</span>
+
+                <span class="hljs-keyword">if</span> @cy.getElementById(triple[<span class="hljs-string">'object'</span>].slice(<span class="hljs-number">1</span>)).length == <span class="hljs-number">0</span>
+
+                    obj = @cy.add({ 
+                        group: <span class="hljs-string">'nodes'</span>
+                        classes: <span class="hljs-string">'node-variable'</span>
+                        data: {
+                            id: triple[<span class="hljs-string">'object'</span>].slice(<span class="hljs-number">1</span>)
+                            label: triple[<span class="hljs-string">'object'</span>].slice(<span class="hljs-number">1</span>)
+                            color: <span class="hljs-string">'#aaa'</span>
+                            links: []
+                        }
+                    })
+
+                    obj = obj[<span class="hljs-number">0</span>]
+
+                <span class="hljs-keyword">else</span>
+
+                    obj = @cy.getElementById(triple[<span class="hljs-string">'object'</span>].slice(<span class="hljs-number">1</span>))
+
+            <span class="hljs-keyword">else</span> 
+
+                obj = @cy.add({ 
+                    group: <span class="hljs-string">'nodes'</span>
+                    classes: <span class="hljs-string">'node-constant-value'</span>
+                    data: {
+                        id: triple[<span class="hljs-string">'object'</span>]
+                        label: triple[<span class="hljs-string">'object'</span>]
+                        color: <span class="hljs-string">'#aaa'</span>
+                        links: []
+                    }
+                })
+
+                obj = obj[<span class="hljs-number">0</span>]
+
+
+            $.each(parsed_query[<span class="hljs-string">'prefixes'</span>], <span class="hljs-function"><span class="hljs-params">(elem)</span> =&gt;</span> 
+                <span class="hljs-built_in">console</span>.log triple[<span class="hljs-string">'predicate'</span>].indexOf(parsed_query[<span class="hljs-string">'prefixes'</span>][elem])
+                <span class="hljs-keyword">if</span> triple[<span class="hljs-string">'predicate'</span>].indexOf(parsed_query[<span class="hljs-string">'prefixes'</span>][elem]) != <span class="hljs-number">-1</span>
+                    triple[<span class="hljs-string">'predicate'</span>] = triple[<span class="hljs-string">'predicate'</span>].substr(parsed_query[<span class="hljs-string">'prefixes'</span>][elem].length)
+                    )
+
+
+
+            link = <span class="hljs-keyword">new</span> PainlessLink(<span class="hljs-keyword">this</span>, @cy, triple[<span class="hljs-string">'predicate'</span>], <span class="hljs-string">'role'</span>, subj, obj)
+            @links.push(link)
+
+            @reshape()
+            @sparql_text.update()
+
+
+
+    
+    init: <span class="hljs-function">=&gt;</span>
+
+        @cy = <span class="hljs-keyword">new</span> cytoscape(
+            container: <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"query_canvas"</span>),
+            style: @utils.generate_style()
+            wheelSensitivity: <span class="hljs-number">0.5</span>
+        )
+
+        @cy.<span class="hljs-literal">on</span>(<span class="hljs-string">'click'</span>, <span class="hljs-string">'.node-variable'</span>,
+            <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span>
+                event.target.select()
+                @reshape()
+            )
+
+        @cy.<span class="hljs-literal">on</span>(<span class="hljs-string">'mouseup'</span>,
+            <span class="hljs-function"><span class="hljs-params">($)</span> =&gt;</span> 
+                <span class="hljs-keyword">if</span> @check_collisions() != <span class="hljs-literal">undefined</span>
+                    node_tmp_arr = @check_collisions()
+                    @merge(node_tmp_arr[<span class="hljs-number">0</span>], node_tmp_arr[<span class="hljs-number">1</span>])
+            
+                @reshape()
+            )
+        @cy.resize()</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

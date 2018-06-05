@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>query_filter.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>query_filter.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">QueryFilter</span></span>
+
+
+    constructor: <span class="hljs-function"><span class="hljs-params">(sparql_text, node)</span> -&gt;</span>
+        
+        @node1 = node
+        @node2 = <span class="hljs-literal">null</span>
+
+        @v1_val = <span class="hljs-literal">null</span>
+        @v2_val = <span class="hljs-literal">null</span>
+
+        @datatype = <span class="hljs-string">"^^xsd:string"</span>
+        @operator_sym = <span class="hljs-string">"&gt;="</span>
+
+        @sparql_text = sparql_text
+
+        @conditions = []
+        @conditions.push(@new_condition())
+
+        @slots = []
+
+
+    new_condition: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span>
+
+        @slots = []
+
+        <span class="hljs-keyword">if</span> @node1 != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @node1 != <span class="hljs-literal">null</span>
+            @node1.addClass(<span class="hljs-string">'filtered'</span>)
+        <span class="hljs-keyword">if</span> @node2 != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @node2 != <span class="hljs-literal">null</span>
+            @node2.addClass(<span class="hljs-string">'filtered'</span>)
+
+        d = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        d.style.display = <span class="hljs-string">'flex'</span>
+        <span class="hljs-keyword">if</span> @node1 != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @node1 != <span class="hljs-literal">null</span>
+            hl_box = <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.HlBox(@node1)
+            d.appendChild(hl_box.to_html())
+            @slots.push(hl_box)
+        <span class="hljs-keyword">else</span>
+            @v = <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.Void(@, <span class="hljs-number">0</span>, @v1_val)
+            @v.div.addEventListener(<span class="hljs-string">'input'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> 
+                <span class="hljs-built_in">console</span>.log @v.div.innerHTML
+                @v1_val = @v.div.innerHTML
+                @v.val = @v.div.innerHTML
+                )
+            d.appendChild(@v.to_html())
+            @slots.push(@v)
+
+        operator = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        operator.innerHTML = @operator_sym
+        operator.style.marginLeft = <span class="hljs-string">'5px'</span>
+        operator.style.marginRight = <span class="hljs-string">'5px'</span>
+        operator.contentEditable = <span class="hljs-string">'true'</span>
+        operator.addEventListener(<span class="hljs-string">'input'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> @operator_sym = operator.innerHTML)
+
+        d.appendChild(operator)
+
+        <span class="hljs-keyword">if</span> @node2 != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @node2 != <span class="hljs-literal">null</span>
+            hl_box = <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.HlBox(@node2)
+            d.appendChild(hl_box.to_html())
+            @slots.push(hl_box)
+        <span class="hljs-keyword">else</span>
+            @v = <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.Void(@, <span class="hljs-number">1</span>, @v2_val)
+            @v.div.addEventListener(<span class="hljs-string">'input'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> 
+                @v2_val = @v.div.innerHTML
+                @v.val = @v.div.innerHTML
+                )
+            d.appendChild(@v.to_html())
+            @slots.push(@v)
+
+        value = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        value.style.marginLeft = <span class="hljs-string">'5px'</span>
+        value.style.marginRight = <span class="hljs-string">'5px'</span>
+        value.innerHTML = @datatype
+        value.contentEditable = <span class="hljs-string">'true'</span>
+        value.addEventListener(<span class="hljs-string">'input'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> @datatype = value.innerHTML)
+
+        d.appendChild(value)
+
+        <span class="hljs-keyword">return</span> d
+
+
+    to_string: <span class="hljs-function">=&gt;</span>
+        result = <span class="hljs-string">'filter ('</span>
+        <span class="hljs-keyword">if</span> @slots[<span class="hljs-number">0</span>] <span class="hljs-keyword">instanceof</span> HlBox
+            <span class="hljs-keyword">if</span> @node1 != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @node1 != <span class="hljs-literal">null</span>
+                result += <span class="hljs-string">' '</span> + @node1.id()
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> @v1_val != <span class="hljs-literal">null</span>
+            result += @v1_val
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-string">''</span>
+
+        <span class="hljs-keyword">if</span> @operator_sym != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @operator_sym != <span class="hljs-literal">null</span>
+            result += <span class="hljs-string">' '</span> + @operator_sym
+
+        <span class="hljs-keyword">if</span> @slots[<span class="hljs-number">1</span>] <span class="hljs-keyword">instanceof</span> HlBox
+            <span class="hljs-keyword">if</span> @node2 != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @node2 != <span class="hljs-literal">null</span>
+                result += <span class="hljs-string">' '</span> + @node2.id()
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> @v2_val != <span class="hljs-literal">null</span>
+            result += @v2_val
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-string">''</span>
+
+        <span class="hljs-keyword">if</span> @datatype != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @datatype != <span class="hljs-literal">null</span>
+            result += <span class="hljs-string">' '</span> + @datatype
+
+        <span class="hljs-keyword">return</span> result + <span class="hljs-string">' )'</span>
+
+
+    to_html: <span class="hljs-function">=&gt;</span>
+        result_div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        
+        start = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        start.innerHTML = <span class="hljs-string">"filter "</span>
+        start.style.display = <span class="hljs-string">"inline"</span>
+        result_div.append(start)
+
+        conditions_container = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        conditions_container.className = <span class="hljs-string">"filter_condition_container"</span>
+        <span class="hljs-keyword">for</span> condition <span class="hljs-keyword">in</span> @conditions
+            conditions_container.appendChild(@new_condition())
+        result_div.append(conditions_container)
+
+        remove_button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        remove_button.innerHTML = <span class="hljs-string">'❎'</span>
+        remove_button.style.color = <span class="hljs-string">'#F08080'</span>
+        remove_button.style.fontSize = <span class="hljs-string">'large'</span>
+        remove_button.style.marginLeft = <span class="hljs-string">'8px'</span>
+        remove_button.style.visibility = <span class="hljs-string">'hidden'</span>
+        remove_button.style.display = <span class="hljs-string">'inline-block'</span>
+        remove_button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span>
+            @delete()
+        result_div.append(remove_button)
+
+        result_div.onmouseover = <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span>
+            remove_button.style.visibility = <span class="hljs-string">'visible'</span>
+        result_div.onmouseout = <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span>
+            remove_button.style.visibility = <span class="hljs-string">'hidden'</span>
+            
+
+        <span class="hljs-keyword">return</span> result_div
+
+
+    delete: <span class="hljs-function">=&gt;</span>
+        index = @sparql_text.filters.indexOf(@)
+        <span class="hljs-keyword">if</span> @node1 != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @node1 != <span class="hljs-literal">null</span>
+            @node1.removeClass(<span class="hljs-string">'filtered'</span>)
+        <span class="hljs-keyword">if</span> @node2 != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> @node2 != <span class="hljs-literal">null</span>
+            @node2.removeClass(<span class="hljs-string">'filtered'</span>)
+        @sparql_text.filters.splice(index, <span class="hljs-number">1</span>)
+        @sparql_text.update()</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

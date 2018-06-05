@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>sparqling.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>sparqling.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">Sparqling</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Main class of the application, keeps together all the different components, 
+and defines the interaction with the grapholscape graph.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    
+    instance = <span class="hljs-literal">null</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p><strong>tappedBefore</strong> and <strong>tappedTimeout</strong> are doubleclick timers</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    tappedBefore = <span class="hljs-literal">null</span>
+    tappedTimeout = <span class="hljs-literal">null</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>note that <strong>@graphol_cy</strong> is the cytoscape instance from grapholscape, 
+while <strong>@cy</strong> is the new instance created by sparqling to represent the query.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    constructor: <span class="hljs-function"><span class="hljs-params">(graph)</span> -&gt;</span>
+        <span class="hljs-keyword">if</span> instance 
+            <span class="hljs-keyword">return</span> instance
+        <span class="hljs-keyword">else</span>    
+            @graphol_cy = graph.cy <span class="hljs-comment">#</span>
+            instance = <span class="hljs-keyword">this</span>
+            <span class="hljs-keyword">do</span> @init
+
+
+    init : <span class="hljs-function">-&gt;</span>
+        @sidenav        = <span class="hljs-keyword">new</span> SparqlingNavbar <span class="hljs-keyword">this</span>
+        @graph          = <span class="hljs-keyword">new</span> SparqlingGraph <span class="hljs-keyword">this</span>
+        @menu           = <span class="hljs-keyword">new</span> PainlessMenu <span class="hljs-keyword">this</span>
+        @alert          = <span class="hljs-keyword">new</span> SparqlingAlert
+        @sparql_text    = @graph.sparql_text
+        
+        <span class="hljs-keyword">do</span> @add_event_listener</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Add the <strong>selected node</strong> in grapholscape to the query,
+according to the type of the node (stored in node.data(‘type’)).
+Nodes can be ‘role’, ‘attribute’ or ‘concept’</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    add_to_query: <span class="hljs-function">=&gt;</span>
+        selected_node = @graphol_cy.nodes(<span class="hljs-string">":selected"</span>)
+        
+        <span class="hljs-keyword">if</span> selected_node.length == <span class="hljs-number">0</span>
+            @alert.alert <span class="hljs-string">"please, select a node in the main graph"</span>
+        
+        <span class="hljs-keyword">switch</span> selected_node.data(<span class="hljs-string">'type'</span>)
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"role"</span>         <span class="hljs-keyword">then</span> @graph.add_link(selected_node.data(<span class="hljs-string">'label'</span>), <span class="hljs-string">'role'</span>)
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"attribute"</span>    <span class="hljs-keyword">then</span> @graph.add_link(selected_node.data(<span class="hljs-string">'label'</span>), <span class="hljs-string">'attribute'</span>, @extract_datatype(selected_node))
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"concept"</span>      <span class="hljs-keyword">then</span> @graph.add_link(selected_node.data(<span class="hljs-string">'label'</span>), <span class="hljs-string">'concept'</span>)         
+
+
+    extract_datatype: <span class="hljs-function"><span class="hljs-params">(inode)</span> =&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>extracts the attribute type from the grapholscape graph</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">for</span> neighbor <span class="hljs-keyword">in</span> inode.neighborhood(<span class="hljs-string">'node'</span>)
+            <span class="hljs-keyword">if</span> neighbor.data(<span class="hljs-string">'type'</span>) == <span class="hljs-string">"range-restriction"</span>
+                <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> neighbor.neighborhood(<span class="hljs-string">'node'</span>)
+                    <span class="hljs-keyword">if</span> node.data(<span class="hljs-string">'type'</span>) == <span class="hljs-string">"value-domain"</span>
+                        <span class="hljs-keyword">return</span> node.data(<span class="hljs-string">'label'</span>)
+
+
+    onkeypress_handler : <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>debug bindings - to be removed</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> event.key == <span class="hljs-string">"d"</span>
+            <span class="hljs-built_in">console</span>.log @graph.cy.nodes(<span class="hljs-string">":selected"</span>).data(<span class="hljs-string">'links'</span>)
+
+        <span class="hljs-keyword">if</span> event.key == <span class="hljs-string">"c"</span>
+            <span class="hljs-built_in">console</span>.log @graph.links
+
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> event.keyCode == <span class="hljs-number">46</span> <span class="hljs-keyword">or</span> event.keyCode == <span class="hljs-number">8</span> <span class="hljs-keyword">or</span> event.keyCode == <span class="hljs-number">127</span>
+            <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> @graph.cy.nodes(<span class="hljs-string">":selected"</span>).data(<span class="hljs-string">'links'</span>)
+                link.<span class="hljs-keyword">delete</span>()
+
+
+    doubleclick_handler: <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span>
+        tappedNow = event.target;
+        <span class="hljs-keyword">if</span> tappedTimeout &amp;&amp; tappedBefore 
+            clearTimeout(tappedTimeout);
+      
+        <span class="hljs-keyword">if</span> tappedBefore == tappedNow 
+            tappedNow.trigger(<span class="hljs-string">'doubleTap'</span>, event);
+            tappedBefore = <span class="hljs-literal">null</span>;
+            originalTapEvent = <span class="hljs-literal">null</span>;
+            @add_to_query()
+        <span class="hljs-keyword">else</span> 
+            tappedTimeout = setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>  
+                    tappedBefore = <span class="hljs-literal">null</span>
+                , <span class="hljs-number">300</span>);
+            tappedBefore = tappedNow;
+
+
+    add_event_listener : <span class="hljs-function">-&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>keypress handler</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'keypress'</span>, <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span> @onkeypress_handler(event))</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>fix sizes on window resize</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'resize'</span>, <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> @resize_navbar())</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>doubleclick handler on grapholscape</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        @graphol_cy.<span class="hljs-literal">on</span>(<span class="hljs-string">'tap'</span>, <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span> @doubleclick_handler(event))</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

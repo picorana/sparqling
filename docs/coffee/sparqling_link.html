@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>sparqling_link.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>sparqling_link.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>_require constants.coffee</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">PainlessLink</span></span>
+
+    color_index = <span class="hljs-number">0</span>
+
+    constructor: <span class="hljs-function"><span class="hljs-params">(context, cy, link_name, link_type, node_var1 = <span class="hljs-literal">null</span>, node_var2 = <span class="hljs-literal">null</span>, datatype)</span> -&gt;</span>
+        @cy         = cy
+        @context    = context
+
+        @link_name  = link_name
+        @link_type  = link_type
+
+        @node_var1  = node_var1
+        @node_var2  = node_var2
+
+        @edge_source = <span class="hljs-literal">null</span>
+        @edge_target = <span class="hljs-literal">null</span>
+
+        @datatype = datatype
+        @datatype_node = <span class="hljs-literal">null</span>
+
+        <span class="hljs-keyword">if</span> link_type == <span class="hljs-string">'concept'</span>
+            @create_concept()
+        <span class="hljs-keyword">else</span>
+            @create_link()
+
+
+    find_new_name: <span class="hljs-function"><span class="hljs-params">(base_name = <span class="hljs-literal">null</span>)</span> -&gt;</span>
+        <span class="hljs-keyword">if</span> base_name == <span class="hljs-literal">null</span>
+            base_name = <span class="hljs-string">"x"</span>
+
+        i = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">while</span> @cy.getElementById(base_name + i).length != <span class="hljs-number">0</span> 
+            i += <span class="hljs-number">1</span>
+        <span class="hljs-keyword">return</span> base_name + i
+
+
+    create_edge: <span class="hljs-function"><span class="hljs-params">(node1, node2, classes = <span class="hljs-literal">null</span>)</span> =&gt;</span>
+        <span class="hljs-keyword">return</span> @cy.add({
+            group: <span class="hljs-string">'edges'</span>
+            data: {source: node1.id(), target: node2.id()}
+            classes: classes
+        })
+
+
+    reverse: <span class="hljs-function">=&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>##* can only be applied to non-concept relationships ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> @source == @node_var1
+            @edge_source.classes(<span class="hljs-string">'target-edge'</span>)
+            @edge_target.classes(<span class="hljs-string">'source-edge'</span>)
+            @source = @node_var2
+            @target = @node_var1
+        <span class="hljs-keyword">else</span> 
+            @edge_source.classes(<span class="hljs-string">'source-edge'</span>)
+            @edge_target.classes(<span class="hljs-string">'target-edge'</span>)
+            @source = @node_var1
+            @target = @node_var2
+
+
+    add_datatype: <span class="hljs-function"><span class="hljs-params">(node, datatype)</span> =&gt;</span>
+        @datatype_node = @cy.add({
+            group: <span class="hljs-string">'nodes'</span>
+            data: {
+                label: datatype
+            }
+            classes: <span class="hljs-string">'node-datatype'</span>
+        })
+
+        @edge_datatype = @cy.add({
+            group: <span class="hljs-string">'edges'</span>
+            data: {source: node.id(), target: @datatype_node.id(), weight: <span class="hljs-number">99</span>}
+            classes: <span class="hljs-string">'edge-datatype'</span>
+        })
+   
+
+    create_node: <span class="hljs-function"><span class="hljs-params">(type, label = <span class="hljs-literal">null</span>)</span> =&gt;</span>
+
+        data = {}
+
+        <span class="hljs-keyword">if</span> type == <span class="hljs-string">'node-variable'</span> 
+            label = @find_new_name(label)
+            data[<span class="hljs-string">'id'</span>] = label
+            
+            data[<span class="hljs-string">'color'</span>] = <span class="hljs-string">'#'</span> + palette[color_index % palette.length]
+            color_index += <span class="hljs-number">1</span>
+        
+        <span class="hljs-keyword">if</span> type == <span class="hljs-string">'node-concept'</span> 
+            data[<span class="hljs-string">'label'</span>] = @link_name
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> type == <span class="hljs-string">'node-attribute'</span> <span class="hljs-keyword">or</span> type == <span class="hljs-string">'node-role'</span>
+            data[<span class="hljs-string">'label'</span>] = label
+        <span class="hljs-keyword">else</span> data[<span class="hljs-string">'label'</span>] = <span class="hljs-string">'?'</span> + label
+        
+        data[<span class="hljs-string">'links'</span>] = [@]
+
+        <span class="hljs-keyword">return</span> @cy.add({
+            group: <span class="hljs-string">'nodes'</span>
+            data: data
+            classes: type
+        })
+
+
+    delete: <span class="hljs-function">=&gt;</span>
+
+        index = @context.links.indexOf(<span class="hljs-keyword">this</span>)
+        @context.links.splice(index, <span class="hljs-number">1</span>)
+        @context.sparql_text.update()
+
+        <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> @context.context.cy.nodes()
+            <span class="hljs-keyword">if</span> node.data(<span class="hljs-string">'label'</span>) == @link_name
+                node.style(<span class="hljs-string">'border-color'</span>, <span class="hljs-string">'black'</span>)
+                node.style(<span class="hljs-string">'border-width'</span>, <span class="hljs-string">'1px'</span>)
+
+        <span class="hljs-keyword">if</span> @node_link != <span class="hljs-literal">null</span> <span class="hljs-keyword">and</span> @node_link != <span class="hljs-literal">undefined</span>
+            @cy.remove(@node_link)
+        <span class="hljs-keyword">if</span> @node_concept != <span class="hljs-literal">null</span> <span class="hljs-keyword">and</span> @node_concept != <span class="hljs-literal">undefined</span>
+            @cy.remove(@node_concept)
+        <span class="hljs-keyword">if</span> @datatype_node != <span class="hljs-literal">null</span> <span class="hljs-keyword">and</span> @datatype_node != <span class="hljs-literal">undefined</span>
+            @cy.remove(@datatype_node)
+        <span class="hljs-keyword">for</span> node_var <span class="hljs-keyword">in</span> [@node_var1, @node_var2]
+            <span class="hljs-keyword">if</span> node_var != <span class="hljs-literal">null</span> <span class="hljs-keyword">and</span> node_var != <span class="hljs-literal">undefined</span>    
+
+                index = node_var.data(<span class="hljs-string">'links'</span>).indexOf(@)
+                node_var.data(<span class="hljs-string">'links'</span>).splice(index, <span class="hljs-number">1</span>)
+
+                <span class="hljs-keyword">if</span> node_var.data(<span class="hljs-string">'links'</span>).length == <span class="hljs-number">0</span>
+                    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0</span> ... @context.sparql_text.select_boxes.length]
+                        <span class="hljs-keyword">if</span> @context.sparql_text.select_boxes[i] == node_var.id()
+                            @context.sparql_text.select_boxes.splice(i, <span class="hljs-number">1</span>)
+
+                    @cy.remove(node_var)          
+
+        @context.sparql_text.update()
+
+
+    create_link: <span class="hljs-function">=&gt;</span>
+        <span class="hljs-keyword">if</span> @node_var1 == <span class="hljs-literal">null</span> <span class="hljs-keyword">or</span> @node_var1 == <span class="hljs-literal">undefined</span>
+            @node_var1   = @create_node(<span class="hljs-string">'node-variable'</span>)
+            @node_var1.classes(<span class="hljs-string">'node-variable node-variable-full-options'</span>)
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> @node_var1.hasClass(<span class="hljs-string">'attr-range'</span>) 
+            <span class="hljs-built_in">console</span>.warn <span class="hljs-string">'properties can\'t be added to the range of an attribute'</span>
+            <span class="hljs-keyword">return</span> 
+        <span class="hljs-keyword">else</span> @node_var1.data(<span class="hljs-string">'links'</span>).push(@)
+
+        <span class="hljs-keyword">if</span> @node_var2 == <span class="hljs-literal">null</span> <span class="hljs-keyword">or</span> @node_var2 == <span class="hljs-literal">undefined</span>
+            <span class="hljs-keyword">if</span> @link_type == <span class="hljs-string">'attribute'</span>
+                @node_var2   = @create_node(<span class="hljs-string">'node-variable'</span>, @link_name)
+                @node_var2.classes(<span class="hljs-string">'node-variable attr-range'</span>)
+                <span class="hljs-keyword">if</span> @datatype != <span class="hljs-literal">null</span> <span class="hljs-keyword">and</span> @datatype != <span class="hljs-literal">undefined</span>
+                    @add_datatype(@node_var2, @datatype)
+            <span class="hljs-keyword">else</span> 
+                @node_var2 = @create_node(<span class="hljs-string">'node-variable'</span>)
+                @node_var2.classes(<span class="hljs-string">'node-variable node-variable-full-options'</span>)
+        <span class="hljs-keyword">else</span> @node_var2.data(<span class="hljs-string">'links'</span>).push(@)
+       
+        @source = @node_var1
+        @target = @node_var2
+
+        <span class="hljs-keyword">if</span> @link_type == <span class="hljs-string">'role'</span>
+            @node_link       = @create_node(<span class="hljs-string">'node-role'</span>, @link_name)
+        <span class="hljs-keyword">else</span>
+            @node_link       = @create_node(<span class="hljs-string">'node-attribute'</span>, @link_name)
+
+        @edge_source = @create_edge(@node_link, @source, <span class="hljs-string">"source-edge"</span>)
+        @edge_target = @create_edge(@node_link, @target, <span class="hljs-string">"target-edge"</span>)
+
+        
+
+    create_concept: <span class="hljs-function">=&gt;</span>
+        <span class="hljs-keyword">if</span> @node_var1 == <span class="hljs-literal">null</span> <span class="hljs-keyword">or</span> @node_var1 == <span class="hljs-literal">undefined</span>
+            @node_var1  = @create_node(<span class="hljs-string">'node-variable'</span>)
+            @node_var1.classes(<span class="hljs-string">'node-variable node-variable-full-options'</span>)
+        <span class="hljs-keyword">else</span> @node_var1.data(<span class="hljs-string">'links'</span>).push(@) 
+
+        @node_concept     = @create_node(<span class="hljs-string">'node-concept'</span>)
+        @create_edge(@node_var1, @node_concept, <span class="hljs-string">'edge-concept'</span>)
+
+
+    to_string: <span class="hljs-function">=&gt;</span>
+        <span class="hljs-keyword">if</span> @link_type != <span class="hljs-string">'concept'</span> 
+            <span class="hljs-keyword">return</span> @source.data(<span class="hljs-string">'label'</span>) + <span class="hljs-string">' '</span> + @link_name + <span class="hljs-string">' '</span> + @target.data(<span class="hljs-string">'label'</span>) + <span class="hljs-string">' .'</span>
+        <span class="hljs-keyword">else</span> 
+            <span class="hljs-keyword">return</span> @node_var1.data(<span class="hljs-string">'label'</span>) + <span class="hljs-string">' rdf:type '</span> + @node_concept.data(<span class="hljs-string">'label'</span>) + <span class="hljs-string">' .'</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

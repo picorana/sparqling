@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>sparqling_navbar.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>sparqling_navbar.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">SparqlingNavbar</span></span>
+
+    cur_sidenav_size = <span class="hljs-number">50</span>
+
+    constructor: <span class="hljs-function"><span class="hljs-params">(context)</span> -&gt;</span>
+        @context = context
+        @create_sidenav()
+
+
+    create_sidenav : <span class="hljs-function">=&gt;</span>
+
+        @side_nav_container = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"div"</span>)
+        @side_nav_container.id = <span class="hljs-string">"sidenav_container"</span>
+
+        <span class="hljs-built_in">document</span>.body.appendChild(@side_nav_container)
+
+        @context.graphol_cy.resize()
+
+        slider = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"div"</span>)
+        slider.id = <span class="hljs-string">'slider'</span>
+        sidenav_container.appendChild(slider)
+
+        slider_button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        slider_button.innerHTML = <span class="hljs-string">'&lt;i class="material-icons"&gt;keyboard_arrow_left&lt;/i&gt;'</span>
+        slider_button.className = <span class="hljs-string">'slider_button'</span>
+        slider_button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span>
+            @resize_navbar(cur_sidenav_size + <span class="hljs-number">25</span>)
+            
+        slider.appendChild(slider_button)
+
+        slider_button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        slider_button.innerHTML = <span class="hljs-string">'&lt;i class="material-icons"&gt;keyboard_arrow_right&lt;/i&gt;'</span>
+        slider_button.className = <span class="hljs-string">'slider_button'</span>
+        slider_button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span>
+            @resize_navbar(cur_sidenav_size - <span class="hljs-number">25</span>)
+
+        slider.appendChild(slider_button)
+
+        button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"div"</span>)
+        button.innerHTML = <span class="hljs-string">'&lt;i class="material-icons"&gt;add&lt;/i&gt;&lt;p style="font-size:xx-small; margin-top: -5px"&gt;query&lt;/p&gt;'</span>;
+        button.className = <span class="hljs-string">"slider_button_down"</span>
+        button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> @add_to_query()
+        slider.appendChild(button);
+
+        @side_nav = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"div"</span>);
+        @side_nav.id = <span class="hljs-string">"sidenav"</span>;
+        @side_nav.style.width = cur_sidenav_size + <span class="hljs-string">'%'</span>
+        @side_nav_container.appendChild(@side_nav);
+
+        sparql_textbox = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"div"</span>);
+        sparql_textbox.id = <span class="hljs-string">"sparql_textbox"</span>;
+        sparql_textbox.innerHTML = <span class="hljs-string">"sparql_query_here"</span>;
+        @side_nav.appendChild(sparql_textbox);
+
+        @query_canvas = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"div"</span>);
+        @query_canvas.id = <span class="hljs-string">"query_canvas"</span>;
+        @side_nav.appendChild(@query_canvas)
+
+        @resize_navbar()
+
+
+    resize_navbar: <span class="hljs-function"><span class="hljs-params">(new_size = cur_sidenav_size)</span> =&gt;</span>
+
+        cur_sidenav_size = new_size
+
+        client_width    = <span class="hljs-built_in">document</span>.documentElement.clientWidth
+
+        center_button   = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'center_button'</span>)
+        zoom_tools      = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'zoom_tools'</span>)
+        owl_translator  = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'owl_translator'</span>)
+        explorer        = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'explorer'</span>)
+        details         = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'details'</span>)
+
+        <span class="hljs-keyword">if</span> center_button != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> center_button != <span class="hljs-literal">null</span>
+            center_button.style.right = (cur_sidenav_size * client_width / <span class="hljs-number">100</span> + <span class="hljs-number">50</span>) + <span class="hljs-string">"px"</span>
+            center_button.style.transitionDuration = <span class="hljs-string">'0.1s'</span>
+
+        <span class="hljs-keyword">if</span> zoom_tools != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> zoom_tools != <span class="hljs-literal">null</span>
+            zoom_tools.style.right = (cur_sidenav_size * client_width / <span class="hljs-number">100</span> + <span class="hljs-number">50</span>) + <span class="hljs-string">"px"</span>
+            zoom_tools.style.transitionDuration = <span class="hljs-string">'0.1s'</span>
+        
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'cy'</span>) != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'cy'</span>) != <span class="hljs-literal">null</span>
+            <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'cy'</span>).style.width = ((<span class="hljs-number">100</span> - cur_sidenav_size) * client_width / <span class="hljs-number">100</span> + <span class="hljs-number">50</span>) + <span class="hljs-string">"px"</span>
+
+        <span class="hljs-keyword">if</span> owl_translator != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> owl_translator != <span class="hljs-literal">null</span>
+            owl_translator.style.transitionDuration = <span class="hljs-string">'0.1s'</span>
+            owl_translator.style.left = (<span class="hljs-number">100</span> - cur_sidenav_size)/<span class="hljs-number">2</span> + <span class="hljs-string">"%"</span>
+            <span class="hljs-keyword">if</span> cur_sidenav_size &gt; <span class="hljs-number">50</span>
+                owl_translator.style.display = <span class="hljs-string">'none'</span>
+            <span class="hljs-keyword">else</span> 
+                owl_translator.style.display = <span class="hljs-string">'block'</span>
+
+        <span class="hljs-keyword">if</span> explorer != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> explorer != <span class="hljs-literal">null</span>
+            explorer.style.transitionDuration = <span class="hljs-string">'0.1s'</span>
+            explorer.style.left = (<span class="hljs-number">100</span> - cur_sidenav_size)/<span class="hljs-number">2</span> + <span class="hljs-string">"%"</span>
+            <span class="hljs-keyword">if</span> cur_sidenav_size &gt; <span class="hljs-number">50</span>
+                explorer.style.display = <span class="hljs-string">'none'</span>
+            <span class="hljs-keyword">else</span> 
+                explorer.style.display = <span class="hljs-string">'block'</span>
+
+        <span class="hljs-keyword">if</span> details != <span class="hljs-literal">undefined</span> <span class="hljs-keyword">and</span> details != <span class="hljs-literal">null</span>
+            details.style.right = (cur_sidenav_size * client_width / <span class="hljs-number">100</span> + <span class="hljs-number">60</span>) + <span class="hljs-string">"px"</span>
+            details.style.transitionDuration = <span class="hljs-string">'0.1s'</span>
+            <span class="hljs-keyword">if</span> cur_sidenav_size &gt; <span class="hljs-number">25</span>
+                details.style.display = <span class="hljs-string">'none'</span>
+            <span class="hljs-keyword">else</span> 
+                details.style.display = <span class="hljs-string">'block'</span>
+
+        <span class="hljs-keyword">if</span> cur_sidenav_size != <span class="hljs-number">100</span>
+            @side_nav_container.style.width = (cur_sidenav_size * client_width / <span class="hljs-number">100</span> + <span class="hljs-number">30</span>) + <span class="hljs-string">"px"</span>
+            @side_nav.style.width = cur_sidenav_size + <span class="hljs-string">'%'</span>
+        <span class="hljs-keyword">else</span> 
+            @side_nav_container.style.width = (cur_sidenav_size * client_width / <span class="hljs-number">100</span>) + <span class="hljs-string">"px"</span>
+            @side_nav.style.width =  (cur_sidenav_size * client_width / <span class="hljs-number">100</span> - <span class="hljs-number">30</span>) + <span class="hljs-string">"px"</span>
+
+        @context.graphol_cy.resize()
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> 
+            @context.graph.cy.resize()
+        , <span class="hljs-number">150</span>)</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>style.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>style.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">PainlessUtils</span></span>
+
+    constructor: <span class="hljs-function">-&gt;</span>
+        @a = <span class="hljs-number">0</span>
+
+    generate_style: <span class="hljs-function">-&gt;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> cytoscape.stylesheet()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>##* EDGES ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+            .selector(<span class="hljs-string">'edge'</span>)
+                .style({
+                    <span class="hljs-string">'curve-style'</span>: <span class="hljs-string">'bezier'</span>
+                    <span class="hljs-string">'width'</span> : <span class="hljs-number">3</span>
+                    <span class="hljs-string">'source-endpoint'</span> : <span class="hljs-string">'outside-to-node'</span>
+                    <span class="hljs-string">'target-endpoint'</span> : <span class="hljs-string">'outside-to-node'</span>
+                    <span class="hljs-string">'arrow-scale'</span> : <span class="hljs-number">1.5</span>
+                    <span class="hljs-string">'line-color'</span> : <span class="hljs-string">'#839496'</span>
+                    <span class="hljs-string">'font-family'</span> : <span class="hljs-string">"Roboto"</span>
+                    <span class="hljs-string">'font-size'</span> : <span class="hljs-string">'10'</span>
+                    <span class="hljs-string">'text-outline-color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'text-outline-width'</span> : <span class="hljs-string">'2px'</span>
+                    <span class="hljs-string">'color'</span> : <span class="hljs-string">'#002b36'</span>
+                })
+            .selector(<span class="hljs-string">'.source-edge'</span>)
+                .style({
+                    <span class="hljs-string">'target-arrow-shape'</span> : <span class="hljs-string">'square'</span>
+                    <span class="hljs-string">'target-arrow-fill'</span> : <span class="hljs-string">'hollow'</span>
+                    <span class="hljs-string">'target-arrow-color'</span> : <span class="hljs-string">'#002b36'</span>
+                })
+            .selector(<span class="hljs-string">'.target-edge'</span>)
+                .style({
+                    <span class="hljs-string">'target-arrow-shape'</span> : <span class="hljs-string">'square'</span>
+                    <span class="hljs-string">'target-arrow-color'</span> : <span class="hljs-string">'#002b36'</span>
+                })
+            .selector(<span class="hljs-string">'.edge-datatype'</span>)
+                .style({
+                    <span class="hljs-string">'line-style'</span> : <span class="hljs-string">'dotted'</span>
+                })
+            .selector(<span class="hljs-string">'.edge-concept'</span>)
+                .style({
+                    <span class="hljs-string">'content'</span> : <span class="hljs-string">'rdf:type'</span>
+                })</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>##* NODES ###</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+            .selector(<span class="hljs-string">'node'</span>)
+                .style({
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-string">'black'</span>,
+                    <span class="hljs-string">'shape'</span> : <span class="hljs-string">'rectangle'</span>
+                })
+            .selector(<span class="hljs-string">'.node-domain'</span>)
+                .style({
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-string">'#002b36'</span>
+                    <span class="hljs-string">'border-color'</span> : <span class="hljs-string">'#002b36'</span>
+                    <span class="hljs-string">'border-style'</span> : <span class="hljs-string">'solid'</span>
+                    <span class="hljs-string">'border-width'</span> : <span class="hljs-string">'0.5px'</span>
+                    <span class="hljs-string">'width'</span> : <span class="hljs-number">15</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-number">15</span>
+                })
+            .selector(<span class="hljs-string">'.node-range'</span>)
+                .style({
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'border-color'</span> : <span class="hljs-string">'#002b36'</span>
+                    <span class="hljs-string">'border-style'</span> : <span class="hljs-string">'solid'</span>
+                    <span class="hljs-string">'border-width'</span> : <span class="hljs-string">'2px'</span>
+                    <span class="hljs-string">'width'</span> : <span class="hljs-number">15</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-number">15</span>
+                })
+            .selector(<span class="hljs-string">'.node-datatype'</span>)
+                .style({
+                    <span class="hljs-string">'shape'</span> : <span class="hljs-string">'ellipse'</span>
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-string">'#93a1a1'</span>
+                    <span class="hljs-string">'content'</span> : <span class="hljs-string">'data(label)'</span>
+                    <span class="hljs-string">'text-valign'</span> : <span class="hljs-string">'center'</span>
+                    <span class="hljs-string">'font-family'</span> : <span class="hljs-string">"Roboto"</span>;
+                    <span class="hljs-string">'font-size'</span> : <span class="hljs-string">'12'</span>
+                    <span class="hljs-string">'width'</span> : <span class="hljs-number">15</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-number">15</span>
+                })
+            .selector(<span class="hljs-string">'.node-role'</span>)
+                .style({
+                    <span class="hljs-string">'shape'</span> : <span class="hljs-string">'diamond'</span>
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'border-style'</span> : <span class="hljs-string">'solid'</span>
+                    <span class="hljs-string">'border-color'</span> : <span class="hljs-string">'#002b36'</span>
+                    <span class="hljs-string">'color'</span> : <span class="hljs-string">'#002b36'</span>
+                    <span class="hljs-string">'border-width'</span> : <span class="hljs-string">'4px'</span> 
+                    <span class="hljs-string">'content'</span> : <span class="hljs-string">'data(label)'</span>
+                    <span class="hljs-string">'text-valign'</span> : <span class="hljs-string">'center'</span>
+                    <span class="hljs-string">'font-family'</span> : <span class="hljs-string">"Roboto"</span>;
+                    <span class="hljs-string">'text-outline-color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'text-outline-width'</span> : <span class="hljs-string">'3px'</span>
+                    <span class="hljs-string">'width'</span> : <span class="hljs-number">90</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-number">60</span>
+                })
+            .selector(<span class="hljs-string">'.node-attribute'</span>)
+                .style({
+                    <span class="hljs-string">'shape'</span> : <span class="hljs-string">'ellipse'</span>
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'border-style'</span> : <span class="hljs-string">'solid'</span>
+                    <span class="hljs-string">'border-color'</span> : <span class="hljs-string">'#002b36'</span>
+                    <span class="hljs-string">'color'</span> : <span class="hljs-string">'#002b36'</span>
+                    <span class="hljs-string">'border-width'</span> : <span class="hljs-string">'4px'</span> 
+                    <span class="hljs-string">'content'</span> : <span class="hljs-string">'data(label)'</span>
+                    <span class="hljs-string">'text-valign'</span> : <span class="hljs-string">'center'</span>
+                    <span class="hljs-string">'font-family'</span> : <span class="hljs-string">"Roboto"</span>;
+                    <span class="hljs-string">'text-outline-color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'text-outline-width'</span> : <span class="hljs-string">'3px'</span>
+                    <span class="hljs-string">'width'</span> : <span class="hljs-number">30</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-number">30</span>
+                })
+            .selector(<span class="hljs-string">'.node-variable'</span>)
+                .style({
+                    <span class="hljs-string">'shape'</span> : <span class="hljs-string">'ellipse'</span>
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> ele.data(<span class="hljs-string">'color'</span>)
+                    <span class="hljs-string">'width'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">100</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">100</span>
+                    <span class="hljs-string">'text-valign'</span> : <span class="hljs-string">'center'</span>
+                    <span class="hljs-string">'font-size'</span> : <span class="hljs-string">'30'</span>
+                    <span class="hljs-string">'font-family'</span> : <span class="hljs-string">"Roboto"</span>;
+                    <span class="hljs-string">'color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'text-outline-color'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span> <span class="hljs-keyword">return</span> ele.data(<span class="hljs-string">'color'</span>)
+                    <span class="hljs-string">'text-outline-width'</span> : <span class="hljs-string">'5px'</span>
+                    <span class="hljs-string">'content'</span> : <span class="hljs-string">'data(label)'</span>
+                })
+            .selector(<span class="hljs-string">'.node-constant-value'</span>)
+                .style({
+                    <span class="hljs-string">'shape'</span> : <span class="hljs-string">'ellipse'</span>
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> ele.data(<span class="hljs-string">'color'</span>)
+                    <span class="hljs-string">'width'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">100</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">100</span>
+                    <span class="hljs-string">'text-valign'</span> : <span class="hljs-string">'center'</span>
+                    <span class="hljs-string">'font-size'</span> : <span class="hljs-string">'20'</span>
+                    <span class="hljs-string">'font-family'</span> : <span class="hljs-string">"Roboto"</span>;
+                    <span class="hljs-string">'color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'text-outline-color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'text-outline-width'</span> : <span class="hljs-string">'0px'</span>
+                    <span class="hljs-string">'content'</span> : <span class="hljs-string">'data(label)'</span>
+                })
+            .selector(<span class="hljs-string">'.node-constant-object'</span>)
+                .style({
+                    <span class="hljs-string">'shape'</span> : <span class="hljs-string">'ellipse'</span>
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> ele.data(<span class="hljs-string">'color'</span>)
+                    <span class="hljs-string">'width'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">100</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">100</span>
+                    <span class="hljs-string">'text-valign'</span> : <span class="hljs-string">'center'</span>
+                    <span class="hljs-string">'font-size'</span> : <span class="hljs-string">'20'</span>
+                    <span class="hljs-string">'font-family'</span> : <span class="hljs-string">"Roboto"</span>;
+                    <span class="hljs-string">'color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'text-outline-color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'text-outline-width'</span> : <span class="hljs-string">'0px'</span>
+                    <span class="hljs-string">'content'</span> : <span class="hljs-string">'data(label)'</span>
+                })
+            .selector(<span class="hljs-string">'.node-concept'</span>)
+                .style({
+                    <span class="hljs-string">'shape'</span> : <span class="hljs-string">'rectangle'</span>
+                    <span class="hljs-string">'background-color'</span> : <span class="hljs-string">'#073642'</span>
+                    <span class="hljs-string">'content'</span> : <span class="hljs-string">'data(label)'</span>
+                    <span class="hljs-string">'text-valign'</span> : <span class="hljs-string">'center'</span>
+                    <span class="hljs-string">'width'</span> : <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+                        <span class="hljs-keyword">return</span> ele.data(<span class="hljs-string">'label'</span>).length * <span class="hljs-number">10</span> + <span class="hljs-number">50</span> <span class="hljs-comment">#compute text length?</span>
+                    <span class="hljs-string">'height'</span> : <span class="hljs-string">'80'</span>
+                    <span class="hljs-string">'border-color'</span> : <span class="hljs-string">'#073642'</span>
+                    <span class="hljs-string">'border-width'</span> : <span class="hljs-string">'2px'</span>
+                    <span class="hljs-string">'font-family'</span> : <span class="hljs-string">"Roboto"</span>;
+                    <span class="hljs-string">'font-size'</span> : <span class="hljs-string">'20'</span>
+                    <span class="hljs-string">'color'</span> : <span class="hljs-string">'#fdf6e3'</span>
+                    <span class="hljs-string">'border-style'</span> : <span class="hljs-string">'solid'</span>
+                })
+            .selector(<span class="hljs-string">'node.highlight'</span>)
+                .style({
+                    <span class="hljs-string">'border-color'</span> : <span class="hljs-string">'#333'</span>
+                    <span class="hljs-string">'border-opacity'</span> : <span class="hljs-string">'0.5'</span>
+                    <span class="hljs-string">'border-width'</span> : <span class="hljs-string">'20px'</span>
+                    <span class="hljs-string">'border-style'</span> : <span class="hljs-string">'solid'</span>
+                })
+            .selector(<span class="hljs-string">'node.filtered'</span>)
+                .style({
+                    <span class="hljs-string">'border-color'</span> : <span class="hljs-string">'#ff0000'</span>
+                    <span class="hljs-string">'border-opacity'</span> : <span class="hljs-string">'1'</span>
+                    <span class="hljs-string">'border-width'</span> : <span class="hljs-string">'20px'</span>
+                    <span class="hljs-string">'border-style'</span> : <span class="hljs-string">'double'</span>
+                })
+            .selector(<span class="hljs-string">'node:selected'</span>)
+                .style({
+                    <span class="hljs-string">'border-color'</span> : <span class="hljs-string">'#daa'</span>
+                    <span class="hljs-string">'border-opacity'</span> : <span class="hljs-string">'0.5'</span>
+                    <span class="hljs-string">'border-width'</span> : <span class="hljs-string">'20px'</span>
+                    <span class="hljs-string">'border-style'</span> : <span class="hljs-string">'solid'</span>
+                })</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

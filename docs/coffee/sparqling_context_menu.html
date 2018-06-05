@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>sparqling_context_menu.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="constants.html">
+                  ./coffee/constants.coffee
+                </a>
+              
+                
+                <a class="source" href="hl_box.html">
+                  ./coffee/hl_box.coffee
+                </a>
+              
+                
+                <a class="source" href="query_filter.html">
+                  ./coffee/query_filter.coffee
+                </a>
+              
+                
+                <a class="source" href="query_line.html">
+                  ./coffee/query_line.coffee
+                </a>
+              
+                
+                <a class="source" href="sparql_text.html">
+                  ./coffee/sparql_text.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling.html">
+                  ./coffee/sparqling.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_alert.html">
+                  ./coffee/sparqling_alert.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_context_menu.html">
+                  ./coffee/sparqling_context_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_graph.html">
+                  ./coffee/sparqling_graph.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_link.html">
+                  ./coffee/sparqling_link.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_menu.html">
+                  ./coffee/sparqling_menu.coffee
+                </a>
+              
+                
+                <a class="source" href="sparqling_navbar.html">
+                  ./coffee/sparqling_navbar.coffee
+                </a>
+              
+                
+                <a class="source" href="style.html">
+                  ./coffee/style.coffee
+                </a>
+              
+                
+                <a class="source" href="void.html">
+                  ./coffee/void.coffee
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>sparqling_context_menu.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">PainlessContextMenu</span></span>
+
+    constructor: <span class="hljs-function"><span class="hljs-params">(cy, context)</span> -&gt;</span>
+        @context = context
+        @cy = cy
+        @init()
+
+
+    init: <span class="hljs-function">=&gt;</span>
+        node_variable_context_menu = {
+            selector: <span class="hljs-string">'.node-variable-full-options'</span>,
+            commands: [
+                {content: <span class="hljs-string">'delete node'</span>, select: <span class="hljs-function"><span class="hljs-params">(ele)</span>=&gt;</span> 
+                    to_remove = []
+                    <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> ele.data(<span class="hljs-string">'links'</span>)
+                        <span class="hljs-keyword">if</span> link != <span class="hljs-literal">null</span> <span class="hljs-keyword">and</span> link != <span class="hljs-literal">undefined</span>
+                           to_remove.push(link)
+                    <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> to_remove
+                        link.<span class="hljs-keyword">delete</span>()
+                    @cy.remove(ele)
+                },
+                {content: <span class="hljs-string">'center view'</span>,                    select: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span> @context.center_view(ele)}
+                {content: <span class="hljs-string">'add node to select statement'</span>,   select: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span> @context.add_to_select(ele.id())},
+                {content: <span class="hljs-string">'rename node'</span>,                    select: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span> @rename_var(ele)}
+                {content: <span class="hljs-string">'filter'</span>,                         select: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span> @context.sparql_text.add_filter(ele)}
+            ] 
+        }
+
+        node_link_context_menu = {
+            selector: <span class="hljs-string">'.node-role'</span>,
+            commands: [
+                {content: <span class="hljs-string">'reverse'</span>, select: <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span> ele.data(<span class="hljs-string">'links'</span>)[<span class="hljs-number">0</span>].reverse()},
+                {content: <span class="hljs-string">'delete'</span>, select: <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span> ele.data(<span class="hljs-string">'links'</span>)[<span class="hljs-number">0</span>].<span class="hljs-keyword">delete</span>()}
+            ]
+        }
+
+        node_link_attr_context_menu = {
+            selector: <span class="hljs-string">'.node-attribute'</span>,
+            commands: [
+                {content: <span class="hljs-string">'delete'</span>, select: <span class="hljs-function"><span class="hljs-params">(ele)</span>=&gt;</span> ele.data(<span class="hljs-string">'links'</span>)[<span class="hljs-number">0</span>].<span class="hljs-keyword">delete</span>()}
+            ]
+        }
+
+        node_attr_range_menu = {
+            selector: <span class="hljs-string">'.attr-range'</span>,
+            commands: [
+                {content: <span class="hljs-string">'delete'</span>, select: <span class="hljs-function"><span class="hljs-params">(ele)</span>=&gt;</span> ele.data(<span class="hljs-string">'links'</span>)[<span class="hljs-number">0</span>].<span class="hljs-keyword">delete</span>()}
+                {content: <span class="hljs-string">'transform into constant [object]'</span>, select: 
+                    <span class="hljs-function"><span class="hljs-params">(ele)</span>=&gt;</span> 
+                        ele.data(<span class="hljs-string">'color'</span>, tinycolor(ele.data(<span class="hljs-string">'color'</span>)).desaturate(<span class="hljs-number">50</span>).toString())
+                        ele.data(<span class="hljs-string">'label'</span>, <span class="hljs-string">'const[o]'</span>)
+                        ele.classes(<span class="hljs-string">'node-constant-object'</span>)
+                }
+                {content: <span class="hljs-string">'transform into constant [value]'</span>, select: 
+                    <span class="hljs-function"><span class="hljs-params">(ele)</span>=&gt;</span> 
+                        ele.data(<span class="hljs-string">'color'</span>, tinycolor(ele.data(<span class="hljs-string">'color'</span>)).desaturate(<span class="hljs-number">50</span>).toString())
+                        ele.data(<span class="hljs-string">'label'</span>, <span class="hljs-string">'const[v]'</span>)
+                        ele.classes(<span class="hljs-string">'node-constant-value'</span>)
+                }
+                {content: <span class="hljs-string">'filter'</span>,                         select: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span> @context.sparql_text.add_filter(ele)}
+            ]
+        }
+
+        node_concept_menu = {
+            selector: <span class="hljs-string">'.node-concept'</span>,
+            commands: [
+                {content: <span class="hljs-string">'delete'</span>, select: <span class="hljs-function"><span class="hljs-params">(ele)</span>=&gt;</span> ele.data(<span class="hljs-string">'links'</span>)[<span class="hljs-number">0</span>].<span class="hljs-keyword">delete</span>()}
+            ]
+        }
+
+        node_constant_value_menu = {
+            selector: <span class="hljs-string">'.node-constant-value'</span>,
+            commands: [
+                {content: <span class="hljs-string">'define value'</span>, select: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span> @rename_const(ele)}
+                {content: <span class="hljs-string">'delete'</span>,     select: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span> ele.data(<span class="hljs-string">'links'</span>)[<span class="hljs-number">0</span>].<span class="hljs-keyword">delete</span>()}
+                
+            ]
+        }
+
+        node_constant_object_menu = {
+            selector: <span class="hljs-string">'.node-constant-object'</span>,
+            commands: [
+                {content: <span class="hljs-string">'define value'</span>, select: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span> @rename_const(ele)}
+                {content: <span class="hljs-string">'delete'</span>,     select: <span class="hljs-function"><span class="hljs-params">(ele)</span>=&gt;</span> ele.data(<span class="hljs-string">'links'</span>)[<span class="hljs-number">0</span>].<span class="hljs-keyword">delete</span>()}
+            ]
+        }
+
+        @cy.cxtmenu(node_variable_context_menu)
+        @cy.cxtmenu(node_link_context_menu)
+        @cy.cxtmenu(node_link_attr_context_menu)
+        @cy.cxtmenu(node_concept_menu)
+        @cy.cxtmenu(node_constant_value_menu)
+        @cy.cxtmenu(node_attr_range_menu)
+
+
+    rename_const: <span class="hljs-function"><span class="hljs-params">(ele)</span> -&gt;</span>
+        prevlabel = ele.data(<span class="hljs-string">'label'</span>)
+        ele.data(<span class="hljs-string">'label'</span>, <span class="hljs-string">''</span>)
+        container = <span class="hljs-built_in">document</span>.createElement(div)
+
+        div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        div.innerHTML = ele.data(<span class="hljs-string">'label'</span>).slice(<span class="hljs-number">1</span>)
+        div.style.display = <span class="hljs-string">'inline-block'</span>
+<span class="hljs-function">
+        <span class="hljs-title">outclickhandler</span> = <span class="hljs-params">(event)</span> =&gt;</span> 
+            <span class="hljs-keyword">if</span> event.target != div
+                <span class="hljs-keyword">if</span> div.innerHTML == <span class="hljs-string">''</span>
+                    div.innerHTML = prevlabel
+                ele.data(<span class="hljs-string">'label'</span>, div.innerHTML)
+                container.parentNode.removeChild(container)
+                <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'click'</span>, outclickhandler)
+                <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'keypress'</span>, keypresshandler)
+<span class="hljs-function">
+        <span class="hljs-title">keypresshandler</span> = <span class="hljs-params">(event)</span> =&gt;</span>
+            <span class="hljs-keyword">if</span> event.key == <span class="hljs-string">'Enter'</span>
+                <span class="hljs-keyword">if</span> div.innerHTML == <span class="hljs-string">''</span>
+                    div.innerHTML = prevlabel
+                ele.data(<span class="hljs-string">'label'</span>, div.innerHTML)
+                container.parentNode.removeChild(container)
+                <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'click'</span>, outclickhandler)
+                <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'keypress'</span>, keypresshandler)
+
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>, outclickhandler)
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'keypress'</span>, keypresshandler)
+
+        div.setAttribute(<span class="hljs-string">'contenteditable'</span>, <span class="hljs-literal">true</span>)
+
+        container.appendChild(div)
+
+        container.style.position = <span class="hljs-string">"absolute"</span>;
+        container.id = <span class="hljs-string">"rename_div"</span>
+        container.style.top =  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'query_canvas'</span>).getBoundingClientRect()[<span class="hljs-string">'y'</span>] + ele.renderedPosition(<span class="hljs-string">'y'</span>) - ele.renderedWidth()/<span class="hljs-number">4</span> + <span class="hljs-string">'px'</span>
+        container.style.left =  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'query_canvas'</span>).getBoundingClientRect()[<span class="hljs-string">'x'</span>] + ele.renderedPosition(<span class="hljs-string">'x'</span>) - ele.renderedWidth()/<span class="hljs-number">4</span> + <span class="hljs-string">'px'</span>
+        container.style.backgroundColor = ele.data(<span class="hljs-string">'color'</span>)
+        container.style.fontSize = <span class="hljs-string">'xx-large'</span>
+        container.style.color = <span class="hljs-string">'#fdf6e3'</span>
+        container.style.borderRadius = <span class="hljs-string">'100px'</span>
+        container.style.fontFamily = <span class="hljs-string">'Courier New'</span>
+        container.style.padding = <span class="hljs-string">'2px'</span>
+        container.style.textAlign = <span class="hljs-string">'center'</span>
+
+        <span class="hljs-built_in">document</span>.body.appendChild(container)
+        div.focus()
+
+
+    rename_var: <span class="hljs-function"><span class="hljs-params">(ele)</span> =&gt;</span>
+        prevlabel = ele.data(<span class="hljs-string">'label'</span>).slice(<span class="hljs-number">1</span>)
+        ele.data(<span class="hljs-string">'label'</span>, <span class="hljs-string">''</span>)
+        container = <span class="hljs-built_in">document</span>.createElement(div)
+
+        question_mark = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        question_mark.innerHTML = <span class="hljs-string">'?'</span>
+        question_mark.style.display = <span class="hljs-string">'inline-block'</span>
+        container.appendChild(question_mark)
+
+        div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>)
+        div.innerHTML = ele.data(<span class="hljs-string">'label'</span>).slice(<span class="hljs-number">1</span>)
+        div.style.display = <span class="hljs-string">'inline-block'</span>
+<span class="hljs-function">
+        <span class="hljs-title">outclickhandler</span> = <span class="hljs-params">(event)</span> =&gt;</span> 
+            <span class="hljs-keyword">if</span> event.target != div
+                <span class="hljs-keyword">if</span> div.innerHTML == <span class="hljs-string">''</span>
+                    div.innerHTML = prevlabel
+                ele.data(<span class="hljs-string">'label'</span>, <span class="hljs-string">'?'</span> + div.innerHTML)
+                container.parentNode.removeChild(container)
+                <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'click'</span>, outclickhandler)
+                <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'keypress'</span>, keypresshandler)
+<span class="hljs-function">
+        <span class="hljs-title">keypresshandler</span> = <span class="hljs-params">(event)</span> =&gt;</span>
+            <span class="hljs-keyword">if</span> event.key == <span class="hljs-string">'Enter'</span>
+                <span class="hljs-keyword">if</span> div.innerHTML == <span class="hljs-string">''</span>
+                    div.innerHTML = prevlabel
+                ele.data(<span class="hljs-string">'label'</span>, <span class="hljs-string">'?'</span> + div.innerHTML)
+                container.parentNode.removeChild(container)
+                <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'click'</span>, outclickhandler)
+                <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'keypress'</span>, keypresshandler)
+
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>, outclickhandler)
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'keypress'</span>, keypresshandler)
+
+        div.setAttribute(<span class="hljs-string">'contenteditable'</span>, <span class="hljs-literal">true</span>)
+
+        container.appendChild(div)
+
+        container.style.position = <span class="hljs-string">"absolute"</span>;
+        container.id = <span class="hljs-string">"rename_div"</span>
+        container.style.top =  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'query_canvas'</span>).getBoundingClientRect()[<span class="hljs-string">'y'</span>] + ele.renderedPosition(<span class="hljs-string">'y'</span>) - ele.renderedWidth()/<span class="hljs-number">4</span> + <span class="hljs-string">'px'</span>
+        container.style.left =  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'query_canvas'</span>).getBoundingClientRect()[<span class="hljs-string">'x'</span>] + ele.renderedPosition(<span class="hljs-string">'x'</span>) - ele.renderedWidth()/<span class="hljs-number">4</span> + <span class="hljs-string">'px'</span>
+        container.style.backgroundColor = ele.data(<span class="hljs-string">'color'</span>)
+        container.style.fontSize = <span class="hljs-string">'xx-large'</span>
+        container.style.color = <span class="hljs-string">'#fdf6e3'</span>
+        container.style.borderRadius = <span class="hljs-string">'100px'</span>
+        container.style.fontFamily = <span class="hljs-string">'Courier New'</span>
+        container.style.padding = <span class="hljs-string">'2px'</span>
+        container.style.textAlign = <span class="hljs-string">'center'</span>
+
+        <span class="hljs-built_in">document</span>.body.appendChild(container)
+        div.focus()</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
