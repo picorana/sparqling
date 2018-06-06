@@ -167,10 +167,23 @@
 
         menu.append(@create_div(<span class="hljs-string">'&lt;i class="material-icons" style="font-size: 18px"&gt;undo&lt;/i&gt;'</span>,                 <span class="hljs-string">'menu_button'</span>, <span class="hljs-literal">null</span>, ( <span class="hljs-function">=&gt;</span> @context.graph.undo()), <span class="hljs-string">'undo'</span>))
         menu.append(@create_div(<span class="hljs-string">'&lt;i class="material-icons" style="font-size: 18px"&gt;filter_center_focus&lt;/i&gt;'</span>,  <span class="hljs-string">'menu_button'</span>, <span class="hljs-literal">null</span>, ( <span class="hljs-function">=&gt;</span> @context.graph.center_view()), <span class="hljs-string">'center view'</span>))
-        menu.append(@create_div(<span class="hljs-string">'&lt;i class="material-icons" style="font-size: 18px"&gt;file_copy&lt;/i&gt;'</span>,            <span class="hljs-string">'menu_button'</span>, <span class="hljs-literal">null</span>, ( <span class="hljs-function">=&gt;</span> @context.graph.copy_to_clipboard()), <span class="hljs-string">'copy to clipboard'</span>))
-        menu.append(@create_div(<span class="hljs-string">'&lt;i class="material-icons" style="font-size: 18px"&gt;save&lt;/i&gt;'</span>,                 <span class="hljs-string">'menu_button'</span>, <span class="hljs-literal">null</span>, ( <span class="hljs-function">=&gt;</span> @context.graph.download()), <span class="hljs-string">'export'</span>))
-        menu.append(@create_div(<span class="hljs-string">'&lt;i class="material-icons" style="font-size: 18px"&gt;open_in_browser&lt;/i&gt;'</span>,      <span class="hljs-string">'menu_button'</span>, <span class="hljs-literal">null</span>, ( <span class="hljs-function">=&gt;</span> @context.graph.load()), <span class="hljs-string">'import'</span>))
-        menu.append(@create_div(<span class="hljs-string">'&lt;i class="material-icons" style="font-size: 18px"&gt;clear_all&lt;/i&gt;'</span>,            <span class="hljs-string">'menu_button'</span>, <span class="hljs-literal">null</span>, ( <span class="hljs-function">=&gt;</span> @context.graph.clear_all()), <span class="hljs-string">'clear all'</span>))</pre></div></div>
+        menu.append(@create_div(<span class="hljs-string">'&lt;i class="material-icons" style="font-size: 18px"&gt;file_copy&lt;/i&gt;'</span>,            <span class="hljs-string">'menu_button'</span>, <span class="hljs-literal">null</span>, ( <span class="hljs-function">=&gt;</span> @context.graph.copy_to_clipboard()), <span class="hljs-string">'copy to clipboard'</span>))</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>menu.append(@create_div(‘<i class="material-icons" style="font-size: 18px">save</i>‘,                 ‘menu_button’, null, ( =&gt; @context.graph.download()), ‘export’))
+menu.append(@create_div(‘<i class="material-icons" style="font-size: 18px">open_in_browser</i>‘,      ‘menu_button’, null, ( =&gt; @context.graph.load()), ‘import’))</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        menu.append(@create_div(<span class="hljs-string">'&lt;i class="material-icons" style="font-size: 18px"&gt;clear_all&lt;/i&gt;'</span>,            <span class="hljs-string">'menu_button'</span>, <span class="hljs-literal">null</span>, ( <span class="hljs-function">=&gt;</span> @context.graph.clear_all()), <span class="hljs-string">'clear all'</span>))</pre></div></div>
             
         </li>
         

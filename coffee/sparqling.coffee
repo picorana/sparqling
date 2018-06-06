@@ -1,6 +1,6 @@
+# Main class of the application, keeps together all the different components, 
+# and defines the interaction with the grapholscape graph.
 class window.Sparqling
-    # Main class of the application, keeps together all the different components, 
-    # and defines the interaction with the grapholscape graph.
     
     instance = null
 
@@ -44,8 +44,8 @@ class window.Sparqling
             when "concept"      then @graph.add_link(selected_node.data('label'), 'concept')         
 
 
+    # extracts the attribute type from the grapholscape graph
     extract_datatype: (inode) =>
-        # extracts the attribute type from the grapholscape graph
         for neighbor in inode.neighborhood('node')
             if neighbor.data('type') == "range-restriction"
                 for node in neighbor.neighborhood('node')
@@ -53,8 +53,8 @@ class window.Sparqling
                         return node.data('label')
 
 
+    # debug bindings - to be removed
     onkeypress_handler : (event) =>
-        # debug bindings - to be removed
         if event.key == "d"
             console.log @graph.cy.nodes(":selected").data('links')
 
@@ -66,6 +66,7 @@ class window.Sparqling
                 link.delete()
 
 
+    # since cytoscape does not emit doubleclick events, we create one based on the tap event.
     doubleclick_handler: (event) =>
         tappedNow = event.target;
         if tappedTimeout && tappedBefore 

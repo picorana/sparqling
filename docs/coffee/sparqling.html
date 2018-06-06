@@ -110,10 +110,14 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              
+              <p>Main class of the application, keeps together all the different components, 
+and defines the interaction with the grapholscape graph.</p>
+
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">Sparqling</span></span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">Sparqling</span></span>
+    
+    instance = <span class="hljs-literal">null</span></pre></div></div>
             
         </li>
         
@@ -123,23 +127,6 @@
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
-              </div>
-              <p>Main class of the application, keeps together all the different components, 
-and defines the interaction with the grapholscape graph.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    
-    instance = <span class="hljs-literal">null</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-3">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
               <p><strong>tappedBefore</strong> and <strong>tappedTimeout</strong> are doubleclick timers</p>
 
@@ -151,11 +138,11 @@ and defines the interaction with the grapholscape graph.</p>
         </li>
         
         
-        <li id="section-4">
+        <li id="section-3">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
+                <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
               <p>note that <strong>@graphol_cy</strong> is the cytoscape instance from grapholscape, 
 while <strong>@cy</strong> is the new instance created by sparqling to represent the query.</p>
@@ -183,11 +170,11 @@ while <strong>@cy</strong> is the new instance created by sparqling to represent
         </li>
         
         
-        <li id="section-5">
+        <li id="section-4">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
               <p>Add the <strong>selected node</strong> in grapholscape to the query,
 according to the type of the node (stored in node.data(‘type’)).
@@ -204,10 +191,27 @@ Nodes can be ‘role’, ‘attribute’ or ‘concept’</p>
         <span class="hljs-keyword">switch</span> selected_node.data(<span class="hljs-string">'type'</span>)
             <span class="hljs-keyword">when</span> <span class="hljs-string">"role"</span>         <span class="hljs-keyword">then</span> @graph.add_link(selected_node.data(<span class="hljs-string">'label'</span>), <span class="hljs-string">'role'</span>)
             <span class="hljs-keyword">when</span> <span class="hljs-string">"attribute"</span>    <span class="hljs-keyword">then</span> @graph.add_link(selected_node.data(<span class="hljs-string">'label'</span>), <span class="hljs-string">'attribute'</span>, @extract_datatype(selected_node))
-            <span class="hljs-keyword">when</span> <span class="hljs-string">"concept"</span>      <span class="hljs-keyword">then</span> @graph.add_link(selected_node.data(<span class="hljs-string">'label'</span>), <span class="hljs-string">'concept'</span>)         
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"concept"</span>      <span class="hljs-keyword">then</span> @graph.add_link(selected_node.data(<span class="hljs-string">'label'</span>), <span class="hljs-string">'concept'</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>extracts the attribute type from the grapholscape graph</p>
 
-
-    extract_datatype: <span class="hljs-function"><span class="hljs-params">(inode)</span> =&gt;</span></pre></div></div>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    extract_datatype: <span class="hljs-function"><span class="hljs-params">(inode)</span> =&gt;</span>
+        <span class="hljs-keyword">for</span> neighbor <span class="hljs-keyword">in</span> inode.neighborhood(<span class="hljs-string">'node'</span>)
+            <span class="hljs-keyword">if</span> neighbor.data(<span class="hljs-string">'type'</span>) == <span class="hljs-string">"range-restriction"</span>
+                <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> neighbor.neighborhood(<span class="hljs-string">'node'</span>)
+                    <span class="hljs-keyword">if</span> node.data(<span class="hljs-string">'type'</span>) == <span class="hljs-string">"value-domain"</span>
+                        <span class="hljs-keyword">return</span> node.data(<span class="hljs-string">'label'</span>)</pre></div></div>
             
         </li>
         
@@ -218,18 +222,20 @@ Nodes can be ‘role’, ‘attribute’ or ‘concept’</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>extracts the attribute type from the grapholscape graph</p>
+              <p>debug bindings - to be removed</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">for</span> neighbor <span class="hljs-keyword">in</span> inode.neighborhood(<span class="hljs-string">'node'</span>)
-            <span class="hljs-keyword">if</span> neighbor.data(<span class="hljs-string">'type'</span>) == <span class="hljs-string">"range-restriction"</span>
-                <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> neighbor.neighborhood(<span class="hljs-string">'node'</span>)
-                    <span class="hljs-keyword">if</span> node.data(<span class="hljs-string">'type'</span>) == <span class="hljs-string">"value-domain"</span>
-                        <span class="hljs-keyword">return</span> node.data(<span class="hljs-string">'label'</span>)
+            <div class="content"><div class='highlight'><pre>    onkeypress_handler : <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span>
+        <span class="hljs-keyword">if</span> event.key == <span class="hljs-string">"d"</span>
+            <span class="hljs-built_in">console</span>.log @graph.cy.nodes(<span class="hljs-string">":selected"</span>).data(<span class="hljs-string">'links'</span>)
 
+        <span class="hljs-keyword">if</span> event.key == <span class="hljs-string">"c"</span>
+            <span class="hljs-built_in">console</span>.log @graph.links
 
-    onkeypress_handler : <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span></pre></div></div>
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> event.keyCode == <span class="hljs-number">46</span> <span class="hljs-keyword">or</span> event.keyCode == <span class="hljs-number">8</span> <span class="hljs-keyword">or</span> event.keyCode == <span class="hljs-number">127</span>
+            <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> @graph.cy.nodes(<span class="hljs-string">":selected"</span>).data(<span class="hljs-string">'links'</span>)
+                link.<span class="hljs-keyword">delete</span>()</pre></div></div>
             
         </li>
         
@@ -240,22 +246,11 @@ Nodes can be ‘role’, ‘attribute’ or ‘concept’</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>debug bindings - to be removed</p>
+              <p>since cytoscape does not emit doubleclick events, we create one based on the tap event.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> event.key == <span class="hljs-string">"d"</span>
-            <span class="hljs-built_in">console</span>.log @graph.cy.nodes(<span class="hljs-string">":selected"</span>).data(<span class="hljs-string">'links'</span>)
-
-        <span class="hljs-keyword">if</span> event.key == <span class="hljs-string">"c"</span>
-            <span class="hljs-built_in">console</span>.log @graph.links
-
-        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> event.keyCode == <span class="hljs-number">46</span> <span class="hljs-keyword">or</span> event.keyCode == <span class="hljs-number">8</span> <span class="hljs-keyword">or</span> event.keyCode == <span class="hljs-number">127</span>
-            <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> @graph.cy.nodes(<span class="hljs-string">":selected"</span>).data(<span class="hljs-string">'links'</span>)
-                link.<span class="hljs-keyword">delete</span>()
-
-
-    doubleclick_handler: <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span>
+            <div class="content"><div class='highlight'><pre>    doubleclick_handler: <span class="hljs-function"><span class="hljs-params">(event)</span> =&gt;</span>
         tappedNow = event.target;
         <span class="hljs-keyword">if</span> tappedTimeout &amp;&amp; tappedBefore 
             clearTimeout(tappedTimeout);

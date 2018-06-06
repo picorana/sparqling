@@ -17,6 +17,7 @@ class window.SparqlText
         else
             div_sparql_text = document.getElementById('sparql_textbox')
             div_sparql_text.className = "unselectable"
+            @div_sparql_text = div_sparql_text
 
             @select_boxes = select_boxes
 

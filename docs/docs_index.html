@@ -6,14 +6,87 @@
 <style>
 #content {
 	margin-left: 20%;
+	margin-right: 20%;
 }
 </style>
 </head>
 <body>
 <div id="content">
 	<div class = 'markdown_content'>
-# Sparqling docs
+# Sparqling
 Query editor
+
+### documentation index:
+[sparqling.coffee](./coffee/sparqling.html)   
+[sparqling_graph.coffee](./coffee/sparqling_graph.html)   
+[sparqling_link.coffee](./coffee/sparqling_link.html)   
+[sparqling_menu.coffee](./coffee/sparqling_menu.html)   
+[sparqling_navbar.coffee](./coffee/sparqling_navbar.html)   
+[sparqling_context_menu.coffee](./coffee/sparqling_context_menu.html)   
+[sparqling_alert.coffee](./coffee/sparqling_alert.html) 
+[sparql_text.coffee](./coffee/sparql_text.html)   
+[query_line.coffee](./coffee/query_line.html)   
+[query_filter.coffee](./coffee/query_filter.html)   
+[hl_box.coffee](./coffee/hl_box.html)   
+[void.coffee](./coffee/void.html)   
+[style.coffee](./coffee/style.html)   
+[constants.coffee](./coffee/constants.html) 
+
+## [Demo](https://picorana.github.io/sparqling/)
+## [Video](https://www.youtube.com/watch?v=5Vla5h8W5sg&feature=youtu.be)
+
+## Usage
+Clone the repository with 
+
+	git clone https://github.com/picorana/sparqling
+
+Then import app.js and the css style in your graphol html visualization:
+	
+	<link href="../sparqling/css/style.css"/ rel="stylesheet">
+	<script type="text/javascript" src="./dist/sparqling.js"></script>
+
+After importing the script, initialize it with
+
+	var ps = new Sparqling(graph);
+	
+in which `graph` is an instance of a GrapholScape graph.
+
+An example graphol visualization can be found here: [GrapholScape](https://gianluca-pepe.github.io/GrapholScape/)   
+A working demo of this project can be found here: [demo](https://picorana.github.io/sparqling/)
+
+CDN:   
+	
+	https://rawgit.com/picorana/sparqling/master/css/style.css
+	https://rawgit.com/picorana/sparqling/master/dist/sparqling_min.js
+
+
+## Contribute
+
+Clone the repository
+
+	git clone https://github.com/picorana/sparqling
+
+and run    
+
+	node install
+
+that will take care of downloading the dev dependencies.
+
+Then run
+	
+	gulp
+
+in the base project directory. The default behaviour of gulp is to watch for changes in the `.coffee ` folder and recompile
+the coffee files, bundling them into sparqling.js. You can force `gulp` to just build once with `gulp build` 
+or to watch for changes with `gulp watch`
+
+The project is developed in `coffeescript`, and the source files are contained in the `coffee` folder of this repository. `gulp` is used to compile coffeescript to javascript and to bundle the project files together with the third party libraries. The final result is stored in the `dist` folder.
+
+## Disclaimer 
+Based on [GrapholScape](https://github.com/gianluca-pepe/GrapholScape) by [gianluca-pepe](https://github.com/gianluca-pepe).   
+Developed with [cytoscape.js](http://js.cytoscape.org) in [coffeescript](http://coffeescript.org)
+
+Supported by [OBDA Systems](https://www.obdasystems.com).
 	</div>
 </div>
 
