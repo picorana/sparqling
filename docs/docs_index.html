@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" type="text/css" href="docco.css">
+<style>
+#content {
+	margin-left: 20%;
+}
+</style>
+</head>
+<body>
+<div id="content">
+	<div class = 'markdown_content'>
+# Sparqling docs
+Query editor
+	</div>
+</div>
+
+	
+</body>
+
+<script>
+	for(var i=0; i<document.getElementsByClassName('markdown_content').length; i++){
+		document.getElementsByClassName('markdown_content')[i].innerHTML = marked(document.getElementsByClassName('markdown_content')[i].innerHTML) 
+
+    }
+</script>
+</html>
