@@ -110,14 +110,26 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p><em>require cyto</em>style.coffee
-<em>require sparql</em>text.coffee
-<em>require painless</em>link.coffee </p>
+              <p>Manages the visualization of the cytoscape graph, plus some interactions</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">SparqlingGraph</span></span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">SparqlingGraph</span></span>
+
+    state_buffer    = <span class="hljs-literal">null</span>
+
+    constructor: <span class="hljs-function"><span class="hljs-params">(context)</span> -&gt;</span>
+
+        @utils = <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.PainlessUtils()
+        @context = context
+
+        @links = []
+
+        @layout_names   = [<span class="hljs-string">'cola'</span>, <span class="hljs-string">'cose-bilkent'</span>, <span class="hljs-string">'circle'</span>, <span class="hljs-string">'cose'</span>, <span class="hljs-string">'grid'</span>, <span class="hljs-string">'breadthfirst'</span>, <span class="hljs-string">'concentric'</span>]
+        @layout_index   = <span class="hljs-number">0</span>
+
+        @init()
+        @reshape()</pre></div></div>
             
         </li>
         
@@ -128,11 +140,12 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>##* manages the graph visualization</p>
+              <p>TODO: sparql_text should be managed by sparqling.coffee</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        TODO: hardcoded collision distance should be <span class="hljs-keyword">in</span> constants</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        @sparql_text = <span class="hljs-keyword">new</span> SparqlText(@cy, @links)
+        @sparql_text.update()</pre></div></div>
             
         </li>
         
@@ -143,14 +156,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>##</p>
+              <p>TODO: this too should be managed by main class</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-    state_buffer    = <span class="hljs-literal">null</span>
-
-    constructor: <span class="hljs-function"><span class="hljs-params">(context)</span> -&gt;</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.PainlessContextMenu(@cy, <span class="hljs-keyword">this</span>)</pre></div></div>
             
         </li>
         
@@ -161,11 +171,19 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>##*</p>
+              <p>resets node positions in the graph view</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        TODO: sparql_text should be managed <span class="hljs-keyword">by</span> painless_sparql.coffee</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    reshape: <span class="hljs-function">=&gt;</span>
+        @layout = @layout_names[@layout_index % @layout_names.length]
+        @cy.layout({
+            name: @layout
+            fit: <span class="hljs-literal">false</span>
+            animate: <span class="hljs-literal">true</span>
+            nodeDimensionsIncludeLabels: <span class="hljs-literal">true</span>
+            edgeLength: <span class="hljs-number">200</span>
+        }).run()</pre></div></div>
             
         </li>
         
@@ -176,70 +194,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>##</p>
+              <p>downloads the whole state of cytoscape. TODO: not useful.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-        @utils = <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.PainlessUtils()
-        @context = context
-
-        @links = []
-
-        @layout_names   = [<span class="hljs-string">'cola'</span>, <span class="hljs-string">'cose-bilkent'</span>, <span class="hljs-string">'circle'</span>, <span class="hljs-string">'cose'</span>, <span class="hljs-string">'grid'</span>, <span class="hljs-string">'breadthfirst'</span>, <span class="hljs-string">'concentric'</span>]
-        @layout_index   = <span class="hljs-number">0</span>
-
-        @init()
-        @reshape()
-       
-        @sparql_text = <span class="hljs-keyword">new</span> SparqlText(@cy, @links)
-        @sparql_text.update()
-
-        <span class="hljs-keyword">new</span> <span class="hljs-built_in">window</span>.PainlessContextMenu(@cy, <span class="hljs-keyword">this</span>)
-
-        
-
-    reshape: <span class="hljs-function">=&gt;</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p>##* resets node positions in the graph view ###</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
-        @layout = @layout_names[@layout_index % @layout_names.length]
-        @cy.layout({
-            name: @layout
-            fit: <span class="hljs-literal">false</span>
-            animate: <span class="hljs-literal">true</span>
-            nodeDimensionsIncludeLabels: <span class="hljs-literal">true</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
-              </div>
-              <p>padding: </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            edgeLength: <span class="hljs-number">200</span>
-        }).run()
-
-
-    download: <span class="hljs-function">=&gt;</span> 
+            <div class="content"><div class='highlight'><pre>    download: <span class="hljs-function">=&gt;</span> 
         data = JSON.stringify(@cy.json())
         filename = <span class="hljs-string">"sparql.json"</span>
         type = <span class="hljs-string">"text/plain"</span>
@@ -257,10 +216,22 @@
                 <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span> 
                     <span class="hljs-built_in">document</span>.body.removeChild(a)
                     <span class="hljs-built_in">window</span>.URL.revokeObjectURL(url) 
-            , <span class="hljs-number">0</span>); 
+            , <span class="hljs-number">0</span>);</pre></div></div>
+            
+        </li>
         
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>removes all node. TODO: sometimes does not remove all nodes.</p>
 
-    clear_all: <span class="hljs-function">=&gt;</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    clear_all: <span class="hljs-function">=&gt;</span>
         <span class="hljs-keyword">for</span> link <span class="hljs-keyword">in</span> @links
             <span class="hljs-keyword">try</span> link.<span class="hljs-keyword">delete</span>()
             <span class="hljs-keyword">catch</span> e <span class="hljs-keyword">then</span> <span class="hljs-built_in">console</span>.log link
@@ -271,40 +242,23 @@
         @links = []
 
         @sparql_text.filters = []
-        @sparql_text.update()
-
-
-    center_view: <span class="hljs-function"><span class="hljs-params">(ele = <span class="hljs-literal">null</span>)</span> =&gt;</span></pre></div></div>
+        @sparql_text.update()</pre></div></div>
             
         </li>
         
         
-        <li id="section-8">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>##* </p>
+              <p>if <strong>ele</strong> is null, visualizes the whole graph.
+if <strong>ele</strong> is not null, focuses the view on <strong>ele</strong></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        TODO: pan <span class="hljs-keyword">and</span> center should actually be two different buttons!</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-9">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>##</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
+            <div class="content"><div class='highlight'><pre>    center_view: <span class="hljs-function"><span class="hljs-params">(ele = <span class="hljs-literal">null</span>)</span> =&gt;</span>
         <span class="hljs-keyword">if</span> ele == <span class="hljs-literal">null</span>
             <span class="hljs-keyword">if</span> @cy.nodes(<span class="hljs-string">':selected'</span>).length &gt; <span class="hljs-number">0</span>
                 @cy.center(@cy.nodes(<span class="hljs-string">':selected'</span>))
@@ -359,11 +313,11 @@
         </li>
         
         
-        <li id="section-10">
+        <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>##* merges node1 and node2, repositioning all node2’s edges into node1 ###
 node2 è il nodo che viene trascinato</p>
@@ -404,11 +358,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-11">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>##* adds a new link in the graph. </p>
 
@@ -428,11 +382,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-12">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>##</p>
 
@@ -457,11 +411,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>##* if a var node is selected, the link is added to the var node and one new var node is created###</p>
 
@@ -474,11 +428,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-14">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>##* otherwise, two new var nodes are created ###</p>
 
@@ -499,11 +453,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-15">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>##* computes distance between two node positions ###</p>
 
@@ -519,11 +473,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>##* check if there are any collisions in all the node variables</p>
 
@@ -537,11 +491,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>##</p>
 

@@ -1,18 +1,9 @@
-#_require cyto_style.coffee
-#_require sparql_text.coffee
-#_require painless_link.coffee 
-
+# Manages the visualization of the cytoscape graph, plus some interactions
 class window.SparqlingGraph
-    ###* manages the graph visualization
-        TODO: hardcoded collision distance should be in constants
-    ###
 
     state_buffer    = null
 
     constructor: (context) ->
-        ###*
-        TODO: sparql_text should be managed by painless_sparql.coffee
-        ###
 
         @utils = new window.PainlessUtils()
         @context = context
@@ -25,27 +16,27 @@ class window.SparqlingGraph
         @init()
         @reshape()
        
+        # TODO: sparql_text should be managed by sparqling.coffee
         @sparql_text = new SparqlText(@cy, @links)
         @sparql_text.update()
 
+        # TODO: this too should be managed by main class
         new window.PainlessContextMenu(@cy, this)
 
         
-
+    # resets node positions in the graph view
     reshape: =>
-        ###* resets node positions in the graph view ###
-
         @layout = @layout_names[@layout_index % @layout_names.length]
         @cy.layout({
             name: @layout
             fit: false
             animate: true
             nodeDimensionsIncludeLabels: true
-            #padding: 
             edgeLength: 200
         }).run()
 
 
+    # downloads the whole state of cytoscape. TODO: not useful.
     download: => 
         data = JSON.stringify(@cy.json())
         filename = "sparql.json"
@@ -67,6 +58,7 @@ class window.SparqlingGraph
             , 0); 
         
 
+    # removes all node. TODO: sometimes does not remove all nodes.
     clear_all: =>
         for link in @links
             try link.delete()
@@ -81,11 +73,9 @@ class window.SparqlingGraph
         @sparql_text.update()
 
 
+    # if __ele__ is null, visualizes the whole graph.
+    # if __ele__ is not null, focuses the view on __ele__
     center_view: (ele = null) =>
-        ###* 
-        TODO: pan and center should actually be two different buttons!
-        ###
-
         if ele == null
             if @cy.nodes(':selected').length > 0
                 @cy.center(@cy.nodes(':selected'))
@@ -134,10 +124,9 @@ class window.SparqlingGraph
         else console.warn 'this action cannot be performed on the selected node'
 
 
-
+    # merges node1 and node2, repositioning all node2's edges into node1
+    # node2 is the node that is carried on top of the other.
     merge: (node1, node2) ->
-        ###* merges node1 and node2, repositioning all node2's edges into node1 ###
-        # node2 è il nodo che viene trascinato
 
         @save_state()
 

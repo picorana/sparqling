@@ -110,7 +110,8 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              
+              <p>define the behaviour of the menu buttons located over the query canvas</p>
+
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">window</span>.<span class="hljs-title">PainlessMenu</span></span>
@@ -121,7 +122,7 @@
 
 
     change_size: <span class="hljs-function"><span class="hljs-params">(query_canvas_size)</span> =&gt;</span>
-        @context.query_canvas.style.height = query_canvas_size + <span class="hljs-string">"%"</span>
+        @context.sidenav.query_canvas.style.height = query_canvas_size + <span class="hljs-string">"%"</span>
         sparql_textbox.style.height = (<span class="hljs-number">100</span> - <span class="hljs-number">10</span> - query_canvas_size) + <span class="hljs-string">"%"</span>
         setTimeout =&gt; 
             @context.graph.cy.resize()
