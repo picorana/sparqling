@@ -4,8 +4,17 @@
 
 A graphical tool to write SPARQL queries.
 
-## [Demo](https://picorana.github.io/sparqling/)
-## [Video](https://www.youtube.com/watch?v=5Vla5h8W5sg&feature=youtu.be)
+<div style='text-align: center'> <img width='80%' style='border-radius: 100px; box-shadow: 5px 5px 3px 5px #88888855;' src='./res/gif1.gif'></img> </div>
+
+## [Demo](https://picorana.github.io/sparqling/) &#9679; [Video](https://www.youtube.com/watch?v=5Vla5h8W5sg&feature=youtu.be) &#9679; [Docs/tutorial](https://picorana.github.io/sparqling/docs_index.html) &#9679; [github](https://github.com/picorana/sparqling)
+
+
+## Table of contents
+- [Usage](#usage)
+- [Documentation index](#documentation-index)
+- [Contribute](#contribute)
+- [Disclaimer](#disclaimer)
+
 
 ## Usage
 Clone the repository with 
@@ -30,6 +39,23 @@ CDN:
 	
 	https://rawgit.com/picorana/sparqling/master/css/style.css
 	https://rawgit.com/picorana/sparqling/master/dist/sparqling_min.js
+
+
+## Documentation index
+- [sparqling.coffee](./coffee/sparqling.html)   
+- [sparqling_graph.coffee](./coffee/sparqling_graph.html)   
+- [sparqling_link.coffee](./coffee/sparqling_link.html)   
+- [sparqling_menu.coffee](./coffee/sparqling_menu.html)   
+- [sparqling_navbar.coffee](./coffee/sparqling_navbar.html)   
+- [sparqling_context_menu.coffee](./coffee/sparqling_context_menu.html)   
+- [sparqling_alert.coffee](./coffee/sparqling_alert.html) 
+- [sparql_text.coffee](./coffee/sparql_text.html)   
+- [query_line.coffee](./coffee/query_line.html)   
+- [query_filter.coffee](./coffee/query_filter.html)   
+- [hl_box.coffee](./coffee/hl_box.html)   
+- [void.coffee](./coffee/void.html)   
+- [style.coffee](./coffee/style.html)   
+- [constants.coffee](./coffee/constants.html) 
 
 
 ## Contribute
