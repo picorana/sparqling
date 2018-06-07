@@ -4,7 +4,7 @@
 
 A graphical tool to write SPARQL queries.
 
-<div style='text-align: center'> <img width='80%' style='border-radius: 100px; box-shadow: 5px 5px 3px 5px #88888855;' src='./res/gif1.gif'></img> </div>
+<div style='text-align: center'> <img width='80%' style='border-radius: 100px; box-shadow: 5px 5px 3px 5px #88888855;' src='https://picorana.github.io/sparqling/res/gif1.gif'></img> </div>
 
 ## [Demo](https://picorana.github.io/sparqling/) &#9679; [Video](https://www.youtube.com/watch?v=5Vla5h8W5sg&feature=youtu.be) &#9679; [Docs/tutorial](https://picorana.github.io/sparqling/docs_index.html) &#9679; [github](https://github.com/picorana/sparqling)
 
