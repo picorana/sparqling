@@ -304,11 +304,7 @@ if <strong>ele</strong> is not null, focuses the view on <strong>ele</strong></p
             <span class="hljs-built_in">console</span>.warn <span class="hljs-string">'attributes cannot be reversed'</span>
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> s_node.hasClass(<span class="hljs-string">"node-role"</span>) <span class="hljs-keyword">or</span> s_node.hasClass(<span class="hljs-string">"node-domain"</span>) <span class="hljs-keyword">or</span> s_node.hasClass(<span class="hljs-string">"node-range"</span>)
             @cy.nodes(<span class="hljs-string">":selected"</span>).data(<span class="hljs-string">'links'</span>).reverse()
-        <span class="hljs-keyword">else</span> <span class="hljs-built_in">console</span>.warn <span class="hljs-string">'this action cannot be performed on the selected node'</span>
-
-
-
-    merge: <span class="hljs-function"><span class="hljs-params">(node1, node2)</span> -&gt;</span></pre></div></div>
+        <span class="hljs-keyword">else</span> <span class="hljs-built_in">console</span>.warn <span class="hljs-string">'this action cannot be performed on the selected node'</span></pre></div></div>
             
         </li>
         
@@ -319,12 +315,13 @@ if <strong>ele</strong> is not null, focuses the view on <strong>ele</strong></p
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>##* merges node1 and node2, repositioning all node2’s edges into node1 ###
-node2 è il nodo che viene trascinato</p>
+              <p>merges node1 and node2, repositioning all node2’s edges into node1.
+<strong>node2</strong> is the node that is carried on top of the other.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
+            <div class="content"><div class='highlight'><pre>    merge: <span class="hljs-function"><span class="hljs-params">(node1, node2)</span> -&gt;</span>
+
         @save_state()
 
         links_to_add = []
@@ -350,10 +347,7 @@ node2 è il nodo che viene trascinato</p>
             @links.push(link)
 
         @cy.remove(node2) 
-        @sparql_text.update()
-
-
-    add_link: <span class="hljs-function"><span class="hljs-params">(link_name, link_type, datatype)</span> =&gt;</span></pre></div></div>
+        @sparql_text.update()</pre></div></div>
             
         </li>
         
@@ -364,35 +358,19 @@ node2 è il nodo che viene trascinato</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>##* adds a new link in the graph. </p>
+              <p>adds a new link in the graph.<br>links that are not concepts (roles and attributes) add a new variable into the graph.<br>links are always added to the selected variable in the graph, if there are no selected variables,
+two new variables are created.<br>links can be:</p>
+<ul>
+<li>concepts   </li>
+<li>roles</li>
+<li>attributes   </li>
+</ul>
+<p>TODO: use an enum to represent link types instead of hardcoded strings</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            links that are <span class="hljs-keyword">not</span> concepts (roles <span class="hljs-keyword">and</span> attributes) add a <span class="hljs-keyword">new</span> variable into the graph.
-            links are always added to the selected variable <span class="hljs-keyword">in</span> the graph, <span class="hljs-keyword">if</span> there are <span class="hljs-literal">no</span> selected variables,   
-                two <span class="hljs-keyword">new</span> variables are created.
+            <div class="content"><div class='highlight'><pre>    add_link: <span class="hljs-function"><span class="hljs-params">(link_name, link_type, datatype)</span> =&gt;</span>
 
-            links can be:
-            - concepts   
-            - roles
-            - attributes
-
-            TODO: use an enum to represent link types instead <span class="hljs-keyword">of</span> hardcoded strings</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-10">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
-              </div>
-              <p>##</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
         <span class="hljs-keyword">for</span> node <span class="hljs-keyword">in</span> @context.graphol_cy.nodes()
             <span class="hljs-keyword">if</span> node.data(<span class="hljs-string">'label'</span>) == link_name
                 node.style(<span class="hljs-string">'border-color'</span>, <span class="hljs-string">'#e38400'</span>)
@@ -411,11 +389,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-11">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>##* if a var node is selected, the link is added to the var node and one new var node is created###</p>
 
@@ -428,11 +406,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-12">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>##* otherwise, two new var nodes are created ###</p>
 
@@ -453,11 +431,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>##* computes distance between two node positions ###</p>
 
@@ -473,11 +451,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-14">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>##* check if there are any collisions in all the node variables</p>
 
@@ -491,11 +469,11 @@ node2 è il nodo che viene trascinato</p>
         </li>
         
         
-        <li id="section-15">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>##</p>
 

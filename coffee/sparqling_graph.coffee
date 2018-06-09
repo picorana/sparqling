@@ -124,8 +124,8 @@ class window.SparqlingGraph
         else console.warn 'this action cannot be performed on the selected node'
 
 
-    # merges node1 and node2, repositioning all node2's edges into node1
-    # node2 is the node that is carried on top of the other.
+    # merges node1 and node2, repositioning all node2's edges into node1.
+    # __node2__ is the node that is carried on top of the other.
     merge: (node1, node2) ->
 
         @save_state()
@@ -156,19 +156,17 @@ class window.SparqlingGraph
         @sparql_text.update()
 
 
+    # adds a new link in the graph.    
+    # links that are not concepts (roles and attributes) add a new variable into the graph.   
+    # links are always added to the selected variable in the graph, if there are no selected variables,
+    # two new variables are created.   
+    # links can be:
+    # - concepts   
+    # - roles
+    # - attributes   
+    #
+    # TODO: use an enum to represent link types instead of hardcoded strings
     add_link: (link_name, link_type, datatype) =>
-        ###* adds a new link in the graph. 
-            links that are not concepts (roles and attributes) add a new variable into the graph.
-            links are always added to the selected variable in the graph, if there are no selected variables,   
-                two new variables are created.
-
-            links can be:
-            - concepts   
-            - roles
-            - attributes
-
-            TODO: use an enum to represent link types instead of hardcoded strings
-        ###
 
         for node in @context.graphol_cy.nodes()
             if node.data('label') == link_name
