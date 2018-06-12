@@ -3,6 +3,7 @@ class window.QueryLine
 
     constructor: (link, sparql_text) ->
         @link = link
+        console.log @link
         @sparql_text = sparql_text
 
     

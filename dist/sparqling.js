@@ -6468,136 +6468,6 @@ module.exports = register;
 /***/ })
 /******/ ]);
 });
-;(function(root, factory) {
-  if (typeof exports === 'object') {
-    module.exports = factory(window, document)
-  } else {
-    root.SimpleScrollbar = factory(window, document)
-  }
-})(this, function(w, d) {
-  var raf = w.requestAnimationFrame || w.setImmediate || function(c) { return setTimeout(c, 0); };
-
-  function initEl(el) {
-    if (Object.prototype.hasOwnProperty.call(el, 'data-simple-scrollbar')) return;
-    Object.defineProperty(el, 'data-simple-scrollbar', { value: new SimpleScrollbar(el) });
-  }
-
-  // Mouse drag handler
-  function dragDealer(el, context) {
-    var lastPageY;
-
-    el.addEventListener('mousedown', function(e) {
-      lastPageY = e.pageY;
-      el.classList.add('ss-grabbed');
-      d.body.classList.add('ss-grabbed');
-
-      d.addEventListener('mousemove', drag);
-      d.addEventListener('mouseup', stop);
-
-      return false;
-    });
-
-    function drag(e) {
-      var delta = e.pageY - lastPageY;
-      lastPageY = e.pageY;
-
-      raf(function() {
-        context.el.scrollTop += delta / context.scrollRatio;
-      });
-    }
-
-    function stop() {
-      el.classList.remove('ss-grabbed');
-      d.body.classList.remove('ss-grabbed');
-      d.removeEventListener('mousemove', drag);
-      d.removeEventListener('mouseup', stop);
-    }
-  }
-
-  // Constructor
-  function ss(el) {
-    this.target = el;
-
-    this.direction = w.getComputedStyle(this.target).direction;
-
-    this.bar = '<div class="ss-scroll">';
-
-    this.wrapper = d.createElement('div');
-    this.wrapper.setAttribute('class', 'ss-wrapper');
-
-    this.el = d.createElement('div');
-    this.el.setAttribute('class', 'ss-content');
-
-    if (this.direction === 'rtl') {
-      this.el.classList.add('rtl');
-    }
-
-    this.wrapper.appendChild(this.el);
-
-    while (this.target.firstChild) {
-      this.el.appendChild(this.target.firstChild);
-    }
-    this.target.appendChild(this.wrapper);
-
-    this.target.insertAdjacentHTML('beforeend', this.bar);
-    this.bar = this.target.lastChild;
-
-    dragDealer(this.bar, this);
-    this.moveBar();
-
-    w.addEventListener('resize', this.moveBar.bind(this));
-    this.el.addEventListener('scroll', this.moveBar.bind(this));
-    this.el.addEventListener('mouseenter', this.moveBar.bind(this));
-
-    this.target.classList.add('ss-container');
-
-    var css = w.getComputedStyle(el);
-  	if (css['height'] === '0px' && css['max-height'] !== '0px') {
-    	el.style.height = css['max-height'];
-    }
-  }
-
-  ss.prototype = {
-    moveBar: function(e) {
-      var totalHeight = this.el.scrollHeight,
-          ownHeight = this.el.clientHeight,
-          _this = this;
-
-      this.scrollRatio = ownHeight / totalHeight;
-
-      var isRtl = _this.direction === 'rtl';
-      var right = isRtl ?
-        (_this.target.clientWidth - _this.bar.clientWidth + 18) :
-        (_this.target.clientWidth - _this.bar.clientWidth) * -1;
-
-      raf(function() {
-        // Hide scrollbar if no scrolling is possible
-        if(_this.scrollRatio >= 1) {
-          _this.bar.classList.add('ss-hidden')
-        } else {
-          _this.bar.classList.remove('ss-hidden')
-          _this.bar.style.cssText = 'height:' + Math.max(_this.scrollRatio * 100, 10) + '%; top:' + (_this.el.scrollTop / totalHeight ) * 100 + '%;right:' + right + 'px;';
-        }
-      });
-    }
-  }
-
-  function initAll() {
-    var nodes = d.querySelectorAll('*[ss-container]');
-
-    for (var i = 0; i < nodes.length; i++) {
-      initEl(nodes[i]);
-    }
-  }
-
-  d.addEventListener('DOMContentLoaded', initAll);
-  ss.initEl = initEl;
-  ss.initAll = initAll;
-
-  var SimpleScrollbar = ss;
-  return SimpleScrollbar;
-});
-
 window.QueryFilter = class QueryFilter {
   constructor(sparql_text, node) {
     this.new_condition = this.new_condition.bind(this);
@@ -6755,11 +6625,142 @@ window.QueryFilter = class QueryFilter {
 
 };
 
+;(function(root, factory) {
+  if (typeof exports === 'object') {
+    module.exports = factory(window, document)
+  } else {
+    root.SimpleScrollbar = factory(window, document)
+  }
+})(this, function(w, d) {
+  var raf = w.requestAnimationFrame || w.setImmediate || function(c) { return setTimeout(c, 0); };
+
+  function initEl(el) {
+    if (Object.prototype.hasOwnProperty.call(el, 'data-simple-scrollbar')) return;
+    Object.defineProperty(el, 'data-simple-scrollbar', { value: new SimpleScrollbar(el) });
+  }
+
+  // Mouse drag handler
+  function dragDealer(el, context) {
+    var lastPageY;
+
+    el.addEventListener('mousedown', function(e) {
+      lastPageY = e.pageY;
+      el.classList.add('ss-grabbed');
+      d.body.classList.add('ss-grabbed');
+
+      d.addEventListener('mousemove', drag);
+      d.addEventListener('mouseup', stop);
+
+      return false;
+    });
+
+    function drag(e) {
+      var delta = e.pageY - lastPageY;
+      lastPageY = e.pageY;
+
+      raf(function() {
+        context.el.scrollTop += delta / context.scrollRatio;
+      });
+    }
+
+    function stop() {
+      el.classList.remove('ss-grabbed');
+      d.body.classList.remove('ss-grabbed');
+      d.removeEventListener('mousemove', drag);
+      d.removeEventListener('mouseup', stop);
+    }
+  }
+
+  // Constructor
+  function ss(el) {
+    this.target = el;
+
+    this.direction = w.getComputedStyle(this.target).direction;
+
+    this.bar = '<div class="ss-scroll">';
+
+    this.wrapper = d.createElement('div');
+    this.wrapper.setAttribute('class', 'ss-wrapper');
+
+    this.el = d.createElement('div');
+    this.el.setAttribute('class', 'ss-content');
+
+    if (this.direction === 'rtl') {
+      this.el.classList.add('rtl');
+    }
+
+    this.wrapper.appendChild(this.el);
+
+    while (this.target.firstChild) {
+      this.el.appendChild(this.target.firstChild);
+    }
+    this.target.appendChild(this.wrapper);
+
+    this.target.insertAdjacentHTML('beforeend', this.bar);
+    this.bar = this.target.lastChild;
+
+    dragDealer(this.bar, this);
+    this.moveBar();
+
+    w.addEventListener('resize', this.moveBar.bind(this));
+    this.el.addEventListener('scroll', this.moveBar.bind(this));
+    this.el.addEventListener('mouseenter', this.moveBar.bind(this));
+
+    this.target.classList.add('ss-container');
+
+    var css = w.getComputedStyle(el);
+  	if (css['height'] === '0px' && css['max-height'] !== '0px') {
+    	el.style.height = css['max-height'];
+    }
+  }
+
+  ss.prototype = {
+    moveBar: function(e) {
+      var totalHeight = this.el.scrollHeight,
+          ownHeight = this.el.clientHeight,
+          _this = this;
+
+      this.scrollRatio = ownHeight / totalHeight;
+
+      var isRtl = _this.direction === 'rtl';
+      var right = isRtl ?
+        (_this.target.clientWidth - _this.bar.clientWidth + 18) :
+        (_this.target.clientWidth - _this.bar.clientWidth) * -1;
+
+      raf(function() {
+        // Hide scrollbar if no scrolling is possible
+        if(_this.scrollRatio >= 1) {
+          _this.bar.classList.add('ss-hidden')
+        } else {
+          _this.bar.classList.remove('ss-hidden')
+          _this.bar.style.cssText = 'height:' + Math.max(_this.scrollRatio * 100, 10) + '%; top:' + (_this.el.scrollTop / totalHeight ) * 100 + '%;right:' + right + 'px;';
+        }
+      });
+    }
+  }
+
+  function initAll() {
+    var nodes = d.querySelectorAll('*[ss-container]');
+
+    for (var i = 0; i < nodes.length; i++) {
+      initEl(nodes[i]);
+    }
+  }
+
+  d.addEventListener('DOMContentLoaded', initAll);
+  ss.initEl = initEl;
+  ss.initAll = initAll;
+
+  var SimpleScrollbar = ss;
+  return SimpleScrollbar;
+});
+
 window.QueryLine = class QueryLine {
   constructor(link, sparql_text) {
     this.to_html = this.to_html.bind(this);
     this.create_highlighting_box = this.create_highlighting_box.bind(this);
     this.link = link;
+    console.log(this.link);
     this.sparql_text = sparql_text;
   }
 
@@ -10498,6 +10499,16 @@ window.SparqlingGraph = (function() {
       this.center_view = this.center_view.bind(this);
       this.add_to_select = this.add_to_select.bind(this);
       this.reverse_relationship = this.reverse_relationship.bind(this);
+      // adds a new link in the graph.    
+      // links that are not concepts (roles and attributes) add a new variable into the graph.   
+      // links are always added to the selected variable in the graph, if there are no selected variables,
+      // two new variables are created.   
+      // links can be:
+      // - concepts   
+      // - roles
+      // - attributes   
+
+      // TODO: use an enum to represent link types instead of hardcoded strings
       this.add_link = this.add_link.bind(this);
       this.check_collisions = this.check_collisions.bind(this);
       this.load = this.load.bind(this);
@@ -10630,8 +10641,8 @@ window.SparqlingGraph = (function() {
       }
     }
 
-    // merges node1 and node2, repositioning all node2's edges into node1
-    // node2 is the node that is carried on top of the other.
+    // merges node1 and node2, repositioning all node2's edges into node1.
+    // __node2__ is the node that is carried on top of the other.
     merge(node1, node2) {
       var i, j, len, len1, link, links_to_add, node_var1, node_var2, ref;
       this.save_state();
@@ -10665,18 +10676,6 @@ window.SparqlingGraph = (function() {
       /** if a var node is selected, the link is added to the var node and one new var node is created*/
       var i, len, link, node, ref;
       ref = this.context.graphol_cy.nodes();
-      /** adds a new link in the graph. 
-          links that are not concepts (roles and attributes) add a new variable into the graph.
-          links are always added to the selected variable in the graph, if there are no selected variables,   
-              two new variables are created.
-
-          links can be:
-          - concepts   
-          - roles
-          - attributes
-
-          TODO: use an enum to represent link types instead of hardcoded strings
-      */
       for (i = 0, len = ref.length; i < len; i++) {
         node = ref[i];
         if (node.data('label') === link_name) {
@@ -10757,7 +10756,7 @@ window.SparqlingGraph = (function() {
             classes: 'node-variable',
             data: {
               id: triple['subject'].slice(1),
-              label: triple['subject'].slice(1),
+              label: triple['subject'],
               color: '#' + palette[0],
               links: []
             }
@@ -10773,7 +10772,7 @@ window.SparqlingGraph = (function() {
               classes: 'node-variable',
               data: {
                 id: triple['object'].slice(1),
-                label: triple['object'].slice(1),
+                label: triple['object'],
                 color: '#aaa',
                 links: []
               }
@@ -10955,7 +10954,7 @@ window.PainlessLink = (function() {
       index = this.context.links.indexOf(this);
       this.context.links.splice(index, 1);
       this.context.sparql_text.update();
-      ref = this.context.context.cy.nodes();
+      ref = this.context.cy.nodes();
       for (j = 0, len = ref.length; j < len; j++) {
         node = ref[j];
         if (node.data('label') === this.link_name) {
