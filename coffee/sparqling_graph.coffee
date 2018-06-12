@@ -236,7 +236,7 @@ class window.SparqlingGraph
                     classes: 'node-variable'
                     data: {
                         id: triple['subject'].slice(1)
-                        label: triple['subject'].slice(1)
+                        label: triple['subject']
                         color: '#' + palette[0]
                         links: []
                     }
@@ -257,7 +257,7 @@ class window.SparqlingGraph
                         classes: 'node-variable'
                         data: {
                             id: triple['object'].slice(1)
-                            label: triple['object'].slice(1)
+                            label: triple['object']
                             color: '#aaa'
                             links: []
                         }

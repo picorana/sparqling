@@ -1,5 +1,5 @@
 {
-  "name": "painless_sparql",
+  "name": "sparqling",
   "version": "1.0.0",
   "description": "a graphical tool to write sparql queries",
   "main": "gulpfile.js",

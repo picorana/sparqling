@@ -106,7 +106,7 @@ class window.PainlessLink
         @context.links.splice(index, 1)
         @context.sparql_text.update()
 
-        for node in @context.context.cy.nodes()
+        for node in @context.cy.nodes()
             if node.data('label') == @link_name
                 node.style('border-color', 'black')
                 node.style('border-width', '1px')
