@@ -89,7 +89,7 @@ class window.Sparqling
         window.addEventListener('keypress', (event) => @onkeypress_handler(event))
 
         # fix sizes on window resize
-        window.addEventListener('resize', () => @resize_navbar())
+        window.addEventListener('resize', () => @sidenav.resize_navbar())
 
         # doubleclick handler on grapholscape
         @graphol_cy.on('tap', (event) => @doubleclick_handler(event))

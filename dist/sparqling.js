@@ -8030,7 +8030,7 @@ window.Sparqling = (function() {
       });
       // fix sizes on window resize
       window.addEventListener('resize', () => {
-        return this.resize_navbar();
+        return this.sidenav.resize_navbar();
       });
       // doubleclick handler on grapholscape
       return this.graphol_cy.on('tap', (event) => {
@@ -10499,6 +10499,33 @@ window.SparqlingGraph = (function() {
       this.center_view = this.center_view.bind(this);
       this.add_to_select = this.add_to_select.bind(this);
       this.reverse_relationship = this.reverse_relationship.bind(this);
+      /*        @save_state()
+
+      links_to_add = []
+
+      for link in node2.data('links')
+
+          if link.link_type == 'concept'
+              links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
+
+          else if link.node_var1.id() == node2.id() and link.node_var2.id() == node2.id()
+              console.log 'case1'
+              links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
+          else if link.node_var1.id() == node2.id()
+              console.log 'case2'
+              links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
+          else 
+              console.log 'case3'
+              links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
+
+          link.delete()
+
+      for link in links_to_add
+          @links.push(link)
+
+      @cy.remove(node2) 
+      @sparql_text.update()
+      @reshape()*/
       // adds a new link in the graph.    
       // links that are not concepts (roles and attributes) add a new variable into the graph.   
       // links are always added to the selected variable in the graph, if there are no selected variables,
@@ -10526,6 +10553,7 @@ window.SparqlingGraph = (function() {
       this.sparql_text.update();
       // TODO: this too should be managed by main class
       new window.PainlessContextMenu(this.cy, this);
+      this.color_index = 0;
     }
 
     reshape() {
@@ -10644,32 +10672,15 @@ window.SparqlingGraph = (function() {
     // merges node1 and node2, repositioning all node2's edges into node1.
     // __node2__ is the node that is carried on top of the other.
     merge(node1, node2) {
-      var i, j, len, len1, link, links_to_add, node_var1, node_var2, ref;
-      this.save_state();
-      links_to_add = [];
+      var i, len, link, ref;
       ref = node2.data('links');
       for (i = 0, len = ref.length; i < len; i++) {
         link = ref[i];
-        if (link.link_type === 'concept') {
-          links_to_add.push(new PainlessLink(this, this.cy, link.link_name, link.link_type, node_var1 = node1));
-        } else if (link.node_var1.id() === node2.id() && link.node_var2.id() === node2.id()) {
-          console.log('case1');
-          links_to_add.push(new PainlessLink(this, this.cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1));
-        } else if (link.node_var1.id() === node2.id()) {
-          console.log('case2');
-          links_to_add.push(new PainlessLink(this, this.cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2));
-        } else {
-          console.log('case3');
-          links_to_add.push(new PainlessLink(this, this.cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1));
-        }
-        link.delete();
-      }
-      for (j = 0, len1 = links_to_add.length; j < len1; j++) {
-        link = links_to_add[j];
-        this.links.push(link);
+        link.switch_node(node2, node1);
       }
       this.cy.remove(node2);
-      return this.sparql_text.update();
+      this.sparql_text.update();
+      return this.reshape();
     }
 
     add_link(link_name, link_type, datatype) {
@@ -10703,13 +10714,13 @@ window.SparqlingGraph = (function() {
         }
       }
       this.links.push(link);
-      console.log(this.links);
       this.sparql_text.update();
       return this.reshape();
     }
 
+    
+    // computes distance between two node positions
     compute_distance(node1, node2) {
-      /** computes distance between two node positions */
       var a, b;
       a = Math.abs(node1.position('x') - node2.position('x'));
       b = Math.abs(node1.position('y') - node2.position('y'));
@@ -10744,10 +10755,9 @@ window.SparqlingGraph = (function() {
     }
 
     load() {
-      var i, len, link, obj, parsed_query, ref, results, subj, triple;
-      parsed_query = window.sparqljs.Parser().parse('PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX xmlns: <http://baa> ' + 'SELECT * { ?mickey foaf:name "Mickey Mouse" . ?mickey foaf:knows ?other. }');
+      var i, len, link, obj, parsed_query, ref, subj, triple;
+      parsed_query = window.sparqljs.Parser().parse('PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX : <http://www.aci.it/ontology#> PREFIX xml: <http://www.w3.org/XML/1998/namespace> PREFIX aci: <http://www.aci.it/ontology#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> Select ?idVeicolo ?inizioStato ?fineStato ?idFormalitaGeneratrice ?idFormalitaOriginaria ?codiceFormalitaOriginaria ?dataAccettazioneFormalitaOriginaria ?ufficioCompetenteFormalitaOriginaria ?serieTarga ?numeroTarga ?serieTargaPrecedente ?numeroTargaPrecedente ?telaio ?kw ?cilindrata ?peso ?portata ?tara ?classe ?uso ?carrozzeria ?specialita ?alimentazione ?alimentazioneDTT ?dataImmatricolazione ?codiceUltimaFormalitaDiParte ?dataUltimaFormalitaDiParte where { ?veicolo aci:ID_veicolo ?idVeicolo. ?veicolo aci:ha_stato_di_veicolo ?stato. ?stato a aci:Stato_rappresentato_valido. ?stato aci:ha_targa ?targa. ?targa aci:numero_targa ?numeroTarga. ?targa aci:serie_targa ?serieTarga. ?stato aci:ha_formalita_originaria ?formalitaOriginaria. ?formalitaOriginaria aci:ID_formalita ?idFormalitaOriginaria. ?formalitaOriginaria aci:codice_tipo ?codiceFormalitaOriginaria. ?evento aci:determina_stato ?stato. ?formalitaGeneratrice aci:formalita_genera_evento ?evento. ?formalitaGeneratrice aci:ID_formalita ?idFormalitaGeneratrice. ?stato aci:inizio_stato_del_mondo ?inizioStato. ?stato aci:fine_stato_del_mondo ?fineStato. ?formalitaOriginaria aci:data_accettazione_formalita ?dataAccettazioneFormalitaOriginaria. ?formalitaOriginaria aci:est_di_competenza_di_ufficio ?ufficio. ?ufficio aci:descrizione_ufficio ?ufficioCompetenteFormalitaOriginaria. ?stato aci:codice_tipo_ultima_formalita_di_parte ?codiceUltimaFormalitaDiParte. ?stato aci:data_accettazione_ultima_formalita_di_parte ?dataUltimaFormalitaDiParte. ?stato aci:ha_targa_precedente ?targaPrecedente. ?targaPrecedente aci:numero_targa ?numeroTargaPrecedente. ?targaPrecedente  aci:serie_targa ?serieTargaPrecedente. ?stato aci:numero_telaio ?telaio. ?stato aci:kw ?kw. ?stato aci:cilindrata ?cilindrata. ?stato aci:peso_complessivo ?peso. ?stato aci:portata ?portata. ?stato aci:tara ?tara. ?stato aci:classe_veicolo ?classe. ?stato aci:destinazione_di_uso ?uso. ?stato aci:carrozzeria ?carrozzeria. ?stato aci:descrizione_specialita ?specialita. ?stato aci:data_immatricolazione ?dataImmatricolazione. ?stato aci:alimentazione ?alimentazione. ?stato aci:alimentazione_DTT ?alimentazioneDTT. }');
       ref = parsed_query['where'][0]['triples'];
-      results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         triple = ref[i];
         if (this.cy.getElementById(triple['subject'].slice(1)).length === 0) {
@@ -10757,10 +10767,11 @@ window.SparqlingGraph = (function() {
             data: {
               id: triple['subject'].slice(1),
               label: triple['subject'],
-              color: '#' + palette[0],
+              color: '#' + palette[this.color_index % palette.length],
               links: []
             }
           });
+          this.color_index += 1;
           subj = subj[0];
         } else {
           subj = this.cy.getElementById(triple['subject'].slice(1));
@@ -10773,11 +10784,12 @@ window.SparqlingGraph = (function() {
               data: {
                 id: triple['object'].slice(1),
                 label: triple['object'],
-                color: '#aaa',
+                color: '#' + palette[this.color_index % palette.length],
                 links: []
               }
             });
             obj = obj[0];
+            this.color_index += 1;
           } else {
             obj = this.cy.getElementById(triple['object'].slice(1));
           }
@@ -10795,17 +10807,21 @@ window.SparqlingGraph = (function() {
           obj = obj[0];
         }
         $.each(parsed_query['prefixes'], (elem) => {
-          console.log(triple['predicate'].indexOf(parsed_query['prefixes'][elem]));
+          
+          //console.log triple['predicate'].indexOf(parsed_query['prefixes'][elem])
           if (triple['predicate'].indexOf(parsed_query['prefixes'][elem]) !== -1) {
             return triple['predicate'] = triple['predicate'].substr(parsed_query['prefixes'][elem].length);
           }
         });
         link = new PainlessLink(this, this.cy, triple['predicate'], 'role', subj, obj);
         this.links.push(link);
-        this.reshape();
-        results.push(this.sparql_text.update());
       }
-      return results;
+      $.each(parsed_query['variables'], (elem) => {
+        return this.sparql_text.select_boxes.push(parsed_query['variables'][elem].slice(1));
+      });
+      console.log(this.sparql_text.select_boxes);
+      this.reshape();
+      return this.sparql_text.update();
     }
 
     init() {
@@ -10838,219 +10854,232 @@ window.SparqlingGraph = (function() {
 }).call(this);
 
 //_require constants.coffee
-window.PainlessLink = (function() {
-  var color_index;
-
-  class PainlessLink {
-    constructor(context, cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) {
-      this.create_edge = this.create_edge.bind(this);
-      this.reverse = this.reverse.bind(this);
-      this.add_datatype = this.add_datatype.bind(this);
-      this.create_node = this.create_node.bind(this);
-      this.delete = this.delete.bind(this);
-      this.create_link = this.create_link.bind(this);
-      this.create_concept = this.create_concept.bind(this);
-      this.to_string = this.to_string.bind(this);
-      this.cy = cy;
-      this.context = context;
-      this.link_name = link_name;
-      this.link_type = link_type;
-      this.node_var1 = node_var1;
-      this.node_var2 = node_var2;
-      this.edge_source = null;
-      this.edge_target = null;
-      this.datatype = datatype;
-      this.datatype_node = null;
-      if (link_type === 'concept') {
-        this.create_concept();
-      } else {
-        this.create_link();
-      }
+window.PainlessLink = class PainlessLink {
+  constructor(context, cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) {
+    this.create_edge = this.create_edge.bind(this);
+    this.reverse = this.reverse.bind(this);
+    this.add_datatype = this.add_datatype.bind(this);
+    this.create_node = this.create_node.bind(this);
+    this.delete = this.delete.bind(this);
+    // node1 is the node that gets deleted
+    this.switch_node = this.switch_node.bind(this);
+    this.create_link = this.create_link.bind(this);
+    this.create_concept = this.create_concept.bind(this);
+    this.to_string = this.to_string.bind(this);
+    this.cy = cy;
+    this.context = context;
+    this.link_name = link_name;
+    this.link_type = link_type;
+    this.node_var1 = node_var1;
+    this.node_var2 = node_var2;
+    this.edge_source = null;
+    this.edge_target = null;
+    this.datatype = datatype;
+    this.datatype_node = null;
+    if (link_type === 'concept') {
+      this.create_concept();
+    } else {
+      this.create_link();
     }
+  }
 
-    find_new_name(base_name = null) {
-      var i;
-      if (base_name === null) {
-        base_name = "x";
-      }
-      i = 0;
-      while (this.cy.getElementById(base_name + i).length !== 0) {
-        i += 1;
-      }
-      return base_name + i;
+  find_new_name(base_name = null) {
+    var i;
+    if (base_name === null) {
+      base_name = "x";
     }
-
-    create_edge(node1, node2, classes = null) {
-      return this.cy.add({
-        group: 'edges',
-        data: {
-          source: node1.id(),
-          target: node2.id()
-        },
-        classes: classes
-      });
+    i = 0;
+    while (this.cy.getElementById(base_name + i).length !== 0) {
+      i += 1;
     }
+    return base_name + i;
+  }
 
-    reverse() {
-      /** can only be applied to non-concept relationships */
-      if (this.source === this.node_var1) {
-        this.edge_source.classes('target-edge');
-        this.edge_target.classes('source-edge');
-        this.source = this.node_var2;
-        return this.target = this.node_var1;
-      } else {
-        this.edge_source.classes('source-edge');
-        this.edge_target.classes('target-edge');
-        this.source = this.node_var1;
-        return this.target = this.node_var2;
-      }
-    }
+  create_edge(node1, node2, classes = null) {
+    return this.cy.add({
+      group: 'edges',
+      data: {
+        source: node1.id(),
+        target: node2.id()
+      },
+      classes: classes
+    });
+  }
 
-    add_datatype(node, datatype) {
-      this.datatype_node = this.cy.add({
-        group: 'nodes',
-        data: {
-          label: datatype
-        },
-        classes: 'node-datatype'
-      });
-      return this.edge_datatype = this.cy.add({
-        group: 'edges',
-        data: {
-          source: node.id(),
-          target: this.datatype_node.id(),
-          weight: 99
-        },
-        classes: 'edge-datatype'
-      });
-    }
-
-    create_node(type, label = null) {
-      var data;
-      data = {};
-      if (type === 'node-variable') {
-        label = this.find_new_name(label);
-        data['id'] = label;
-        data['color'] = '#' + palette[color_index % palette.length];
-        color_index += 1;
-      }
-      if (type === 'node-concept') {
-        data['label'] = this.link_name;
-      } else if (type === 'node-attribute' || type === 'node-role') {
-        data['label'] = label;
-      } else {
-        data['label'] = '?' + label;
-      }
-      data['links'] = [this];
-      return this.cy.add({
-        group: 'nodes',
-        data: data,
-        classes: type
-      });
-    }
-
-    delete() {
-      var i, index, j, k, l, len, len1, node, node_var, ref, ref1, ref2;
-      index = this.context.links.indexOf(this);
-      this.context.links.splice(index, 1);
-      this.context.sparql_text.update();
-      ref = this.context.cy.nodes();
-      for (j = 0, len = ref.length; j < len; j++) {
-        node = ref[j];
-        if (node.data('label') === this.link_name) {
-          node.style('border-color', 'black');
-          node.style('border-width', '1px');
-        }
-      }
-      if (this.node_link !== null && this.node_link !== void 0) {
-        this.cy.remove(this.node_link);
-      }
-      if (this.node_concept !== null && this.node_concept !== void 0) {
-        this.cy.remove(this.node_concept);
-      }
-      if (this.datatype_node !== null && this.datatype_node !== void 0) {
-        this.cy.remove(this.datatype_node);
-      }
-      ref1 = [this.node_var1, this.node_var2];
-      for (k = 0, len1 = ref1.length; k < len1; k++) {
-        node_var = ref1[k];
-        if (node_var !== null && node_var !== void 0) {
-          index = node_var.data('links').indexOf(this);
-          node_var.data('links').splice(index, 1);
-          if (node_var.data('links').length === 0) {
-            for (i = l = 0, ref2 = this.context.sparql_text.select_boxes.length; (0 <= ref2 ? l < ref2 : l > ref2); i = 0 <= ref2 ? ++l : --l) {
-              if (this.context.sparql_text.select_boxes[i] === node_var.id()) {
-                this.context.sparql_text.select_boxes.splice(i, 1);
-              }
-            }
-            this.cy.remove(node_var);
-          }
-        }
-      }
-      return this.context.sparql_text.update();
-    }
-
-    create_link() {
-      if (this.node_var1 === null || this.node_var1 === void 0) {
-        this.node_var1 = this.create_node('node-variable');
-        this.node_var1.classes('node-variable node-variable-full-options');
-      } else if (this.node_var1.hasClass('attr-range')) {
-        console.warn('properties can\'t be added to the range of an attribute');
-        return;
-      } else {
-        this.node_var1.data('links').push(this);
-      }
-      if (this.node_var2 === null || this.node_var2 === void 0) {
-        if (this.link_type === 'attribute') {
-          this.node_var2 = this.create_node('node-variable', this.link_name);
-          this.node_var2.classes('node-variable attr-range');
-          if (this.datatype !== null && this.datatype !== void 0) {
-            this.add_datatype(this.node_var2, this.datatype);
-          }
-        } else {
-          this.node_var2 = this.create_node('node-variable');
-          this.node_var2.classes('node-variable node-variable-full-options');
-        }
-      } else {
-        this.node_var2.data('links').push(this);
-      }
+  reverse() {
+    /** can only be applied to non-concept relationships */
+    if (this.source === this.node_var1) {
+      this.edge_source.classes('target-edge');
+      this.edge_target.classes('source-edge');
+      this.source = this.node_var2;
+      return this.target = this.node_var1;
+    } else {
+      this.edge_source.classes('source-edge');
+      this.edge_target.classes('target-edge');
       this.source = this.node_var1;
-      this.target = this.node_var2;
-      if (this.link_type === 'role') {
-        this.node_link = this.create_node('node-role', this.link_name);
-      } else {
-        this.node_link = this.create_node('node-attribute', this.link_name);
-      }
-      this.edge_source = this.create_edge(this.node_link, this.source, "source-edge");
-      return this.edge_target = this.create_edge(this.node_link, this.target, "target-edge");
+      return this.target = this.node_var2;
     }
+  }
 
-    create_concept() {
-      if (this.node_var1 === null || this.node_var1 === void 0) {
-        this.node_var1 = this.create_node('node-variable');
-        this.node_var1.classes('node-variable node-variable-full-options');
-      } else {
-        this.node_var1.data('links').push(this);
-      }
-      this.node_concept = this.create_node('node-concept');
-      return this.create_edge(this.node_var1, this.node_concept, 'edge-concept');
+  add_datatype(node, datatype) {
+    this.datatype_node = this.cy.add({
+      group: 'nodes',
+      data: {
+        label: datatype
+      },
+      classes: 'node-datatype'
+    });
+    return this.edge_datatype = this.cy.add({
+      group: 'edges',
+      data: {
+        source: node.id(),
+        target: this.datatype_node.id(),
+        weight: 99
+      },
+      classes: 'edge-datatype'
+    });
+  }
+
+  create_node(type, label = null) {
+    var data;
+    data = {};
+    if (type === 'node-variable') {
+      label = this.find_new_name(label);
+      data['id'] = label;
+      data['color'] = '#' + palette[this.context.color_index % palette.length];
+      this.context.color_index += 1;
     }
+    if (type === 'node-concept') {
+      data['label'] = this.link_name;
+    } else if (type === 'node-attribute' || type === 'node-role') {
+      data['label'] = label;
+    } else {
+      data['label'] = '?' + label;
+    }
+    data['links'] = [this];
+    return this.cy.add({
+      group: 'nodes',
+      data: data,
+      classes: type
+    });
+  }
 
-    to_string() {
-      if (this.link_type !== 'concept') {
-        return this.source.data('label') + ' ' + this.link_name + ' ' + this.target.data('label') + ' .';
-      } else {
-        return this.node_var1.data('label') + ' rdf:type ' + this.node_concept.data('label') + ' .';
+  delete() {
+    var i, index, j, k, l, len, len1, node, node_var, ref, ref1, ref2;
+    index = this.context.links.indexOf(this);
+    this.context.links.splice(index, 1);
+    this.context.sparql_text.update();
+    ref = this.context.cy.nodes();
+    for (j = 0, len = ref.length; j < len; j++) {
+      node = ref[j];
+      if (node.data('label') === this.link_name) {
+        node.style('border-color', 'black');
+        node.style('border-width', '1px');
       }
     }
+    if (this.node_link !== null && this.node_link !== void 0) {
+      this.cy.remove(this.node_link);
+    }
+    if (this.node_concept !== null && this.node_concept !== void 0) {
+      this.cy.remove(this.node_concept);
+    }
+    if (this.datatype_node !== null && this.datatype_node !== void 0) {
+      this.cy.remove(this.datatype_node);
+    }
+    ref1 = [this.node_var1, this.node_var2];
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      node_var = ref1[k];
+      if (node_var !== null && node_var !== void 0) {
+        index = node_var.data('links').indexOf(this);
+        node_var.data('links').splice(index, 1);
+        if (node_var.data('links').length === 0) {
+          for (i = l = 0, ref2 = this.context.sparql_text.select_boxes.length; (0 <= ref2 ? l < ref2 : l > ref2); i = 0 <= ref2 ? ++l : --l) {
+            if (this.context.sparql_text.select_boxes[i] === node_var.id()) {
+              this.context.sparql_text.select_boxes.splice(i, 1);
+            }
+          }
+          this.cy.remove(node_var);
+        }
+      }
+    }
+    return this.context.sparql_text.update();
+  }
 
-  };
+  switch_node(node1, node2) {
+    if (node1.id() === this.node_var1.id()) {
+      this.node_var1 = node2;
+    } else if (node1.id() === this.node_var2.id()) {
+      this.node_var2 = node2;
+    }
+    if (this.link_type === 'concept') {
+      this.create_edge(this.node_var1, this.node_concept, 'edge-concept');
+    } else {
+      if (node1.id() === this.source.id()) {
+        this.source = node2;
+        this.create_edge(this.node_link, this.source, "source-edge");
+      } else if (node1.id() === this.target.id()) {
+        this.target = node2;
+        this.edge_target = this.create_edge(this.node_link, this.target, "target-edge");
+      }
+    }
+    return node2.data('links').push(this);
+  }
 
-  color_index = 0;
+  create_link() {
+    if (this.node_var1 === null || this.node_var1 === void 0) {
+      this.node_var1 = this.create_node('node-variable');
+      this.node_var1.classes('node-variable node-variable-full-options');
+    } else if (this.node_var1.hasClass('attr-range')) {
+      console.warn('properties can\'t be added to the range of an attribute');
+      return;
+    } else {
+      this.node_var1.data('links').push(this);
+    }
+    if (this.node_var2 === null || this.node_var2 === void 0) {
+      if (this.link_type === 'attribute') {
+        this.node_var2 = this.create_node('node-variable', this.link_name);
+        this.node_var2.classes('node-variable attr-range');
+        if (this.datatype !== null && this.datatype !== void 0) {
+          this.add_datatype(this.node_var2, this.datatype);
+        }
+      } else {
+        this.node_var2 = this.create_node('node-variable');
+        this.node_var2.classes('node-variable node-variable-full-options');
+      }
+    } else {
+      this.node_var2.data('links').push(this);
+    }
+    this.source = this.node_var1;
+    this.target = this.node_var2;
+    if (this.link_type === 'role') {
+      this.node_link = this.create_node('node-role', this.link_name);
+    } else {
+      this.node_link = this.create_node('node-attribute', this.link_name);
+    }
+    this.edge_source = this.create_edge(this.node_link, this.source, "source-edge");
+    return this.edge_target = this.create_edge(this.node_link, this.target, "target-edge");
+  }
 
-  return PainlessLink;
+  create_concept() {
+    if (this.node_var1 === null || this.node_var1 === void 0) {
+      this.node_var1 = this.create_node('node-variable');
+      this.node_var1.classes('node-variable node-variable-full-options');
+    } else {
+      this.node_var1.data('links').push(this);
+    }
+    this.node_concept = this.create_node('node-concept');
+    return this.create_edge(this.node_var1, this.node_concept, 'edge-concept');
+  }
 
-}).call(this);
+  to_string() {
+    if (this.link_type !== 'concept') {
+      return this.source.data('label') + ' ' + this.link_name + ' ' + this.target.data('label') + ' .';
+    } else {
+      return this.node_var1.data('label') + ' rdf:type ' + this.node_concept.data('label') + ' .';
+    }
+  }
+
+};
 
 // define the behaviour of the menu buttons located over the query canvas
 window.PainlessMenu = class PainlessMenu {
@@ -11123,7 +11152,9 @@ window.PainlessMenu = class PainlessMenu {
       return this.context.graph.copy_to_clipboard();
     }), 'copy to clipboard'));
     //menu.append(@create_div('<i class="material-icons" style="font-size: 18px">save</i>',                 'menu_button', null, ( => @context.graph.download()), 'export'))
-    //menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',      'menu_button', null, ( => @context.graph.load()), 'import'))
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>', 'menu_button', null, (() => {
+      return this.context.graph.load();
+    }), 'import'));
     return menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>', 'menu_button', null, (() => {
       return this.context.graph.clear_all();
     }), 'clear all'));

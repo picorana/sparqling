@@ -23,6 +23,8 @@ class window.SparqlingGraph
         # TODO: this too should be managed by main class
         new window.PainlessContextMenu(@cy, this)
 
+        @color_index = 0
+
         
     # resets node positions in the graph view
     reshape: =>
@@ -128,7 +130,14 @@ class window.SparqlingGraph
     # __node2__ is the node that is carried on top of the other.
     merge: (node1, node2) ->
 
-        @save_state()
+        for link in node2.data('links')
+            link.switch_node(node2, node1)
+
+        @cy.remove(node2)
+        @sparql_text.update()
+        @reshape()
+
+###        @save_state()
 
         links_to_add = []
 
@@ -154,6 +163,7 @@ class window.SparqlingGraph
 
         @cy.remove(node2) 
         @sparql_text.update()
+        @reshape()###
 
 
     # adds a new link in the graph.    
@@ -192,13 +202,12 @@ class window.SparqlingGraph
                 @sparql_text.add_to_select(link.node_var2.id())
 
         @links.push(link)
-        console.log @links
         @sparql_text.update()
         @reshape()
    
 
+    # computes distance between two node positions
     compute_distance: (node1, node2) ->
-        ###* computes distance between two node positions ###
         a = Math.abs(node1.position('x') - node2.position('x'))
         b = Math.abs(node1.position('y') - node2.position('y'))
         return Math.sqrt(a*a + b*b)
@@ -223,9 +232,62 @@ class window.SparqlingGraph
  
     load: =>
         
-        parsed_query = window.sparqljs.Parser().parse(
-            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX xmlns: <http://baa> ' +
-            'SELECT * { ?mickey foaf:name "Mickey Mouse" . ?mickey foaf:knows ?other. }');
+        parsed_query = window.sparqljs.Parser().parse('
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            PREFIX : <http://www.aci.it/ontology#>
+            PREFIX xml: <http://www.w3.org/XML/1998/namespace>
+            PREFIX aci: <http://www.aci.it/ontology#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+            Select ?idVeicolo ?inizioStato ?fineStato 
+                   ?idFormalitaGeneratrice
+                   ?idFormalitaOriginaria ?codiceFormalitaOriginaria ?dataAccettazioneFormalitaOriginaria ?ufficioCompetenteFormalitaOriginaria 
+                   ?serieTarga ?numeroTarga ?serieTargaPrecedente ?numeroTargaPrecedente 
+                   ?telaio ?kw ?cilindrata ?peso ?portata ?tara ?classe ?uso ?carrozzeria ?specialita 
+                   ?alimentazione ?alimentazioneDTT
+                   ?dataImmatricolazione
+                   ?codiceUltimaFormalitaDiParte ?dataUltimaFormalitaDiParte
+            where 
+            { 
+                ?veicolo aci:ID_veicolo ?idVeicolo.
+                ?veicolo aci:ha_stato_di_veicolo ?stato.
+                ?stato a aci:Stato_rappresentato_valido.
+                ?stato aci:ha_targa ?targa.
+                ?targa aci:numero_targa ?numeroTarga.
+                ?targa aci:serie_targa ?serieTarga.
+                ?stato aci:ha_formalita_originaria ?formalitaOriginaria.
+                ?formalitaOriginaria aci:ID_formalita ?idFormalitaOriginaria.
+                ?formalitaOriginaria aci:codice_tipo ?codiceFormalitaOriginaria.
+                ?evento aci:determina_stato ?stato.
+                ?formalitaGeneratrice aci:formalita_genera_evento ?evento.
+                ?formalitaGeneratrice aci:ID_formalita ?idFormalitaGeneratrice.  
+                ?stato aci:inizio_stato_del_mondo ?inizioStato.
+                ?stato aci:fine_stato_del_mondo ?fineStato.
+                ?formalitaOriginaria aci:data_accettazione_formalita ?dataAccettazioneFormalitaOriginaria.
+                ?formalitaOriginaria aci:est_di_competenza_di_ufficio ?ufficio.
+                ?ufficio aci:descrizione_ufficio ?ufficioCompetenteFormalitaOriginaria.
+                ?stato aci:codice_tipo_ultima_formalita_di_parte ?codiceUltimaFormalitaDiParte.
+                ?stato aci:data_accettazione_ultima_formalita_di_parte ?dataUltimaFormalitaDiParte.
+                ?stato aci:ha_targa_precedente ?targaPrecedente.
+                ?targaPrecedente aci:numero_targa ?numeroTargaPrecedente.
+                ?targaPrecedente  aci:serie_targa ?serieTargaPrecedente.
+                ?stato aci:numero_telaio ?telaio.
+                ?stato aci:kw ?kw.
+                ?stato aci:cilindrata ?cilindrata.  
+                ?stato aci:peso_complessivo ?peso.
+                ?stato aci:portata ?portata.
+                ?stato aci:tara ?tara.
+                ?stato aci:classe_veicolo ?classe.
+                ?stato aci:destinazione_di_uso ?uso.
+                ?stato aci:carrozzeria ?carrozzeria.
+                ?stato aci:descrizione_specialita ?specialita.
+                ?stato aci:data_immatricolazione ?dataImmatricolazione.  
+                ?stato aci:alimentazione ?alimentazione.
+                ?stato aci:alimentazione_DTT ?alimentazioneDTT.
+                }'
+        );
 
         for triple in parsed_query['where'][0]['triples']
 
@@ -237,11 +299,12 @@ class window.SparqlingGraph
                     data: {
                         id: triple['subject'].slice(1)
                         label: triple['subject']
-                        color: '#' + palette[0]
+                        color: '#' + palette[@color_index % palette.length]
                         links: []
                     }
                 })
 
+                @color_index += 1
                 subj = subj[0]
 
             else 
@@ -258,12 +321,13 @@ class window.SparqlingGraph
                         data: {
                             id: triple['object'].slice(1)
                             label: triple['object']
-                            color: '#aaa'
+                            color: '#' + palette[@color_index % palette.length]
                             links: []
                         }
                     })
 
                     obj = obj[0]
+                    @color_index += 1
 
                 else
 
@@ -286,18 +350,22 @@ class window.SparqlingGraph
 
 
             $.each(parsed_query['prefixes'], (elem) => 
-                console.log triple['predicate'].indexOf(parsed_query['prefixes'][elem])
+                #console.log triple['predicate'].indexOf(parsed_query['prefixes'][elem])
                 if triple['predicate'].indexOf(parsed_query['prefixes'][elem]) != -1
                     triple['predicate'] = triple['predicate'].substr(parsed_query['prefixes'][elem].length)
                     )
 
-
-
             link = new PainlessLink(this, @cy, triple['predicate'], 'role', subj, obj)
             @links.push(link)
 
-            @reshape()
-            @sparql_text.update()
+        $.each(parsed_query['variables'], (elem) =>
+            @sparql_text.select_boxes.push(parsed_query['variables'][elem].slice(1))
+            )
+
+        console.log @sparql_text.select_boxes
+
+        @reshape()
+        @sparql_text.update()
 
 
 
