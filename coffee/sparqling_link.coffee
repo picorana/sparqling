@@ -131,7 +131,8 @@ class window.PainlessLink
         @context.sparql_text.update()
 
 
-    # node1 is the node that gets deleted
+    # This function switches a node with another one. It is used when merging two nodes.
+    # __node1__ is the node that gets deleted
     switch_node: (node1, node2) =>
 
         if node1.id() == @node_var1.id()

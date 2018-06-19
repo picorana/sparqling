@@ -7938,7 +7938,8 @@ window.Sparqling = (function() {
       if (instance) {
         return instance;
       } else {
-        this.graphol_cy = graph.cy; 
+        this.graphol = graph;
+        this.graphol_cy = graph.cy;
         instance = this;
         this.init();
       }
@@ -7947,7 +7948,7 @@ window.Sparqling = (function() {
     init() {
       this.sidenav = new SparqlingNavbar(this);
       this.graph = new SparqlingGraph(this);
-      this.menu = new PainlessMenu(this);
+      this.menu = new SparqlingMenu(this);
       this.alert = new SparqlingAlert;
       this.sparql_text = this.graph.sparql_text;
       return this.add_event_listener();
@@ -7957,7 +7958,7 @@ window.Sparqling = (function() {
       var selected_node;
       selected_node = this.graphol_cy.nodes(":selected");
       if (selected_node.length === 0) {
-        this.alert.alert("please, select a node in the main graph");
+        this.alert.say("please, select a node in the main graph");
       }
       switch (selected_node.data('type')) {
         case "role":
@@ -10166,13 +10167,13 @@ window.SparqlingAlert = (function() {
 
   class SparqlingAlert {
     constructor() {
-      this.alert = this.alert.bind(this);
+      this.say = this.say.bind(this);
       this.dialog = document.createElement('div');
       this.dialog.className = 'dialog';
       document.body.append(this.dialog);
     }
 
-    alert(msg) {
+    say(msg) {
       this.dialog.innerHTML = msg;
       this.dialog.style.bottom = '5%';
       this.dialog.onmouseover = () => {
@@ -10499,33 +10500,6 @@ window.SparqlingGraph = (function() {
       this.center_view = this.center_view.bind(this);
       this.add_to_select = this.add_to_select.bind(this);
       this.reverse_relationship = this.reverse_relationship.bind(this);
-      /*        @save_state()
-
-      links_to_add = []
-
-      for link in node2.data('links')
-
-          if link.link_type == 'concept'
-              links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
-
-          else if link.node_var1.id() == node2.id() and link.node_var2.id() == node2.id()
-              console.log 'case1'
-              links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
-          else if link.node_var1.id() == node2.id()
-              console.log 'case2'
-              links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
-          else 
-              console.log 'case3'
-              links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
-
-          link.delete()
-
-      for link in links_to_add
-          @links.push(link)
-
-      @cy.remove(node2) 
-      @sparql_text.update()
-      @reshape()*/
       // adds a new link in the graph.    
       // links that are not concepts (roles and attributes) add a new variable into the graph.   
       // links are always added to the selected variable in the graph, if there are no selected variables,
@@ -10537,7 +10511,15 @@ window.SparqlingGraph = (function() {
 
       // TODO: use an enum to represent link types instead of hardcoded strings
       this.add_link = this.add_link.bind(this);
+      // check if there are any collisions in all the node variables
+      // returns the colliding nodes if there are any.
+
+      // TODO: collision highlight is broken!
+      // TODO: remove hardcoded collision distance threshold
       this.check_collisions = this.check_collisions.bind(this);
+      this.check_existence = this.check_existence.bind(this);
+      this.remove_prefix = this.remove_prefix.bind(this);
+      this.is_valid_triple = this.is_valid_triple.bind(this);
       this.load = this.load.bind(this);
       this.init = this.init.bind(this);
       this.utils = new window.PainlessUtils();
@@ -10673,6 +10655,7 @@ window.SparqlingGraph = (function() {
     // __node2__ is the node that is carried on top of the other.
     merge(node1, node2) {
       var i, len, link, ref;
+      this.save_state();
       ref = node2.data('links');
       for (i = 0, len = ref.length; i < len; i++) {
         link = ref[i];
@@ -10730,12 +10713,6 @@ window.SparqlingGraph = (function() {
     check_collisions() {
       var i, j, len, len1, node, node2, ref, ref1;
       ref = this.cy.nodes(".node-variable");
-      /** check if there are any collisions in all the node variables
-      returns the colliding nodes if there are any.
-
-      TODO: collision highlight is broken!
-      TODO: remove hardcoded collision distance threshold
-      */
       for (i = 0, len = ref.length; i < len; i++) {
         node = ref[i];
         ref1 = this.cy.nodes(".node-variable");
@@ -10754,12 +10731,55 @@ window.SparqlingGraph = (function() {
       }
     }
 
+    check_existence(label) {
+      var compare_label, i, len, node, ref;
+      ref = this.context.graphol.predicates;
+      for (i = 0, len = ref.length; i < len; i++) {
+        node = ref[i];
+        if (node.data('label') === void 0) {
+          continue;
+        }
+        if (node.data('label').indexOf(':') !== -1) {
+          compare_label = node.data('label').split(':')[1];
+        } else {
+          compare_label = node.data('label');
+        }
+        compare_label = compare_label.replace(/[\n\r]+/g, '').replace(/^\s+|\s+$/, '');
+        if (label === compare_label) {
+          return true;
+        }
+      }
+      this.context.alert.say('node ' + label + ' does not exist in current ontology');
+      return false;
+    }
+
+    remove_prefix(s) {
+      return s.split('#')[1];
+    }
+
+    is_valid_triple(triple) {
+      if (triple['predicate'] === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type') {
+        if (this.check_existence(this.remove_prefix(triple['object']))) {
+          return true;
+        }
+      } else {
+        if (this.check_existence(this.remove_prefix(triple['predicate']))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     load() {
       var i, len, link, obj, parsed_query, ref, subj, triple;
       parsed_query = window.sparqljs.Parser().parse('PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX : <http://www.aci.it/ontology#> PREFIX xml: <http://www.w3.org/XML/1998/namespace> PREFIX aci: <http://www.aci.it/ontology#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> Select ?idVeicolo ?inizioStato ?fineStato ?idFormalitaGeneratrice ?idFormalitaOriginaria ?codiceFormalitaOriginaria ?dataAccettazioneFormalitaOriginaria ?ufficioCompetenteFormalitaOriginaria ?serieTarga ?numeroTarga ?serieTargaPrecedente ?numeroTargaPrecedente ?telaio ?kw ?cilindrata ?peso ?portata ?tara ?classe ?uso ?carrozzeria ?specialita ?alimentazione ?alimentazioneDTT ?dataImmatricolazione ?codiceUltimaFormalitaDiParte ?dataUltimaFormalitaDiParte where { ?veicolo aci:ID_veicolo ?idVeicolo. ?veicolo aci:ha_stato_di_veicolo ?stato. ?stato a aci:Stato_rappresentato_valido. ?stato aci:ha_targa ?targa. ?targa aci:numero_targa ?numeroTarga. ?targa aci:serie_targa ?serieTarga. ?stato aci:ha_formalita_originaria ?formalitaOriginaria. ?formalitaOriginaria aci:ID_formalita ?idFormalitaOriginaria. ?formalitaOriginaria aci:codice_tipo ?codiceFormalitaOriginaria. ?evento aci:determina_stato ?stato. ?formalitaGeneratrice aci:formalita_genera_evento ?evento. ?formalitaGeneratrice aci:ID_formalita ?idFormalitaGeneratrice. ?stato aci:inizio_stato_del_mondo ?inizioStato. ?stato aci:fine_stato_del_mondo ?fineStato. ?formalitaOriginaria aci:data_accettazione_formalita ?dataAccettazioneFormalitaOriginaria. ?formalitaOriginaria aci:est_di_competenza_di_ufficio ?ufficio. ?ufficio aci:descrizione_ufficio ?ufficioCompetenteFormalitaOriginaria. ?stato aci:codice_tipo_ultima_formalita_di_parte ?codiceUltimaFormalitaDiParte. ?stato aci:data_accettazione_ultima_formalita_di_parte ?dataUltimaFormalitaDiParte. ?stato aci:ha_targa_precedente ?targaPrecedente. ?targaPrecedente aci:numero_targa ?numeroTargaPrecedente. ?targaPrecedente  aci:serie_targa ?serieTargaPrecedente. ?stato aci:numero_telaio ?telaio. ?stato aci:kw ?kw. ?stato aci:cilindrata ?cilindrata. ?stato aci:peso_complessivo ?peso. ?stato aci:portata ?portata. ?stato aci:tara ?tara. ?stato aci:classe_veicolo ?classe. ?stato aci:destinazione_di_uso ?uso. ?stato aci:carrozzeria ?carrozzeria. ?stato aci:descrizione_specialita ?specialita. ?stato aci:data_immatricolazione ?dataImmatricolazione. ?stato aci:alimentazione ?alimentazione. ?stato aci:alimentazione_DTT ?alimentazioneDTT. }');
       ref = parsed_query['where'][0]['triples'];
       for (i = 0, len = ref.length; i < len; i++) {
         triple = ref[i];
+        if (!this.is_valid_triple(triple)) {
+          this.context.alert.say('invalid query');
+          return;
+        }
         if (this.cy.getElementById(triple['subject'].slice(1)).length === 0) {
           subj = this.cy.add({
             group: 'nodes',
@@ -10807,8 +10827,6 @@ window.SparqlingGraph = (function() {
           obj = obj[0];
         }
         $.each(parsed_query['prefixes'], (elem) => {
-          
-          //console.log triple['predicate'].indexOf(parsed_query['prefixes'][elem])
           if (triple['predicate'].indexOf(parsed_query['prefixes'][elem]) !== -1) {
             return triple['predicate'] = triple['predicate'].substr(parsed_query['prefixes'][elem].length);
           }
@@ -10819,7 +10837,6 @@ window.SparqlingGraph = (function() {
       $.each(parsed_query['variables'], (elem) => {
         return this.sparql_text.select_boxes.push(parsed_query['variables'][elem].slice(1));
       });
-      console.log(this.sparql_text.select_boxes);
       this.reshape();
       return this.sparql_text.update();
     }
@@ -10861,7 +10878,8 @@ window.PainlessLink = class PainlessLink {
     this.add_datatype = this.add_datatype.bind(this);
     this.create_node = this.create_node.bind(this);
     this.delete = this.delete.bind(this);
-    // node1 is the node that gets deleted
+    // This function switches a node with another one. It is used when merging two nodes.
+    // __node1__ is the node that gets deleted
     this.switch_node = this.switch_node.bind(this);
     this.create_link = this.create_link.bind(this);
     this.create_concept = this.create_concept.bind(this);
@@ -11082,7 +11100,7 @@ window.PainlessLink = class PainlessLink {
 };
 
 // define the behaviour of the menu buttons located over the query canvas
-window.PainlessMenu = class PainlessMenu {
+window.SparqlingMenu = class SparqlingMenu {
   constructor(context) {
     this.change_size = this.change_size.bind(this);
     this.create_navigation_div = this.create_navigation_div.bind(this);

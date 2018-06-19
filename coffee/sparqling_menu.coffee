@@ -1,5 +1,5 @@
 # define the behaviour of the menu buttons located over the query canvas
-class window.PainlessMenu
+class window.SparqlingMenu
 
     constructor: (context) ->
         @context = context

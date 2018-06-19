@@ -7,10 +7,10 @@ class window.SparqlingAlert
         @dialog            = document.createElement('div')
         @dialog.className  = 'dialog'
 
-        document.body.append(@dialog)
+        document.body.append @dialog
 
 
-    alert: (msg) =>
+    say: (msg) =>
         @dialog.innerHTML = msg
         @dialog.style.bottom = '5%'
         @dialog.onmouseover = () => 

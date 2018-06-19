@@ -130,40 +130,14 @@ class window.SparqlingGraph
     # __node2__ is the node that is carried on top of the other.
     merge: (node1, node2) ->
 
-        for link in node2.data('links')
-            link.switch_node(node2, node1)
+        do @save_state
 
-        @cy.remove(node2)
-        @sparql_text.update()
-        @reshape()
+        for link in node2.data 'links'
+            link.switch_node node2, node1
 
-###        @save_state()
-
-        links_to_add = []
-
-        for link in node2.data('links')
-
-            if link.link_type == 'concept'
-                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
-
-            else if link.node_var1.id() == node2.id() and link.node_var2.id() == node2.id()
-                console.log 'case1'
-                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
-            else if link.node_var1.id() == node2.id()
-                console.log 'case2'
-                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
-            else 
-                console.log 'case3'
-                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
-
-            link.delete()
-
-        for link in links_to_add
-            @links.push(link)
-
-        @cy.remove(node2) 
-        @sparql_text.update()
-        @reshape()###
+        @cy.remove node2
+        do @sparql_text.update
+        do @reshape
 
 
     # adds a new link in the graph.    
@@ -213,13 +187,12 @@ class window.SparqlingGraph
         return Math.sqrt(a*a + b*b)
 
 
+    # check if there are any collisions in all the node variables
+    # returns the colliding nodes if there are any.
+    #
+    # TODO: collision highlight is broken!
+    # TODO: remove hardcoded collision distance threshold
     check_collisions: =>
-        ###* check if there are any collisions in all the node variables
-        returns the colliding nodes if there are any.
-
-        TODO: collision highlight is broken!
-        TODO: remove hardcoded collision distance threshold
-        ###
         for node in @cy.nodes(".node-variable")
             for node2 in @cy.nodes(".node-variable")
                 if node != node2
@@ -230,6 +203,43 @@ class window.SparqlingGraph
                     else
                         node.removeClass('highlight')
  
+
+    check_existence: (label) =>
+        for node in @context.graphol.predicates
+            if node.data('label') == undefined 
+                continue
+
+            if node.data('label').indexOf(':') != -1
+                compare_label = node.data('label').split(':')[1]
+            else 
+                compare_label = node.data('label')
+
+            compare_label = compare_label.replace(/[\n\r]+/g, '').replace(/^\s+|\s+$/,'') 
+
+            if label == compare_label
+                    return true
+
+        @context.alert.say 'node ' + label + ' does not exist in current ontology'
+        return false
+
+
+    remove_prefix: (s) =>
+        return s.split('#')[1]
+
+
+    is_valid_triple: (triple) =>
+
+        if triple['predicate'] == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
+            if @check_existence(@remove_prefix(triple['object']))
+                return true
+
+        else 
+            if @check_existence(@remove_prefix(triple['predicate']))
+                return true
+            
+        return false
+
+
     load: =>
         
         parsed_query = window.sparqljs.Parser().parse('
@@ -291,6 +301,10 @@ class window.SparqlingGraph
 
         for triple in parsed_query['where'][0]['triples']
 
+            if !@is_valid_triple(triple)
+                @context.alert.say 'invalid query'
+                return
+
             if @cy.getElementById(triple['subject'].slice(1)).length == 0
 
                 subj = @cy.add({ 
@@ -350,7 +364,6 @@ class window.SparqlingGraph
 
 
             $.each(parsed_query['prefixes'], (elem) => 
-                #console.log triple['predicate'].indexOf(parsed_query['prefixes'][elem])
                 if triple['predicate'].indexOf(parsed_query['prefixes'][elem]) != -1
                     triple['predicate'] = triple['predicate'].substr(parsed_query['prefixes'][elem].length)
                     )
@@ -361,8 +374,6 @@ class window.SparqlingGraph
         $.each(parsed_query['variables'], (elem) =>
             @sparql_text.select_boxes.push(parsed_query['variables'][elem].slice(1))
             )
-
-        console.log @sparql_text.select_boxes
 
         @reshape()
         @sparql_text.update()
