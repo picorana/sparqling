@@ -14,12 +14,14 @@
     "gulp-concat": "^2.6.1",
     "gulp-less": "*",
     "gulp-uglify-es": "^1.0.1",
+    "jquery": "^3.3.1",
     "merge2": "^1.2.1",
     "popper.js": "*",
     "simple-scrollbar": "^0.4.0",
     "sparqljs": "*",
     "tinycolor2": "^1.4.0",
-    "tooltip.js": "*"
+    "tooltip.js": "*",
+    "webcola": "^3.3.8"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

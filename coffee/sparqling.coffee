@@ -24,6 +24,7 @@ class window.Sparqling
         @sidenav        = new SparqlingNavbar this
         @graph          = new SparqlingGraph this
         @menu           = new SparqlingMenu this
+        @loader         = new QueryLoader this
         @alert          = new SparqlingAlert
         @sparql_text    = @graph.sparql_text
         
