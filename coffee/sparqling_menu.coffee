@@ -9,7 +9,7 @@ class window.SparqlingMenu
     change_size: (query_canvas_size) =>
         @context.sidenav.query_canvas.style.height = query_canvas_size + "%"
         sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%"
-        setTimeout => 
+        setTimeout =>
             @context.graph.cy.resize()
         , 550
 
@@ -30,23 +30,23 @@ class window.SparqlingMenu
 
             div.onmouseover     = () => span.style.display = 'block'
             div.onmouseout      = () => span.style.display = 'none'
-        
+
         return div
 
 
     create_navigation_div: =>
         nav_div = @create_div(null, null, 'nav_div')
 
-        nav_div.append(@create_div('▲', 'resize_button', null, ( => @change_size(90)), 'expand graph'))
-        nav_div.append(@create_div('≡', 'resize_button', null, ( => @change_size(60)), 'center'))
-        nav_div.append(@create_div('▼', 'resize_button', null, ( => @change_size(0)), 'expand sparql'))
+        nav_div.append(@create_div('▲', 'sparqling_resize_button', null, ( => @change_size(90)), 'expand graph'))
+        nav_div.append(@create_div('≡', 'sparqling_resize_button', null, ( => @change_size(60)), 'center'))
+        nav_div.append(@create_div('▼', 'sparqling_resize_button', null, ( => @change_size(0)), 'expand sparql'))
 
         return nav_div
-        
+
 
     init: =>
         menu = @create_div(null, null, 'painless_menu')
-        
+
         document.getElementById('sidenav').append(menu)
 
         menu.append(@create_navigation_div())
@@ -60,16 +60,16 @@ class window.SparqlingMenu
             PREFIX aci: <http://www.aci.it/ontology#>
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-            Select ?idVeicolo ?inizioStato ?fineStato 
+            Select ?idVeicolo ?inizioStato ?fineStato
                    ?idFormalitaGeneratrice
-                   ?idFormalitaOriginaria ?codiceFormalitaOriginaria ?dataAccettazioneFormalitaOriginaria ?ufficioCompetenteFormalitaOriginaria 
-                   ?serieTarga ?numeroTarga ?serieTargaPrecedente ?numeroTargaPrecedente 
-                   ?telaio ?kw ?cilindrata ?peso ?portata ?tara ?classe ?uso ?carrozzeria ?specialita 
+                   ?idFormalitaOriginaria ?codiceFormalitaOriginaria ?dataAccettazioneFormalitaOriginaria ?ufficioCompetenteFormalitaOriginaria
+                   ?serieTarga ?numeroTarga ?serieTargaPrecedente ?numeroTargaPrecedente
+                   ?telaio ?kw ?cilindrata ?peso ?portata ?tara ?classe ?uso ?carrozzeria ?specialita
                    ?alimentazione ?alimentazioneDTT
                    ?dataImmatricolazione
                    ?codiceUltimaFormalitaDiParte ?dataUltimaFormalitaDiParte
-            where 
-            { 
+            where
+            {
                 ?veicolo aci:ID_veicolo ?idVeicolo.
                 ?veicolo aci:ha_stato_di_veicolo ?stato.
                 ?stato a aci:Stato_rappresentato_valido.
@@ -81,7 +81,7 @@ class window.SparqlingMenu
                 ?formalitaOriginaria aci:codice_tipo ?codiceFormalitaOriginaria.
                 ?evento aci:determina_stato ?stato.
                 ?formalitaGeneratrice aci:formalita_genera_evento ?evento.
-                ?formalitaGeneratrice aci:ID_formalita ?idFormalitaGeneratrice.  
+                ?formalitaGeneratrice aci:ID_formalita ?idFormalitaGeneratrice.
                 ?stato aci:inizio_stato_del_mondo ?inizioStato.
                 ?stato aci:fine_stato_del_mondo ?fineStato.
                 ?formalitaOriginaria aci:data_accettazione_formalita ?dataAccettazioneFormalitaOriginaria.
@@ -94,7 +94,7 @@ class window.SparqlingMenu
                 ?targaPrecedente  aci:serie_targa ?serieTargaPrecedente.
                 ?stato aci:numero_telaio ?telaio.
                 ?stato aci:kw ?kw.
-                ?stato aci:cilindrata ?cilindrata.  
+                ?stato aci:cilindrata ?cilindrata.
                 ?stato aci:peso_complessivo ?peso.
                 ?stato aci:portata ?portata.
                 ?stato aci:tara ?tara.
@@ -102,15 +102,14 @@ class window.SparqlingMenu
                 ?stato aci:destinazione_di_uso ?uso.
                 ?stato aci:carrozzeria ?carrozzeria.
                 ?stato aci:descrizione_specialita ?specialita.
-                ?stato aci:data_immatricolazione ?dataImmatricolazione.  
+                ?stato aci:data_immatricolazione ?dataImmatricolazione.
                 ?stato aci:alimentazione ?alimentazione.
                 ?stato aci:alimentazione_DTT ?alimentazioneDTT.
                 }'
 
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">undo</i>',                 'menu_button', null, ( => @context.graph.undo()), 'undo'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>',  'menu_button', null, ( => @context.graph.center_view()), 'center view'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>',            'menu_button', null, ( => @context.graph.copy_to_clipboard()), 'copy to clipboard'))
-        #menu.append(@create_div('<i class="material-icons" style="font-size: 18px">save</i>',                 'menu_button', null, ( => @context.graph.download()), 'export'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',      'menu_button', null, ( => @context.loader.load(plaintext_query)), 'import'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>',            'menu_button', null, ( => @context.graph.clear_all()), 'clear all'))
-
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">undo</i>',                 'sparqling_menu_button', null, ( => @context.graph.undo()), 'undo'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>',  'sparqling_menu_button', null, ( => @context.graph.center_view()), 'center view'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>',            'sparqling_menu_button', null, ( => @context.graph.copy_to_clipboard()), 'copy to clipboard'))
+        #menu.append(@create_div('<i class="material-icons" style="font-size: 18px">save</i>',                 'sparqling_menu_button', null, ( => @context.graph.download()), 'export'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',      'sparqling_menu_button', null, ( => @context.loader.load(plaintext_query)), 'import'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>',            'sparqling_menu_button', null, ( => @context.graph.clear_all()), 'clear all'))

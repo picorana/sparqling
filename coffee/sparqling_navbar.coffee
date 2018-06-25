@@ -12,7 +12,7 @@ class window.SparqlingNavbar
         @side_nav_container = document.createElement("div")
         @side_nav_container.id = "sidenav_container"
 
-        document.body.appendChild(@side_nav_container)
+        document.getElementById("grapholscape_container").appendChild(@side_nav_container)
 
         @context.graphol_cy.resize()
 
@@ -25,7 +25,7 @@ class window.SparqlingNavbar
         slider_button.className = 'slider_button'
         slider_button.onclick = () =>
             @resize_navbar(cur_sidenav_size + 25)
-            
+
         slider.appendChild(slider_button)
 
         slider_button = document.createElement('div')
@@ -78,7 +78,7 @@ class window.SparqlingNavbar
         if zoom_tools != undefined and zoom_tools != null
             zoom_tools.style.right = (cur_sidenav_size * client_width / 100 + 50) + "px"
             zoom_tools.style.transitionDuration = '0.1s'
-        
+
         if document.getElementById('cy') != undefined and document.getElementById('cy') != null
             document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * client_width / 100 + 50) + "px"
 
@@ -87,7 +87,7 @@ class window.SparqlingNavbar
             owl_translator.style.left = (100 - cur_sidenav_size)/2 + "%"
             if cur_sidenav_size > 50
                 owl_translator.style.display = 'none'
-            else 
+            else
                 owl_translator.style.display = 'block'
 
         if explorer != undefined and explorer != null
@@ -95,7 +95,7 @@ class window.SparqlingNavbar
             explorer.style.left = (100 - cur_sidenav_size)/2 + "%"
             if cur_sidenav_size > 50
                 explorer.style.display = 'none'
-            else 
+            else
                 explorer.style.display = 'block'
 
         if details != undefined and details != null
@@ -103,17 +103,17 @@ class window.SparqlingNavbar
             details.style.transitionDuration = '0.1s'
             if cur_sidenav_size > 25
                 details.style.display = 'none'
-            else 
+            else
                 details.style.display = 'block'
 
         if cur_sidenav_size != 100
             @side_nav_container.style.width = (cur_sidenav_size * client_width / 100 + 30) + "px"
-            @side_nav.style.width = cur_sidenav_size + '%'
-        else 
+            @side_nav.style.width =  (cur_sidenav_size * client_width / 100) + "px"
+        else
             @side_nav_container.style.width = (cur_sidenav_size * client_width / 100) + "px"
             @side_nav.style.width =  (cur_sidenav_size * client_width / 100 - 30) + "px"
 
         @context.graphol_cy.resize()
-        setTimeout(()=> 
+        setTimeout(()=>
             @context.graph.cy.resize()
         , 150)
