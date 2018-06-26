@@ -38,7 +38,7 @@ class window.Sparqling
         selected_node = @graphol_cy.nodes(":selected")
         
         if selected_node.length == 0
-            @alert.say "please, select a node in the main graph"
+            @alert.say "please select a node in the main graph"
         
         switch selected_node.data('type')
             when "role"         then @graph.add_link(selected_node.data('label'), 'role')
