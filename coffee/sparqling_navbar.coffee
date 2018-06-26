@@ -12,7 +12,7 @@ class window.SparqlingNavbar
         @side_nav_container = document.createElement("div")
         @side_nav_container.id = "sidenav_container"
 
-        document.getElementById("grapholscape_container").appendChild(@side_nav_container)
+        document.getElementById("grapholscape-container").appendChild(@side_nav_container)
 
         @context.graphol_cy.resize()
 
@@ -70,6 +70,7 @@ class window.SparqlingNavbar
         owl_translator  = document.getElementById('owl_translator')
         explorer        = document.getElementById('explorer')
         details         = document.getElementById('details')
+        fullscreen      = document.getElementById('grapholscape-fullscreen-btn')
 
         if center_button != undefined and center_button != null
             center_button.style.right = (cur_sidenav_size * client_width / 100 + 50) + "px"
@@ -105,6 +106,10 @@ class window.SparqlingNavbar
                 details.style.display = 'none'
             else
                 details.style.display = 'block'
+
+        if fullscreen != undefined and fullscreen != null
+            fullscreen.style.right = (cur_sidenav_size * client_width / 100 + 50) + "px"
+            fullscreen.style.transitionDuration = '0.1s'
 
         if cur_sidenav_size != 100
             @side_nav_container.style.width = (cur_sidenav_size * client_width / 100 + 30) + "px"
