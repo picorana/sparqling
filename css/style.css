@@ -103,9 +103,6 @@
   z-index: 10000;
 }
 
-body {
-  overflow: hidden;
-}
 #sidenav_container {
   position: relative;
   float: right;

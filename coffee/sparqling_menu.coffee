@@ -44,6 +44,19 @@ class window.SparqlingMenu
         return nav_div
 
 
+    set_invisible: ->
+      for elem in document.getElementsByClassName('sparqling_menu_button')
+        elem.style.display = 'none'
+      for elem in document.getElementsByClassName('sparqling_resize_button')
+        elem.style.display = 'none'
+
+    set_visible: ->
+      for elem in document.getElementsByClassName('sparqling_menu_button')
+        elem.style.display = 'inline-block'
+      for elem in document.getElementsByClassName('sparqling_resize_button')
+        elem.style.display = 'inline-block'
+
+
     init: =>
         menu = @create_div(null, null, 'painless_menu')
 
