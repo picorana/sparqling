@@ -276,7 +276,7 @@
   margin-bottom: 0px;
 }
 
-.tooltip .tooltiptext {
+.grapholscape-tooltip .tooltiptext {
   visibility: hidden;
   width: 120px;
   background-color: #222;
@@ -294,7 +294,7 @@
   -webkit-transition: opacity 0.3s;
   transition: opacity 0.3s;
 }
-.tooltip .tooltiptext::after {
+.grapholscape-tooltip .tooltiptext::after {
   content: "";
   position: absolute;
   top: 100%;
@@ -304,7 +304,7 @@
   border-style: solid;
   border-color: #222 transparent transparent transparent;
 }
-.tooltip:hover .tooltiptext {
+.grapholscape-tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 1;
 }

@@ -17,7 +17,7 @@ class window.SparqlingMenu
     create_div: (innerHTML = null, className = null, id = null, onclick = null, tooltip = null) ->
         div             = document.createElement('div')
         div.innerHTML   = innerHTML
-        div.className   = className + ' tooltip'
+        div.className   = className + ' grapholscape-tooltip'
         div.id          = id
         div.onclick     = onclick
 
