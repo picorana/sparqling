@@ -18114,7 +18114,7 @@ window.Sparqling = (function() {
       var selected_node;
       selected_node = this.graphol_cy.nodes(":selected");
       if (selected_node.length === 0) {
-        this.alert.say("please select a node in the main graph");
+        this.alert.say("please, select a node in the main graph");
       }
       switch (selected_node.data('type')) {
         case "role":

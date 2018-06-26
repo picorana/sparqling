@@ -11,9 +11,9 @@ class window.Sparqling
     # note that __@graphol_cy__ is the cytoscape instance from grapholscape, 
     # while __@cy__ is the new instance created by sparqling to represent the query.
     constructor: (graph) ->
-        if instance 
+        if instance
             return instance
-        else    
+        else
             @graphol    = graph
             @graphol_cy = graph.cy
             instance    = this
@@ -38,7 +38,7 @@ class window.Sparqling
         selected_node = @graphol_cy.nodes(":selected")
         
         if selected_node.length == 0
-            @alert.say "please select a node in the main graph"
+            @alert.say "please, select a node in the main graph"
         
         switch selected_node.data('type')
             when "role"         then @graph.add_link(selected_node.data('label'), 'role')
