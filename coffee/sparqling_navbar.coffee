@@ -40,7 +40,7 @@ class window.SparqlingNavbar
         button = document.createElement("div")
         button.innerHTML = '<i class="material-icons">add</i><p style="font-size:xx-small; margin-top: -5px">query</p>';
         button.className = "slider_button_down"
-        button.onclick = () => @add_to_query()
+        button.onclick = () => @context.add_to_query()
         slider.appendChild(button);
 
         @side_nav = document.createElement("div");
@@ -63,6 +63,11 @@ class window.SparqlingNavbar
     resize_navbar: (new_size = cur_sidenav_size) =>
 
         cur_sidenav_size = new_size
+
+        if cur_sidenav_size < 0
+          cur_sidenav_size = 0
+        if cur_sidenav_size > 75
+          cur_sidenav_size = 75
 
         client_width    = @grapholscape_container.clientWidth
 

@@ -5,7 +5,7 @@ class window.SparqlText
     instance = null
 
     select_boxes        = []
-    
+
     div_sparql_text     = null
     cy                  = null
     links               = null
@@ -62,7 +62,7 @@ class window.SparqlText
         st.ondblclick = () =>
             st.setAttribute('contenteditable', 'true')
             @cy.center(node)
-            setTimeout(() -> 
+            setTimeout(() ->
                 st.focus()
             , 0);
 
@@ -85,7 +85,7 @@ class window.SparqlText
             node.select()
         st.innerHTML = node.data('label')
         st.style.backgroundColor = node.data('color')
-        
+
         container.append(st)
 
         minicross = document.createElement('div')
@@ -122,7 +122,7 @@ class window.SparqlText
         result += '\r\nwhere {'
         for link in @links
             result += '\r\n'
-            result += link.to_string() 
+            result += link.to_string()
         for filter in @filters
             result += '\r\n'
             result += filter.to_string()
@@ -134,7 +134,7 @@ class window.SparqlText
     copy_to_clipboard: =>
         ###* ugly hack to make you able to copy text to clipboard.
         ###
-        tmp_div = document.createElement('textarea') 
+        tmp_div = document.createElement('textarea')
         tmp_div.value = @generate_plaintext_query()
         tmp_div.id = "tmp_div"
         document.body.appendChild(tmp_div)
@@ -152,7 +152,7 @@ class window.SparqlText
 
     update: =>
         div_sparql_text.innerHTML = ""
-        
+
         init_string = document.createElement('div')
         init_string.className = "init_string"
 
@@ -181,16 +181,16 @@ class window.SparqlText
         select_div_f = document.createElement('div')
         select_div_f.innerHTML =  " where {"
         init_string.append(select_div_f)
-        
+
         div_sparql_text.append(init_string)
-       
+
         for link in @links
             query_line = new window.QueryLine(link, this)
             div_sparql_text.append(query_line.to_html())
 
         for filter in @filters
             div_sparql_text.append(filter.to_html())
-        
+
         f_string = document.createElement('div')
         f_string.style.display = 'inline-block'
         f_string.style.marginRight = '5px'
@@ -219,10 +219,14 @@ class window.SparqlText
                 if target.classList.contains('void_box')
                     target.innerHTML.replace('&nbsp;', '')
                 return true
+            invalid: (el, handle) ->
+                if el.classList.contains('highlighting_box') or el.classList.contains('highlighting_box_container')
+                    return false
+                else return true
                 })
 
-        drake.on('drop', 
-            (el, target) => 
+        drake.on('drop',
+            (el, target) =>
                 if target.classList.contains('void_box')
                     if target.dataset.filter_position == '0'
                         $(target).data('parent').node1 = @cy.getElementById(el.firstChild.dataset.node_id)

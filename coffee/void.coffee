@@ -11,6 +11,7 @@ class window.Void
         $(@div).data('parent', parent)
         @position = position
         @div.dataset.filter_position = position
+        @div.style.transitionDuration = '0.1s'
 
     to_html: =>
         return @div
