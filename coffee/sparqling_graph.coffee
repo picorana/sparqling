@@ -23,6 +23,8 @@ class window.SparqlingGraph
         # TODO: this too should be managed by main class
         new window.PainlessContextMenu(@cy, this)
 
+        @color_index = 0
+
         
     # resets node positions in the graph view
     reshape: =>
@@ -128,32 +130,14 @@ class window.SparqlingGraph
     # __node2__ is the node that is carried on top of the other.
     merge: (node1, node2) ->
 
-        @save_state()
+        do @save_state
 
-        links_to_add = []
+        for link in node2.data 'links'
+            link.switch_node node2, node1
 
-        for link in node2.data('links')
-
-            if link.link_type == 'concept'
-                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1))
-
-            else if link.node_var1.id() == node2.id() and link.node_var2.id() == node2.id()
-                console.log 'case1'
-                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = node1))
-            else if link.node_var1.id() == node2.id()
-                console.log 'case2'
-                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = node1, node_var2 = link.node_var2))
-            else 
-                console.log 'case3'
-                links_to_add.push(new PainlessLink(this, @cy, link.link_name, link.link_type, node_var1 = link.node_var1, node_var2 = node1))
-
-            link.delete()
-
-        for link in links_to_add
-            @links.push(link)
-
-        @cy.remove(node2) 
-        @sparql_text.update()
+        @cy.remove node2
+        do @sparql_text.update
+        do @reshape
 
 
     # adds a new link in the graph.    
@@ -192,25 +176,23 @@ class window.SparqlingGraph
                 @sparql_text.add_to_select(link.node_var2.id())
 
         @links.push(link)
-        console.log @links
         @sparql_text.update()
         @reshape()
    
 
+    # computes distance between two node positions
     compute_distance: (node1, node2) ->
-        ###* computes distance between two node positions ###
         a = Math.abs(node1.position('x') - node2.position('x'))
         b = Math.abs(node1.position('y') - node2.position('y'))
         return Math.sqrt(a*a + b*b)
 
 
+    # check if there are any collisions in all the node variables
+    # returns the colliding nodes if there are any.
+    #
+    # TODO: collision highlight is broken!
+    # TODO: remove hardcoded collision distance threshold
     check_collisions: =>
-        ###* check if there are any collisions in all the node variables
-        returns the colliding nodes if there are any.
-
-        TODO: collision highlight is broken!
-        TODO: remove hardcoded collision distance threshold
-        ###
         for node in @cy.nodes(".node-variable")
             for node2 in @cy.nodes(".node-variable")
                 if node != node2
@@ -221,87 +203,7 @@ class window.SparqlingGraph
                     else
                         node.removeClass('highlight')
  
-    load: =>
-        
-        parsed_query = window.sparqljs.Parser().parse(
-            'PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX xmlns: <http://baa> ' +
-            'SELECT * { ?mickey foaf:name "Mickey Mouse" . ?mickey foaf:knows ?other. }');
-
-        for triple in parsed_query['where'][0]['triples']
-
-            if @cy.getElementById(triple['subject'].slice(1)).length == 0
-
-                subj = @cy.add({ 
-                    group: 'nodes'
-                    classes: 'node-variable'
-                    data: {
-                        id: triple['subject'].slice(1)
-                        label: triple['subject']
-                        color: '#' + palette[0]
-                        links: []
-                    }
-                })
-
-                subj = subj[0]
-
-            else 
-
-                subj = @cy.getElementById(triple['subject'].slice(1))
-
-            if triple['object'].charAt(0) == '?'
-
-                if @cy.getElementById(triple['object'].slice(1)).length == 0
-
-                    obj = @cy.add({ 
-                        group: 'nodes'
-                        classes: 'node-variable'
-                        data: {
-                            id: triple['object'].slice(1)
-                            label: triple['object']
-                            color: '#aaa'
-                            links: []
-                        }
-                    })
-
-                    obj = obj[0]
-
-                else
-
-                    obj = @cy.getElementById(triple['object'].slice(1))
-
-            else 
-
-                obj = @cy.add({ 
-                    group: 'nodes'
-                    classes: 'node-constant-value'
-                    data: {
-                        id: triple['object']
-                        label: triple['object']
-                        color: '#aaa'
-                        links: []
-                    }
-                })
-
-                obj = obj[0]
-
-
-            $.each(parsed_query['prefixes'], (elem) => 
-                console.log triple['predicate'].indexOf(parsed_query['prefixes'][elem])
-                if triple['predicate'].indexOf(parsed_query['prefixes'][elem]) != -1
-                    triple['predicate'] = triple['predicate'].substr(parsed_query['prefixes'][elem].length)
-                    )
-
-
-
-            link = new PainlessLink(this, @cy, triple['predicate'], 'role', subj, obj)
-            @links.push(link)
-
-            @reshape()
-            @sparql_text.update()
-
-
-
-    
+ 
     init: =>
 
         @cy = new cytoscape(

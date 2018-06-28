@@ -5,8 +5,12 @@ var gulpConcat = require("gulp-concat");
 var merge2 = require("merge2");
 var less = require("gulp-less");
 var path = require("path");
+var autoprefixer = require("gulp-autoprefixer");
 
 var module_list = [
+  "./node_modules/jquery/dist/jquery.js",
+  "./node_modules/webcola/WebCola/cola.js",
+  "./node_modules/cytoscape-cola/cytoscape-cola.js",
   "./node_modules/dragula/dist/dragula.js",
   "./node_modules/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js",
   "./node_modules/simple-scrollbar/simple-scrollbar.js",
@@ -30,6 +34,12 @@ gulp.task("less", function() {
     .src("./less/**/*.less")
     .pipe(less())
     .pipe(gulpConcat("./css/style.css"))
+    .pipe(
+      autoprefixer({
+        browsers: ["last 2 versions"],
+        cascade: false
+      })
+    )
     .pipe(gulp.dest("."));
 });
 
@@ -49,4 +59,4 @@ gulp.task("watch", function() {
   gulp.watch("./less/**/*.less", ["less"]);
 });
 
-gulp.task("default", ["watch"]);
+gulp.task("default", ["build", "watch"]);

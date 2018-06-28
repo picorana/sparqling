@@ -14,15 +14,17 @@ class window.Sparqling
         if instance 
             return instance
         else    
-            @graphol_cy = graph.cy #
-            instance = this
+            @graphol    = graph
+            @graphol_cy = graph.cy
+            instance    = this
             do @init
 
 
     init : ->
         @sidenav        = new SparqlingNavbar this
         @graph          = new SparqlingGraph this
-        @menu           = new PainlessMenu this
+        @menu           = new SparqlingMenu this
+        @loader         = new QueryLoader this
         @alert          = new SparqlingAlert
         @sparql_text    = @graph.sparql_text
         
@@ -36,7 +38,7 @@ class window.Sparqling
         selected_node = @graphol_cy.nodes(":selected")
         
         if selected_node.length == 0
-            @alert.alert "please, select a node in the main graph"
+            @alert.say "please, select a node in the main graph"
         
         switch selected_node.data('type')
             when "role"         then @graph.add_link(selected_node.data('label'), 'role')
@@ -89,7 +91,7 @@ class window.Sparqling
         window.addEventListener('keypress', (event) => @onkeypress_handler(event))
 
         # fix sizes on window resize
-        window.addEventListener('resize', () => @resize_navbar())
+        window.addEventListener('resize', () => @sidenav.resize_navbar())
 
         # doubleclick handler on grapholscape
         @graphol_cy.on('tap', (event) => @doubleclick_handler(event))

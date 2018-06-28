@@ -1,9 +1,6 @@
-body {
-	overflow: hidden;
-}
-
 #sidenav_container {
-	position: fixed;
+	position: absolute;
+	float: right;
 	top: 0;
 	z-index: 2;
 	right: 0;
@@ -14,12 +11,12 @@ body {
 
 #sidenav {
 	display: inline-block;
-	height: 100%; 
-	width: 50%; 
-	position: fixed; 
-	z-index: 2; 
-	top: 0; 
-	right: 0; 
+	height: 100%;
+	width: 90%;
+	position: absolute;
+	z-index: 2;
+	top: 0;
+	right: 0;
 	background-color: #002b36;
 	transition: 0.1s;
 }
@@ -47,7 +44,7 @@ body {
 }
 
 
-#add_to_query::hover{
+#add_to_query:hover{
 	cursor: grab;
 }
 
@@ -73,7 +70,7 @@ body {
 
 .slider_button_down {
 	bottom: 0;
-	position: fixed;
+	position: absolute;
 	margin-left: 5px;
 	margin-top: 5px;
 	margin-left: 5px;

@@ -2,8 +2,6 @@
 
 class window.PainlessLink
 
-    color_index = 0
-
     constructor: (context, cy, link_name, link_type, node_var1 = null, node_var2 = null, datatype) ->
         @cy         = cy
         @context    = context
@@ -82,8 +80,8 @@ class window.PainlessLink
             label = @find_new_name(label)
             data['id'] = label
             
-            data['color'] = '#' + palette[color_index % palette.length]
-            color_index += 1
+            data['color'] = '#' + palette[@context.color_index % palette.length]
+            @context.color_index += 1
         
         if type == 'node-concept' 
             data['label'] = @link_name
@@ -131,6 +129,29 @@ class window.PainlessLink
                     @cy.remove(node_var)          
 
         @context.sparql_text.update()
+
+
+    # This function switches a node with another one. It is used when merging two nodes.
+    # __node1__ is the node that gets deleted
+    switch_node: (node1, node2) =>
+
+        if node1.id() == @node_var1.id()
+                @node_var1 = node2
+            else if node1.id() == @node_var2.id()
+                @node_var2 = node2
+
+        if @link_type == 'concept'
+            @create_edge(@node_var1, @node_concept, 'edge-concept')
+        else
+            if node1.id() == @source.id()
+                @source = node2
+                @create_edge(@node_link, @source, "source-edge")
+            else if node1.id() == @target.id()
+                @target = node2
+                @edge_target = @create_edge(@node_link, @target, "target-edge")
+
+        node2.data('links').push(this)
+
 
 
     create_link: =>
