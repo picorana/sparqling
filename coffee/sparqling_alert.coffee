@@ -9,7 +9,7 @@ class window.SparqlingAlert
         @dialog.style.opacity = '0'
         @dialog.style.bottom = '5%'
 
-        document.body.append @dialog
+        document.getElementById("grapholscape-container").append @dialog
 
 
     say: (msg) =>

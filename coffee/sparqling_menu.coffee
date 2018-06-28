@@ -4,11 +4,14 @@ class window.SparqlingMenu
     constructor: (context) ->
         @context = context
         @init()
+        @change_size(50)
 
 
     change_size: (query_canvas_size) =>
-        @context.sidenav.query_canvas.style.height = query_canvas_size + "%"
-        sparql_textbox.style.height = (100 - 10 - query_canvas_size) + "%"
+        clientHeight = document.getElementById('cy').clientHeight
+        query_canvas_pixels = (query_canvas_size) * clientHeight / 100
+        @context.sidenav.query_canvas.style.height =  query_canvas_pixels + "px"
+        sparql_textbox.style.height = (clientHeight - 100 - query_canvas_pixels) + "px"
         setTimeout =>
             @context.graph.cy.resize()
         , 550
@@ -37,9 +40,9 @@ class window.SparqlingMenu
     create_navigation_div: =>
         nav_div = @create_div(null, null, 'nav_div')
 
-        nav_div.append(@create_div('▲', 'sparqling_resize_button', null, ( => @change_size(90)), 'expand graph'))
-        nav_div.append(@create_div('≡', 'sparqling_resize_button', null, ( => @change_size(60)), 'center'))
-        nav_div.append(@create_div('▼', 'sparqling_resize_button', null, ( => @change_size(0)), 'expand sparql'))
+        nav_div.append(@create_div('▲', 'sparqling_resize_button', null, ( => @change_size(80)), 'expand graph'))
+        nav_div.append(@create_div('≡', 'sparqling_resize_button', null, ( => @change_size(50)), 'center'))
+        nav_div.append(@create_div('▼', 'sparqling_resize_button', null, ( => @change_size(10)), 'expand sparql'))
 
         return nav_div
 

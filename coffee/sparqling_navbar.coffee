@@ -87,7 +87,7 @@ class window.SparqlingNavbar
             zoom_tools.style.transitionDuration = '0.1s'
 
         if document.getElementById('cy') != undefined and document.getElementById('cy') != null
-            document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * client_width / 100 + 50) + "px"
+            document.getElementById('cy').style.width = ((100 - cur_sidenav_size) * client_width / 100 + 0) + "px"
 
         if owl_translator != undefined and owl_translator != null
             owl_translator.style.transitionDuration = '0.1s'
