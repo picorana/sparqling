@@ -1,19 +1,19 @@
-# Main class of the application, keeps together all the different components, 
+# Main class of the application, keeps together all the different components,
 # and defines the interaction with the grapholscape graph.
 class window.Sparqling
-    
+
     instance = null
 
     # __tappedBefore__ and __tappedTimeout__ are doubleclick timers
     tappedBefore = null
     tappedTimeout = null
- 
-    # note that __@graphol_cy__ is the cytoscape instance from grapholscape, 
+
+    # note that __@graphol_cy__ is the cytoscape instance from grapholscape,
     # while __@cy__ is the new instance created by sparqling to represent the query.
     constructor: (graph) ->
-        if instance 
+        if instance
             return instance
-        else    
+        else
             @graphol    = graph
             @graphol_cy = graph.cy
             instance    = this
@@ -27,7 +27,7 @@ class window.Sparqling
         @loader         = new QueryLoader this
         @alert          = new SparqlingAlert
         @sparql_text    = @graph.sparql_text
-        
+
         do @add_event_listener
 
 
@@ -36,14 +36,14 @@ class window.Sparqling
     # Nodes can be 'role', 'attribute' or 'concept'
     add_to_query: =>
         selected_node = @graphol_cy.nodes(":selected")
-        
+
         if selected_node.length == 0
             @alert.say "please, select a node in the main graph"
-        
+
         switch selected_node.data('type')
             when "role"         then @graph.add_link(selected_node.data('label'), 'role')
             when "attribute"    then @graph.add_link(selected_node.data('label'), 'attribute', @extract_datatype(selected_node))
-            when "concept"      then @graph.add_link(selected_node.data('label'), 'concept')         
+            when "concept"      then @graph.add_link(selected_node.data('label'), 'concept')
 
 
     # extracts the attribute type from the grapholscape graph
@@ -71,16 +71,16 @@ class window.Sparqling
     # since cytoscape does not emit doubleclick events, we create one based on the tap event.
     doubleclick_handler: (event) =>
         tappedNow = event.target;
-        if tappedTimeout && tappedBefore 
+        if tappedTimeout && tappedBefore
             clearTimeout(tappedTimeout);
-      
-        if tappedBefore == tappedNow 
+
+        if tappedBefore == tappedNow
             tappedNow.trigger('doubleTap', event);
             tappedBefore = null;
             originalTapEvent = null;
             @add_to_query()
-        else 
-            tappedTimeout = setTimeout(()=>  
+        else
+            tappedTimeout = setTimeout(()=>
                     tappedBefore = null
                 , 300);
             tappedBefore = tappedNow;
@@ -91,9 +91,10 @@ class window.Sparqling
         window.addEventListener('keypress', (event) => @onkeypress_handler(event))
 
         # fix sizes on window resize
-        window.addEventListener('resize', () => @sidenav.resize_navbar())
+        window.addEventListener('resize', () =>
+            @sidenav.resize_navbar()
+            @menu.change_size(50)
+            )
 
         # doubleclick handler on grapholscape
         @graphol_cy.on('tap', (event) => @doubleclick_handler(event))
-
-    

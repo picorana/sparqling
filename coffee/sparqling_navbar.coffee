@@ -1,6 +1,6 @@
 class window.SparqlingNavbar
 
-    cur_sidenav_size = 50
+    cur_sidenav_size = 0
 
     constructor: (context) ->
         @context = context
@@ -125,9 +125,12 @@ class window.SparqlingNavbar
             @side_nav.style.width =  (cur_sidenav_size * client_width / 100 - 30) + "px"
 
         if cur_sidenav_size == 0
-          @context.menu.set_invisible()
+          if @context.menu!= undefined
+              @context.menu.set_invisible()
+              @context.menu.change_size(50)
         else if @context.menu != undefined
           @context.menu.set_visible()
+          @context.menu.change_size(50)
 
         @context.graphol_cy.resize()
         setTimeout(()=>

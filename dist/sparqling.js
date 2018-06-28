@@ -22849,21 +22849,19 @@ window.SparqlText = (function() {
   return SimpleScrollbar;
 });
 
-// Main class of the application, keeps together all the different components, 
+// Main class of the application, keeps together all the different components,
 // and defines the interaction with the grapholscape graph.
 window.Sparqling = (function() {
   var instance, tappedBefore, tappedTimeout;
 
   class Sparqling {
-    
-    // note that __@graphol_cy__ is the cytoscape instance from grapholscape, 
+    // note that __@graphol_cy__ is the cytoscape instance from grapholscape,
     // while __@cy__ is the new instance created by sparqling to represent the query.
     constructor(graph) {
       // Add the __selected node__ in grapholscape to the query,
       // according to the type of the node (stored in node.data('type')).
       // Nodes can be 'role', 'attribute' or 'concept'
       this.add_to_query = this.add_to_query.bind(this);
-      
       // extracts the attribute type from the grapholscape graph
       this.extract_datatype = this.extract_datatype.bind(this);
       // debug bindings - to be removed
@@ -22967,7 +22965,8 @@ window.Sparqling = (function() {
       });
       // fix sizes on window resize
       window.addEventListener('resize', () => {
-        return this.sidenav.resize_navbar();
+        this.sidenav.resize_navbar();
+        return this.menu.change_size(50);
       });
       // doubleclick handler on grapholscape
       return this.graphol_cy.on('tap', (event) => {
@@ -26706,7 +26705,7 @@ window.SparqlingMenu = class SparqlingMenu {
     clientHeight = document.getElementById('cy').clientHeight;
     query_canvas_pixels = query_canvas_size * clientHeight / 100;
     this.context.sidenav.query_canvas.style.height = query_canvas_pixels + "px";
-    sparql_textbox.style.height = (clientHeight - 100 - query_canvas_pixels) + "px";
+    sparql_textbox.style.height = Math.max(clientHeight - 100 - query_canvas_pixels, 0) + "px";
     return setTimeout(() => {
       return this.context.graph.cy.resize();
     }, 550);
@@ -26739,7 +26738,7 @@ window.SparqlingMenu = class SparqlingMenu {
     var nav_div;
     nav_div = this.create_div(null, null, 'nav_div');
     nav_div.append(this.create_div('▲', 'sparqling_resize_button', null, (() => {
-      return this.change_size(80);
+      return this.change_size(90);
     }), 'expand graph'));
     nav_div.append(this.create_div('≡', 'sparqling_resize_button', null, (() => {
       return this.change_size(50);
@@ -26930,9 +26929,13 @@ window.SparqlingNavbar = (function() {
         this.side_nav.style.width = (cur_sidenav_size * client_width / 100 - 30) + "px";
       }
       if (cur_sidenav_size === 0) {
-        this.context.menu.set_invisible();
+        if (this.context.menu !== void 0) {
+          this.context.menu.set_invisible();
+          this.context.menu.change_size(50);
+        }
       } else if (this.context.menu !== void 0) {
         this.context.menu.set_visible();
+        this.context.menu.change_size(50);
       }
       this.context.graphol_cy.resize();
       return setTimeout(() => {
@@ -26942,7 +26945,7 @@ window.SparqlingNavbar = (function() {
 
   };
 
-  cur_sidenav_size = 50;
+  cur_sidenav_size = 0;
 
   return SparqlingNavbar;
 
