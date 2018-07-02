@@ -93,11 +93,11 @@ class window.QueryLine
                         st.innerHTML = node.id()
                     st.setAttribute('contenteditable', 'false')
                     @sparql_text.update()
-        st.onmouseover = ($) ->
+        st.onmouseover = (jQuery) ->
             node.addClass("highlight")
-        st.onmouseout = ($) ->
+        st.onmouseout = (jQuery) ->
             node.removeClass("highlight")
-        st.onclick = ($) =>
+        st.onclick = (jQuery) =>
             @sparql_text.cy.nodes().unselect()
             node.select()
         st.innerHTML = node.data('label')

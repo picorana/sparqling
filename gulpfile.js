@@ -8,7 +8,7 @@ var path = require("path");
 var autoprefixer = require("gulp-autoprefixer");
 
 var module_list = [
-  "./node_modules/jquery/dist/jquery.js",
+  //"./node_modules/jquery/dist/jquery.js",
   "./node_modules/webcola/WebCola/cola.js",
   "./node_modules/cytoscape-cola/cytoscape-cola.js",
   "./node_modules/dragula/dist/dragula.js",

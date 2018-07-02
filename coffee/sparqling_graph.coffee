@@ -220,7 +220,7 @@ class window.SparqlingGraph
             )
 
         @cy.on('mouseup',
-            ($) => 
+            (jQuery) => 
                 if @check_collisions() != undefined
                     node_tmp_arr = @check_collisions()
                     @merge(node_tmp_arr[0], node_tmp_arr[1])

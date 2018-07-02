@@ -119,7 +119,7 @@ class window.QueryLoader
                 obj = obj[0]
 
 
-            $.each(parsed_query['prefixes'], (elem) => 
+            jQuery.each(parsed_query['prefixes'], (elem) => 
                 if triple['predicate'].indexOf(parsed_query['prefixes'][elem]) != -1
                     triple['predicate'] = triple['predicate'].substr(parsed_query['prefixes'][elem].length)
                     )
@@ -127,7 +127,7 @@ class window.QueryLoader
             link = new PainlessLink(this, @cy, triple['predicate'], 'role', subj, obj)
             @links.push(link)
 
-        $.each(parsed_query['variables'], (elem) =>
+        jQuery.each(parsed_query['variables'], (elem) =>
             @sparql_text.select_boxes.push(parsed_query['variables'][elem].slice(1))
             )
 

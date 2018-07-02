@@ -76,11 +76,11 @@ class window.SparqlText
                     st.setAttribute('contenteditable', 'false')
                     @update()
 
-        st.onmouseover = ($) ->
+        st.onmouseover = (jQuery) ->
             node.addClass("highlight")
-        st.onmouseout = ($) ->
+        st.onmouseout = (jQuery) ->
             node.removeClass("highlight")
-        st.onclick = ($) =>
+        st.onclick = (jQuery) =>
             @cy.nodes().unselect()
             node.select()
         st.innerHTML = node.data('label')
@@ -94,13 +94,13 @@ class window.SparqlText
         minicross.dataset.linkedhbox = st.id
         minicross.dataset.node_id = st.dataset.node_id
         minicross.style.visibility = 'hidden'
-        minicross.onclick = ($) =>
+        minicross.onclick = (jQuery) =>
             console.log 'a'
             @remove_from_select_boxes(minicross.dataset.node_id)
         container.append(minicross)
-        container.onmouseover = ($) ->
+        container.onmouseover = (jQuery) ->
             minicross.style.visibility = 'visible'
-        container.onmouseout = ($) ->
+        container.onmouseout = (jQuery) ->
             minicross.style.visibility = 'hidden'
 
         return container
@@ -229,13 +229,13 @@ class window.SparqlText
             (el, target) =>
                 if target.classList.contains('void_box')
                     if target.dataset.filter_position == '0'
-                        $(target).data('parent').node1 = @cy.getElementById(el.firstChild.dataset.node_id)
-                        $(target).data('parent').conditions = []
-                        $(target).data('parent').conditions.push($(target).data('parent').new_condition())
+                        jQuery(target).data('parent').node1 = @cy.getElementById(el.firstChild.dataset.node_id)
+                        jQuery(target).data('parent').conditions = []
+                        jQuery(target).data('parent').conditions.push(jQuery(target).data('parent').new_condition())
                     else if target.dataset.filter_position == '1'
-                        $(target).data('parent').node2 = @cy.getElementById(el.firstChild.dataset.node_id)
-                        $(target).data('parent').conditions = []
-                        $(target).data('parent').conditions.push($(target).data('parent').new_condition())
+                        jQuery(target).data('parent').node2 = @cy.getElementById(el.firstChild.dataset.node_id)
+                        jQuery(target).data('parent').conditions = []
+                        jQuery(target).data('parent').conditions.push(jQuery(target).data('parent').new_condition())
 
                 @select_boxes = []
                 for child in s_line.children

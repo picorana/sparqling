@@ -8,7 +8,7 @@ class window.Void
         @val = val
         @div.innerHTML = @val
 
-        $(@div).data('parent', parent)
+        jQuery(@div).data('parent', parent)
         @position = position
         @div.dataset.filter_position = position
         @div.style.transitionDuration = '0.1s'
