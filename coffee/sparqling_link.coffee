@@ -18,10 +18,15 @@ class window.PainlessLink
         @datatype = datatype
         @datatype_node = null
 
+        if @link_name != undefined and @link_name != null
+            @link_name = @link_name.replace("\n", "").replace("\r", "").replace(" ", "")
+
         if link_type == 'concept'
             @create_concept()
         else
             @create_link()
+
+
 
 
     find_new_name: (base_name = null) ->
@@ -29,7 +34,7 @@ class window.PainlessLink
             base_name = "x"
 
         i = 0
-        while @cy.getElementById(base_name + i).length != 0 
+        while @cy.getElementById(base_name + i).length != 0
             i += 1
         return base_name + i
 
@@ -49,7 +54,7 @@ class window.PainlessLink
             @edge_target.classes('source-edge')
             @source = @node_var2
             @target = @node_var1
-        else 
+        else
             @edge_source.classes('source-edge')
             @edge_target.classes('target-edge')
             @source = @node_var1
@@ -70,25 +75,25 @@ class window.PainlessLink
             data: {source: node.id(), target: @datatype_node.id(), weight: 99}
             classes: 'edge-datatype'
         })
-   
+
 
     create_node: (type, label = null) =>
 
         data = {}
 
-        if type == 'node-variable' 
+        if type == 'node-variable'
             label = @find_new_name(label)
             data['id'] = label
-            
+
             data['color'] = '#' + palette[@context.color_index % palette.length]
             @context.color_index += 1
-        
-        if type == 'node-concept' 
+
+        if type == 'node-concept'
             data['label'] = @link_name
         else if type == 'node-attribute' or type == 'node-role'
             data['label'] = label
         else data['label'] = '?' + label
-        
+
         data['links'] = [@]
 
         return @cy.add({
@@ -116,7 +121,7 @@ class window.PainlessLink
         if @datatype_node != null and @datatype_node != undefined
             @cy.remove(@datatype_node)
         for node_var in [@node_var1, @node_var2]
-            if node_var != null and node_var != undefined    
+            if node_var != null and node_var != undefined
 
                 index = node_var.data('links').indexOf(@)
                 node_var.data('links').splice(index, 1)
@@ -126,7 +131,7 @@ class window.PainlessLink
                         if @context.sparql_text.select_boxes[i] == node_var.id()
                             @context.sparql_text.select_boxes.splice(i, 1)
 
-                    @cy.remove(node_var)          
+                    @cy.remove(node_var)
 
         @context.sparql_text.update()
 
@@ -158,9 +163,9 @@ class window.PainlessLink
         if @node_var1 == null or @node_var1 == undefined
             @node_var1   = @create_node('node-variable')
             @node_var1.classes('node-variable node-variable-full-options')
-        else if @node_var1.hasClass('attr-range') 
+        else if @node_var1.hasClass('attr-range')
             console.warn 'properties can\'t be added to the range of an attribute'
-            return 
+            return
         else @node_var1.data('links').push(@)
 
         if @node_var2 == null or @node_var2 == undefined
@@ -169,11 +174,11 @@ class window.PainlessLink
                 @node_var2.classes('node-variable attr-range')
                 if @datatype != null and @datatype != undefined
                     @add_datatype(@node_var2, @datatype)
-            else 
+            else
                 @node_var2 = @create_node('node-variable')
                 @node_var2.classes('node-variable node-variable-full-options')
         else @node_var2.data('links').push(@)
-       
+
         @source = @node_var1
         @target = @node_var2
 
@@ -185,23 +190,20 @@ class window.PainlessLink
         @edge_source = @create_edge(@node_link, @source, "source-edge")
         @edge_target = @create_edge(@node_link, @target, "target-edge")
 
-        
+
 
     create_concept: =>
         if @node_var1 == null or @node_var1 == undefined
             @node_var1  = @create_node('node-variable')
             @node_var1.classes('node-variable node-variable-full-options')
-        else @node_var1.data('links').push(@) 
+        else @node_var1.data('links').push(@)
 
         @node_concept     = @create_node('node-concept')
         @create_edge(@node_var1, @node_concept, 'edge-concept')
 
 
     to_string: =>
-        if @link_type != 'concept' 
+        if @link_type != 'concept'
             return @source.data('label') + ' ' + @link_name + ' ' + @target.data('label') + ' .'
-        else 
+        else
             return @node_var1.data('label') + ' rdf:type ' + @node_concept.data('label') + ' .'
-
-
-

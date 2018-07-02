@@ -2,7 +2,7 @@ class window.QueryFilter
 
 
     constructor: (sparql_text, node) ->
-        
+
         @node1 = node
         @node2 = null
 
@@ -37,7 +37,7 @@ class window.QueryFilter
             @slots.push(hl_box)
         else
             @v = new window.Void(@, 0, @v1_val)
-            @v.div.addEventListener('input', ()=> 
+            @v.div.addEventListener('input', ()=>
                 console.log @v.div.innerHTML
                 @v1_val = @v.div.innerHTML
                 @v.val = @v.div.innerHTML
@@ -60,7 +60,7 @@ class window.QueryFilter
             @slots.push(hl_box)
         else
             @v = new window.Void(@, 1, @v2_val)
-            @v.div.addEventListener('input', ()=> 
+            @v.div.addEventListener('input', ()=>
                 @v2_val = @v.div.innerHTML
                 @v.val = @v.div.innerHTML
                 )
@@ -106,7 +106,7 @@ class window.QueryFilter
 
     to_html: =>
         result_div = document.createElement('div')
-        
+
         start = document.createElement('div')
         start.innerHTML = "filter "
         start.style.display = "inline"
@@ -133,7 +133,7 @@ class window.QueryFilter
             remove_button.style.visibility = 'visible'
         result_div.onmouseout = () ->
             remove_button.style.visibility = 'hidden'
-            
+
 
         return result_div
 
@@ -146,4 +146,3 @@ class window.QueryFilter
             @node2.removeClass('filtered')
         @sparql_text.filters.splice(index, 1)
         @sparql_text.update()
-

@@ -22549,7 +22549,6 @@ window.SparqlText = (function() {
     }
 
     generate_plaintext_query() {
-      /** warning: VERY HACKY */
       var elem, filter, j, k, l, len, len1, len2, link, ref, ref1, result;
       result = "Select ";
       if (select_boxes.length === 0) {
@@ -26484,6 +26483,9 @@ window.PainlessLink = class PainlessLink {
     this.edge_target = null;
     this.datatype = datatype;
     this.datatype_node = null;
+    if (this.link_name !== void 0 && this.link_name !== null) {
+      this.link_name = this.link_name.replace("\n", "").replace("\r", "").replace(" ", "");
+    }
     if (link_type === 'concept') {
       this.create_concept();
     } else {

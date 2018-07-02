@@ -113,7 +113,6 @@ class window.SparqlText
 
 
     generate_plaintext_query: =>
-        ###* warning: VERY HACKY ###
         result = "Select "
         if select_boxes.length == 0
             result += '*'
