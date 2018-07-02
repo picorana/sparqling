@@ -7,6 +7,7 @@ class window.SparqlingGraph
 
         @utils = new window.PainlessUtils()
         @context = context
+        @graphol = context.graphol
 
         @links = []
 

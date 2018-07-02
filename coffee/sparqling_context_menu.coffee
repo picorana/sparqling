@@ -184,8 +184,8 @@ class window.PainlessContextMenu
 
         container.style.position = "absolute";
         container.id = "rename_div"
-        container.style.top =  document.getElementById('query_canvas').getBoundingClientRect()['y'] + ele.renderedPosition('y') - ele.renderedWidth()/4 + 'px'
-        container.style.left =  document.getElementById('query_canvas').getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth()/4 + 'px'
+        container.style.top = document.getElementById('query_canvas').getBoundingClientRect()['y'] - @context.graphol.container.getBoundingClientRect()['y']  + ele.renderedPosition('y') - ele.renderedWidth()/4 + 'px'
+        container.style.left = document.getElementById('query_canvas').getBoundingClientRect()['x'] - @context.graphol.container.getBoundingClientRect()['x'] + ele.renderedPosition('x') - ele.renderedWidth()/4 + 'px'
         container.style.backgroundColor = ele.data('color')
         container.style.fontSize = 'xx-large'
         container.style.color = '#fdf6e3'
@@ -194,5 +194,5 @@ class window.PainlessContextMenu
         container.style.padding = '2px'
         container.style.textAlign = 'center'
 
-        document.body.appendChild(container)
+        @context.graphol.container.appendChild(container)
         div.focus()
