@@ -91,9 +91,10 @@ class window.Sparqling
         window.addEventListener('keypress', (event) => @onkeypress_handler(event))
 
         # fix sizes on window resize
-        window.addEventListener('resize', () =>
-            @sidenav.resize_navbar()
-            @menu.change_size(50)
+        for event in ['resize', 'fullscreenchange', 'mozfullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange']
+            window.addEventListener(event, () =>
+                @sidenav.resize_navbar()
+                @menu.change_size(50)
             )
 
         # doubleclick handler on grapholscape
