@@ -26,6 +26,7 @@ class window.Sparqling
         @menu           = new SparqlingMenu this
         @loader         = new QueryLoader this
         @alert          = new SparqlingAlert
+        @storage        = new SparqlingStorage this
         @sparql_text    = @graph.sparql_text
 
         do @add_event_listener
