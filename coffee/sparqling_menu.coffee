@@ -124,8 +124,9 @@ class window.SparqlingMenu
                 }'
 
         menu.append(@create_div('<i class="material-icons" style="font-size: 18px">undo</i>',                 'sparqling_menu_button', null, ( => @context.graph.undo()), 'undo'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">play_arrow</i>',           'sparqling_menu_button', null, ( => @context.storage.setItem('SPARQLING_QUERY', @context.graph.sparql_text.generate_plaintext_query(); window.location = "/queryanswering")), 'run query'))
         menu.append(@create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>',  'sparqling_menu_button', null, ( => @context.graph.center_view()), 'center view'))
         menu.append(@create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>',            'sparqling_menu_button', null, ( => @context.graph.copy_to_clipboard()), 'copy to clipboard'))
         #menu.append(@create_div('<i class="material-icons" style="font-size: 18px">save</i>',                 'sparqling_menu_button', null, ( => @context.graph.download()), 'export'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',      'sparqling_menu_button', null, ( => @context.loader.load(plaintext_query)), 'import'))
+        #menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',      'sparqling_menu_button', null, ( => @context.loader.load(plaintext_query)), 'import'))
         menu.append(@create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>',            'sparqling_menu_button', null, ( => @context.graph.clear_all()), 'clear all'))

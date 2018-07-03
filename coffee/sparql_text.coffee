@@ -113,17 +113,17 @@ class window.SparqlText
 
 
     generate_plaintext_query: =>
-        result = "Select "
+        result = "SELECT "
         if select_boxes.length == 0
             result += '*'
         else for elem in select_boxes
             result += '?' + elem + ' '
-        result += '\r\nwhere {'
+        result += '\r\nWHERE {'
         for link in @links
-            result += '\r\n'
+            result += '\r\n  '
             result += link.to_string()
         for filter in @filters
-            result += '\r\n'
+            result += '\r\n  '
             result += filter.to_string()
         result += '\r\n}'
         console.log result
@@ -171,14 +171,14 @@ class window.SparqlText
                     count += 1
 
         select_div = document.createElement('div')
-        select_div.innerHTML = "Select "
+        select_div.innerHTML = "SELECT "
         init_string.append(select_div)
 
         init_string.append(s_line)
         init_string.append(document.createElement('br'))
 
         select_div_f = document.createElement('div')
-        select_div_f.innerHTML =  " where {"
+        select_div_f.innerHTML =  " WHERE {"
         init_string.append(select_div_f)
 
         div_sparql_text.append(init_string)
