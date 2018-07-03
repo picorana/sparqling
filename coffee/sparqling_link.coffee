@@ -32,6 +32,8 @@ class window.PainlessLink
     find_new_name: (base_name = null) ->
         if base_name == null
             base_name = "x"
+        else if base_name.indexOf(":") != -1 # Remove IRI prefix if present
+            base_name = base_name.substring(base_name.indexOf(":") + 1)
 
         i = 0
         while @cy.getElementById(base_name + i).length != 0
