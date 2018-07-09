@@ -62,71 +62,58 @@ class window.SparqlingMenu
 
     init: =>
         menu = @create_div(null, null, 'painless_menu')
+        menu.append(@create_navigation_div())
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">undo</i>',
+                                'sparqling_menu_button', null,
+                                ( => @context.graph.undo()),
+                                'undo'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">play_arrow</i>',
+                                'sparqling_menu_button', null,
+                                ( =>
+                                    @context.storage.setItem('SPARQLING_QUERY', @context.graph.sparql_text.generate_plaintext_query())
+                                    window.location = "/queryanswering"),
+                                'run query'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>',
+                                'sparqling_menu_button', null,
+                                ( => @context.graph.center_view()),
+                                'center view'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>',
+                                'sparqling_menu_button', null,
+                                ( =>
+                                    @context.graph.copy_to_clipboard()
+                                    @context.alert.say('Query copied to clipboard!', SparqlingAlert::Level.INFO)),
+                                'copy to clipboard'))
+        #menu.append(@create_div('<i class="material-icons" style="font-size: 18px">save</i>',
+        #                        'sparqling_menu_button', null,
+        #                        ( => @context.graph.download()),
+        #                        'export'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',
+                                'sparqling_menu_button', null,
+                                ( =>
+                                    # Create a temporary input element and click it to trigger the open file dialog
+                                    input_field = document.createElement('input')
+                                    input_field.type = 'file'
+                                    input_field.onchange = ((change_event) =>
+                                        # Consider only the first file if multiple are selected from the user
+                                        if change_event.target.files.length > 0
+                                            file = change_event.target.files[0]
+                                            file_reader = new FileReader
+                                            file_reader.onload = ((event) =>
+                                                b64_encoded_content = event.target.result
+                                                b64_content_start_idx = b64_encoded_content.indexOf(',') + 1
+                                                # Returned data is formatted as <mime-type>,<b64-encoded-content>,
+                                                # so we extract only the content (if any)
+                                                if b64_content_start_idx > 0
+                                                    b64_decoded_content = atob(b64_encoded_content.substring(b64_content_start_idx))
+                                                    @context.loader.load(b64_decoded_content))
+                                            # Finally trigger the data read
+                                            file_reader.readAsDataURL(file))
+                                    # Trigger the input field click
+                                    input_field.click()),
+                                'import'))
+        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>',
+                                'sparqling_menu_button', null,
+                                ( => @context.graph.clear_all()),
+                                'clear all'))
 
         document.getElementById('sidenav').append(menu)
-
-        menu.append(@create_navigation_div())
-
-        plaintext_query = '
-            PREFIX owl: <http://www.w3.org/2002/07/owl#>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-            PREFIX : <http://www.aci.it/ontology#>
-            PREFIX xml: <http://www.w3.org/XML/1998/namespace>
-            PREFIX aci: <http://www.aci.it/ontology#>
-            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-            Select ?idVeicolo ?inizioStato ?fineStato
-                   ?idFormalitaGeneratrice
-                   ?idFormalitaOriginaria ?codiceFormalitaOriginaria ?dataAccettazioneFormalitaOriginaria ?ufficioCompetenteFormalitaOriginaria
-                   ?serieTarga ?numeroTarga ?serieTargaPrecedente ?numeroTargaPrecedente
-                   ?telaio ?kw ?cilindrata ?peso ?portata ?tara ?classe ?uso ?carrozzeria ?specialita
-                   ?alimentazione ?alimentazioneDTT
-                   ?dataImmatricolazione
-                   ?codiceUltimaFormalitaDiParte ?dataUltimaFormalitaDiParte
-            where
-            {
-                ?veicolo aci:ID_veicolo ?idVeicolo.
-                ?veicolo aci:ha_stato_di_veicolo ?stato.
-                ?stato a aci:Stato_rappresentato_valido.
-                ?stato aci:ha_targa ?targa.
-                ?targa aci:numero_targa ?numeroTarga.
-                ?targa aci:serie_targa ?serieTarga.
-                ?stato aci:ha_formalita_originaria ?formalitaOriginaria.
-                ?formalitaOriginaria aci:ID_formalita ?idFormalitaOriginaria.
-                ?formalitaOriginaria aci:codice_tipo ?codiceFormalitaOriginaria.
-                ?evento aci:determina_stato ?stato.
-                ?formalitaGeneratrice aci:formalita_genera_evento ?evento.
-                ?formalitaGeneratrice aci:ID_formalita ?idFormalitaGeneratrice.
-                ?stato aci:inizio_stato_del_mondo ?inizioStato.
-                ?stato aci:fine_stato_del_mondo ?fineStato.
-                ?formalitaOriginaria aci:data_accettazione_formalita ?dataAccettazioneFormalitaOriginaria.
-                ?formalitaOriginaria aci:est_di_competenza_di_ufficio ?ufficio.
-                ?ufficio aci:descrizione_ufficio ?ufficioCompetenteFormalitaOriginaria.
-                ?stato aci:codice_tipo_ultima_formalita_di_parte ?codiceUltimaFormalitaDiParte.
-                ?stato aci:data_accettazione_ultima_formalita_di_parte ?dataUltimaFormalitaDiParte.
-                ?stato aci:ha_targa_precedente ?targaPrecedente.
-                ?targaPrecedente aci:numero_targa ?numeroTargaPrecedente.
-                ?targaPrecedente  aci:serie_targa ?serieTargaPrecedente.
-                ?stato aci:numero_telaio ?telaio.
-                ?stato aci:kw ?kw.
-                ?stato aci:cilindrata ?cilindrata.
-                ?stato aci:peso_complessivo ?peso.
-                ?stato aci:portata ?portata.
-                ?stato aci:tara ?tara.
-                ?stato aci:classe_veicolo ?classe.
-                ?stato aci:destinazione_di_uso ?uso.
-                ?stato aci:carrozzeria ?carrozzeria.
-                ?stato aci:descrizione_specialita ?specialita.
-                ?stato aci:data_immatricolazione ?dataImmatricolazione.
-                ?stato aci:alimentazione ?alimentazione.
-                ?stato aci:alimentazione_DTT ?alimentazioneDTT.
-                }'
-
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">undo</i>',                 'sparqling_menu_button', null, ( => @context.graph.undo()), 'undo'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">play_arrow</i>',           'sparqling_menu_button', null, ( => @context.storage.setItem('SPARQLING_QUERY', @context.graph.sparql_text.generate_plaintext_query(); window.location = "/queryanswering")), 'run query'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>',  'sparqling_menu_button', null, ( => @context.graph.center_view()), 'center view'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">file_copy</i>',            'sparqling_menu_button', null, ( => @context.graph.copy_to_clipboard()), 'copy to clipboard'))
-        #menu.append(@create_div('<i class="material-icons" style="font-size: 18px">save</i>',                 'sparqling_menu_button', null, ( => @context.graph.download()), 'export'))
-        #menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',      'sparqling_menu_button', null, ( => @context.loader.load(plaintext_query)), 'import'))
-        menu.append(@create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>',            'sparqling_menu_button', null, ( => @context.graph.clear_all()), 'clear all'))
