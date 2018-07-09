@@ -21,11 +21,11 @@ class window.Sparqling
 
 
     init : ->
+        @alert          = new SparqlingAlert
         @sidenav        = new SparqlingNavbar this
         @graph          = new SparqlingGraph this
         @menu           = new SparqlingMenu this
         @loader         = new QueryLoader this
-        @alert          = new SparqlingAlert
         @storage        = new SparqlingStorage this
         @sparql_text    = @graph.sparql_text
 

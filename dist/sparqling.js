@@ -1,7 +1,15 @@
 // solarized palette
-var palette, state_buffer_max_length;
+var alert_palette, palette, state_buffer_max_length;
 
 palette = ["b58900", "cb4b16", "dc322f", "d33682", "6c71c4", "268bd2", "2aa198", "859900"];
+
+// alert palette
+alert_palette = {
+  error: "#ffb3ba",
+  warn: "#ffdfba",
+  debug: "#ffffba",
+  info: "#bae1ff"
+};
 
 // number of max save states for the undo function
 state_buffer_max_length = 20;
@@ -7744,11 +7752,11 @@ window.Sparqling = (function() {
     }
 
     init() {
+      this.alert = new SparqlingAlert;
       this.sidenav = new SparqlingNavbar(this);
       this.graph = new SparqlingGraph(this);
       this.menu = new SparqlingMenu(this);
       this.loader = new QueryLoader(this);
-      this.alert = new SparqlingAlert;
       this.storage = new SparqlingStorage(this);
       this.sparql_text = this.graph.sparql_text;
       return this.add_event_listener();
@@ -9754,6 +9762,10 @@ window.SparqlingAlert = (function() {
   class SparqlingAlert {
     constructor() {
       this.say = this.say.bind(this);
+      this.error = this.error.bind(this);
+      this.warn = this.warn.bind(this);
+      this.info = this.info.bind(this);
+      this.debug = this.debug.bind(this);
       this.dialog = document.createElement('div');
       this.dialog.className = 'sparqling_dialog';
       this.dialog.style.opacity = '0';
@@ -9761,8 +9773,10 @@ window.SparqlingAlert = (function() {
       document.getElementById("grapholscape-container").append(this.dialog);
     }
 
-    say(msg) {
+    say(msg, level = SparqlingAlert.prototype.Level.ERROR) {
       this.dialog.innerHTML = msg;
+      this.dialog.style.backgroundColor = level;
+      this.dialog.style.borderColor = tinycolor(level).darken(50).toString();
       this.dialog.style.opacity = '1';
       this.dialog.onmouseover = () => {
         return setTimeout((() => {
@@ -9774,11 +9788,34 @@ window.SparqlingAlert = (function() {
       }), 3000);
     }
 
+    error(msg) {
+      return this.say(msg, SparqlingAlert.prototype.Level.ERROR);
+    }
+
+    warn(msg) {
+      return this.say(msg, SparqlingAlert.prototype.Level.WARN);
+    }
+
+    info(msg) {
+      return this.say(msg, SparqlingAlert.prototype.Level.INFO);
+    }
+
+    debug(msg) {
+      return this.say(msg, SparqlingAlert.prototype.Level.DEBUG);
+    }
+
   };
 
   instance = null;
 
   SparqlingAlert.dialog = null;
+
+  SparqlingAlert.prototype.Level = {
+    ERROR: alert_palette.error,
+    WARN: alert_palette.warn,
+    INFO: alert_palette.info,
+    DEBUG: alert_palette.debug
+  };
 
   return SparqlingAlert;
 
