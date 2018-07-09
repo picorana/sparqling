@@ -6,12 +6,12 @@
 class window.SparqlingStorage
 
     # Storage types
-    @Type: {
+    Type: {
         LOCAL:   "localStorage"
         SESSION: "sessionStorage"
     }
 
-    constructor: (context, type = SparqlingStorage.Type.SESSION) ->
+    constructor: (context, type = SparqlingStorage::Type.SESSION) ->
         @context = context
         @type = type
         @initStorage()

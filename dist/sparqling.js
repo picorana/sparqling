@@ -6289,7 +6289,6 @@ window.QueryLine = class QueryLine {
     this.to_html = this.to_html.bind(this);
     this.create_highlighting_box = this.create_highlighting_box.bind(this);
     this.link = link;
-    console.log(this.link);
     this.sparql_text = sparql_text;
   }
 
@@ -7542,7 +7541,7 @@ window.SparqlText = (function() {
 
     generate_plaintext_query() {
       var elem, filter, j, k, l, len, len1, len2, link, ref, ref1, result;
-      result = "Select ";
+      result = "SELECT ";
       if (select_boxes.length === 0) {
         result += '*';
       } else {
@@ -7551,17 +7550,17 @@ window.SparqlText = (function() {
           result += '?' + elem + ' ';
         }
       }
-      result += '\r\nwhere {';
+      result += '\r\nWHERE {';
       ref = this.links;
       for (k = 0, len1 = ref.length; k < len1; k++) {
         link = ref[k];
-        result += '\r\n';
+        result += '\r\n  ';
         result += link.to_string();
       }
       ref1 = this.filters;
       for (l = 0, len2 = ref1.length; l < len2; l++) {
         filter = ref1[l];
-        result += '\r\n';
+        result += '\r\n  ';
         result += filter.to_string();
       }
       result += '\r\n}';
@@ -7611,12 +7610,12 @@ window.SparqlText = (function() {
         }
       }
       select_div = document.createElement('div');
-      select_div.innerHTML = "Select ";
+      select_div.innerHTML = "SELECT ";
       init_string.append(select_div);
       init_string.append(s_line);
       init_string.append(document.createElement('br'));
       select_div_f = document.createElement('div');
-      select_div_f.innerHTML = " where {";
+      select_div_f.innerHTML = " WHERE {";
       init_string.append(select_div_f);
       div_sparql_text.append(init_string);
       ref1 = this.links;
@@ -7750,6 +7749,7 @@ window.Sparqling = (function() {
       this.menu = new SparqlingMenu(this);
       this.loader = new QueryLoader(this);
       this.alert = new SparqlingAlert;
+      this.storage = new SparqlingStorage(this);
       this.sparql_text = this.graph.sparql_text;
       return this.add_event_listener();
     }
@@ -10683,6 +10683,9 @@ window.SparqlingMenu = class SparqlingMenu {
     menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">undo</i>', 'sparqling_menu_button', null, (() => {
       return this.context.graph.undo();
     }), 'undo'));
+    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">play_arrow</i>', 'sparqling_menu_button', null, (() => {
+      return this.context.storage.setItem('SPARQLING_QUERY', this.context.graph.sparql_text.generate_plaintext_query(), window.location = "/queryanswering");
+    }), 'run query'));
     menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">filter_center_focus</i>', 'sparqling_menu_button', null, (() => {
       return this.context.graph.center_view();
     }), 'center view'));
@@ -10690,9 +10693,7 @@ window.SparqlingMenu = class SparqlingMenu {
       return this.context.graph.copy_to_clipboard();
     }), 'copy to clipboard'));
     //menu.append(@create_div('<i class="material-icons" style="font-size: 18px">save</i>',                 'sparqling_menu_button', null, ( => @context.graph.download()), 'export'))
-    menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>', 'sparqling_menu_button', null, (() => {
-      return this.context.loader.load(plaintext_query);
-    }), 'import'));
+    //menu.append(@create_div('<i class="material-icons" style="font-size: 18px">open_in_browser</i>',      'sparqling_menu_button', null, ( => @context.loader.load(plaintext_query)), 'import'))
     return menu.append(this.create_div('<i class="material-icons" style="font-size: 18px">clear_all</i>', 'sparqling_menu_button', null, (() => {
       return this.context.graph.clear_all();
     }), 'clear all'));
@@ -10841,6 +10842,75 @@ window.SparqlingNavbar = (function() {
   cur_sidenav_size = 0;
 
   return SparqlingNavbar;
+
+}).call(this);
+
+//#
+//# sparqling_storage.coffee
+//#
+//# Manages interaction with the local storage API.
+//#
+window.SparqlingStorage = (function() {
+  class SparqlingStorage {
+    constructor(context, type = SparqlingStorage.prototype.Type.SESSION) {
+      this.context = context;
+      this.type = type;
+      this.initStorage();
+    }
+
+    initStorage() {
+      if (!this.storageAvailable(this.type)) {
+        throw `${this.type} is not available`;
+      }
+      return this.storage = window[this.type];
+    }
+
+    storageAvailable(type) {
+      var e, storage, x;
+      try {
+        storage = window[type];
+        // Test availability of storage
+        x = '__storage_test__';
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+      } catch (error) {
+        e = error;
+        // test name field too, because code might not be present
+        // acknowledge QuotaExceededError only if there's something already stored
+        return e instanceof DOMException && (e.code === 22 || e.code === 1014 || e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') && storage.length !== 0;
+      }
+    }
+
+    setItem(key, value) {
+      return this.storage.setItem(key, value);
+    }
+
+    getItem(key) {
+      return this.storage.getItem(key);
+    }
+
+    hasItem(key) {
+      return this.storage.getItem(key) !== null;
+    }
+
+    removeItem(key) {
+      return this.storage.removeItem(key);
+    }
+
+    clear() {
+      return this.storage.clear();
+    }
+
+  };
+
+  // Storage types
+  SparqlingStorage.prototype.Type = {
+    LOCAL: "localStorage",
+    SESSION: "sessionStorage"
+  };
+
+  return SparqlingStorage;
 
 }).call(this);
 
