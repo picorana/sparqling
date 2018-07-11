@@ -11933,9 +11933,12 @@ window.PainlessLink = class PainlessLink {
     index = this.context.links.indexOf(this);
     this.context.links.splice(index, 1);
     this.context.sparql_text.update();
-    ref = this.context.cy.nodes();
+    ref = this.context.context.graphol_cy.nodes();
     for (j = 0, len = ref.length; j < len; j++) {
       node = ref[j];
+      console.log(node.data('label'));
+      console.log("link name: " + this.link_name);
+      console.log(node.data('label') === this.link_name);
       if (node.data('label') === this.link_name) {
         node.style('border-color', 'black');
         node.style('border-width', '1px');

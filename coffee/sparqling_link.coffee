@@ -109,7 +109,10 @@ class window.PainlessLink
         @context.links.splice(index, 1)
         @context.sparql_text.update()
 
-        for node in @context.cy.nodes()
+        for node in @context.context.graphol_cy.nodes()
+            console.log node.data('label')
+            console.log "link name: " + @link_name
+            console.log node.data('label') == @link_name 
             if node.data('label') == @link_name
                 node.style('border-color', 'black')
                 node.style('border-width', '1px')
