@@ -222,6 +222,7 @@ class window.SparqlText
                 if el.classList.contains('highlighting_box') or el.classList.contains('highlighting_box_container')
                     return false
                 else return true
+            revertOnSpill: true
                 })
 
         drake.on('drop',

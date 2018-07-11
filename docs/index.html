@@ -23,13 +23,14 @@
   <script src="https://unpkg.com/webcola/WebCola/cola.min.js"></script>
   <script src='https://cdn.rawgit.com/cytoscape/cytoscape.js-cola/abdbdf2b/cytoscape-cola.js'></script>
 
-  <link href="https://rawgit.com/picorana/sparqling/master/css/style.css" rel="stylesheet">
-  <script src="https://rawgit.com/picorana/sparqling/master/dist/sparqling_min.js"></script>
+  <link href="../css/style.css" rel="stylesheet">
+  <script src="../dist/sparqling.js"></script>
 
   <style>
     body, html {
       font-family : "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
       color: #666;
+      overflow: hidden;
     }
 
     #header {
@@ -85,7 +86,7 @@
 </head>
 
 <body style="margin: 0">
-  <div id="grapholscape_container"></div>
+  <div id="grapholscape-container"></div>
 
 
   <div id="home">
@@ -140,7 +141,7 @@
       var files = dt.files;
 
       document.getElementById('home').style.display = 'none';
-      var graph = new GrapholScape(files[0], document.getElementById('grapholscape_container'));
+      var graph = new GrapholScape(files[0], document.getElementById('grapholscape-container'));
 
       var ps = new Sparqling(graph);
 
@@ -159,7 +160,7 @@
 
       li.onclick = function() {
         document.getElementById('home').style.display = 'none';
-        var graph = new GrapholScape(null,document.getElementById('grapholscape_container'),examples[this.getAttribute('exmp_id')][1]);
+        var graph = new GrapholScape(null,document.getElementById('grapholscape-container'),examples[this.getAttribute('exmp_id')][1]);
         graph.drawDiagram(graph.getDiagramName(0));
 
         var ps = new Sparqling(graph);
