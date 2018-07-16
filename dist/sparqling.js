@@ -11189,8 +11189,10 @@ window.PainlessUtils = class PainlessUtils {
       'font-size': '20',
       'font-family': "Roboto",
       'color': '#fdf6e3',
-      'text-outline-color': '#fdf6e3',
-      'text-outline-width': '0px',
+      'text-outline-color': function(ele) {
+        return ele.data('color');
+      },
+      'text-outline-width': '5px',
       'content': 'data(label)'
     }).selector('.node-constant-object').style({
       'shape': 'ellipse',
@@ -11207,8 +11209,10 @@ window.PainlessUtils = class PainlessUtils {
       'font-size': '20',
       'font-family': "Roboto",
       'color': '#fdf6e3',
-      'text-outline-color': '#fdf6e3',
-      'text-outline-width': '0px',
+      'text-outline-color': function(ele) {
+        return ele.data('color');
+      },
+      'text-outline-width': '5px',
       'content': 'data(label)'
     }).selector('.node-concept').style({
       'shape': 'rectangle',

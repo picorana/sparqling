@@ -85,7 +85,7 @@ class window.PainlessUtils
                     'border-style' : 'solid'
                     'border-color' : '#002b36'
                     'color' : '#002b36'
-                    'border-width' : '4px' 
+                    'border-width' : '4px'
                     'content' : 'data(label)'
                     'text-valign' : 'center'
                     'font-family' : "Roboto";
@@ -101,7 +101,7 @@ class window.PainlessUtils
                     'border-style' : 'solid'
                     'border-color' : '#002b36'
                     'color' : '#002b36'
-                    'border-width' : '4px' 
+                    'border-width' : '4px'
                     'content' : 'data(label)'
                     'text-valign' : 'center'
                     'font-family' : "Roboto";
@@ -140,8 +140,8 @@ class window.PainlessUtils
                     'font-size' : '20'
                     'font-family' : "Roboto";
                     'color' : '#fdf6e3'
-                    'text-outline-color' : '#fdf6e3'
-                    'text-outline-width' : '0px'
+                    'text-outline-color' : (ele) -> return ele.data('color')
+                    'text-outline-width' : '5px'
                     'content' : 'data(label)'
                 })
             .selector('.node-constant-object')
@@ -157,8 +157,8 @@ class window.PainlessUtils
                     'font-size' : '20'
                     'font-family' : "Roboto";
                     'color' : '#fdf6e3'
-                    'text-outline-color' : '#fdf6e3'
-                    'text-outline-width' : '0px'
+                    'text-outline-color' : (ele) -> return ele.data('color')
+                    'text-outline-width' : '5px'
                     'content' : 'data(label)'
                 })
             .selector('.node-concept')
